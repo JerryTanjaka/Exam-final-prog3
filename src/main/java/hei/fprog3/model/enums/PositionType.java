@@ -5,6 +5,6 @@ public enum PositionType {
     VICE_PRESIDENT,
     TREASURER,
     SECRETARY,
-    CONFIRMED_MEMBER,
-    JUNIOR_MEMBER
+    SENIOR,
+    JUNIOR
 }
