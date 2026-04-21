@@ -26,7 +26,7 @@ CREATE TYPE attendance_status      AS ENUM ('PRESENT', 'ABSENT', 'EXCUSED');
 -- ============================================================
 
 CREATE TABLE communities (
-    id                              UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
+    id                              serial          PRIMARY KEY DEFAULT gen_random_uuid(),
     number                          VARCHAR(50)   NOT NULL UNIQUE,
     name                            VARCHAR(255)  NOT NULL UNIQUE,
     city                            VARCHAR(255)  NOT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE communities (
 -- ============================================================
 
 CREATE TABLE members (
-    id                               UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
+    id                               serial          PRIMARY KEY DEFAULT gen_random_uuid(),
     last_name                        VARCHAR(255)  NOT NULL,
     first_name                       VARCHAR(255)  NOT NULL,
     birth_date                       DATE          NOT NULL,
@@ -56,7 +56,7 @@ CREATE TABLE members (
     phone                            VARCHAR(50)   NOT NULL,
     email                            VARCHAR(255)  NOT NULL UNIQUE,
     membership_date                  DATE          NOT NULL,
-    community_id                     UUID          NOT NULL REFERENCES communities(id),
+    community_id                     serial          NOT NULL REFERENCES communities(id),
     -- Poste du membre (mis à jour à chaque nouveau mandat)
     position                         position_type NOT NULL DEFAULT 'JUNIOR_MEMBER',
     active                           BOOLEAN       NOT NULL DEFAULT TRUE,
@@ -85,9 +85,9 @@ CREATE INDEX idx_members_position  ON members(position);
 -- ============================================================
 
 CREATE TABLE sponsors (
-    id           UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
-    member_id    UUID         NOT NULL REFERENCES members(id),  -- candidat
-    sponsor_id   UUID         NOT NULL REFERENCES members(id),  -- parrain confirmé
+    id           serial         PRIMARY KEY DEFAULT gen_random_uuid(),
+    member_id    serial         NOT NULL REFERENCES members(id),  -- candidat
+    sponsor_id   serial         NOT NULL REFERENCES members(id),  -- parrain confirmé
     relationship VARCHAR(255) NOT NULL,                          -- famille, amis, collègues…
     created_at   TIMESTAMP    NOT NULL DEFAULT NOW(),
     UNIQUE (member_id, sponsor_id)
@@ -103,13 +103,13 @@ CREATE INDEX idx_sponsors_sponsor ON sponsors(sponsor_id);
 -- ============================================================
 
 CREATE TABLE mandates (
-    id                UUID      PRIMARY KEY DEFAULT gen_random_uuid(),
-    community_id      UUID      NOT NULL REFERENCES communities(id),
+    id                serial      PRIMARY KEY DEFAULT gen_random_uuid(),
+    community_id      serial      NOT NULL REFERENCES communities(id),
     year              INTEGER   NOT NULL,
-    president_id      UUID      NOT NULL REFERENCES members(id),
-    vice_president_id UUID      NOT NULL REFERENCES members(id),
-    treasurer_id      UUID      NOT NULL REFERENCES members(id),
-    secretary_id      UUID      NOT NULL REFERENCES members(id),
+    president_id      serial      NOT NULL REFERENCES members(id),
+    vice_president_id serial      NOT NULL REFERENCES members(id),
+    treasurer_id      serial      NOT NULL REFERENCES members(id),
+    secretary_id      serial      NOT NULL REFERENCES members(id),
     start_date        DATE      NOT NULL,
     end_date          DATE      NOT NULL,
     created_at        TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -124,10 +124,10 @@ CREATE INDEX idx_mandates_community_year ON mandates(community_id, year);
 -- ============================================================
 
 CREATE TABLE community_changes (
-    id               UUID      PRIMARY KEY DEFAULT gen_random_uuid(),
-    member_id        UUID      NOT NULL REFERENCES members(id),
-    old_community_id UUID      REFERENCES communities(id),        -- NULL à l'admission initiale
-    new_community_id UUID      NOT NULL REFERENCES communities(id),
+    id               serial      PRIMARY KEY DEFAULT gen_random_uuid(),
+    member_id        serial      NOT NULL REFERENCES members(id),
+    old_community_id serial      REFERENCES communities(id),        -- NULL à l'admission initiale
+    new_community_id serial      NOT NULL REFERENCES communities(id),
     reason           TEXT      NOT NULL,
     change_date      DATE      NOT NULL,
     created_at       TIMESTAMP NOT NULL DEFAULT NOW()
@@ -142,8 +142,8 @@ CREATE INDEX idx_community_changes_member ON community_changes(member_id);
 -- ============================================================
 
 CREATE TABLE accounts (
-    id                   UUID             PRIMARY KEY DEFAULT gen_random_uuid(),
-    community_id         UUID             REFERENCES communities(id),  -- NULL = fédération
+    id                   serial             PRIMARY KEY DEFAULT gen_random_uuid(),
+    community_id         serial             REFERENCES communities(id),  -- NULL = fédération
     type                 account_type     NOT NULL,
     balance              NUMERIC(15,2)    NOT NULL DEFAULT 0,
     statement_date       DATE,
@@ -182,7 +182,7 @@ CREATE INDEX idx_accounts_community ON accounts(community_id);
 -- ============================================================
 
 CREATE TABLE contribution_rates (
-    id             UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    id             serial         PRIMARY KEY DEFAULT gen_random_uuid(),
     rate           NUMERIC(5,4) NOT NULL CHECK (rate >= 0 AND rate <= 1),
     effective_date DATE         NOT NULL,
     created_at     TIMESTAMP    NOT NULL DEFAULT NOW()
@@ -194,9 +194,9 @@ CREATE TABLE contribution_rates (
 -- ============================================================
 
 CREATE TABLE contributions (
-    id                      UUID              PRIMARY KEY DEFAULT gen_random_uuid(),
-    member_id               UUID              NOT NULL REFERENCES members(id),
-    community_id            UUID              NOT NULL REFERENCES communities(id),
+    id                      serial              PRIMARY KEY DEFAULT gen_random_uuid(),
+    member_id               serial              NOT NULL REFERENCES members(id),
+    community_id            serial              NOT NULL REFERENCES communities(id),
     type                    contribution_type NOT NULL,
     amount                  NUMERIC(15,2)     NOT NULL,
     collection_date         DATE              NOT NULL,
@@ -221,8 +221,8 @@ CREATE INDEX idx_contributions_type      ON contributions(type);
 -- ============================================================
 
 CREATE TABLE activities (
-    id            UUID           PRIMARY KEY DEFAULT gen_random_uuid(),
-    community_id  UUID           REFERENCES communities(id),  -- NULL = fédération
+    id            serial           PRIMARY KEY DEFAULT gen_random_uuid(),
+    community_id  serial           REFERENCES communities(id),  -- NULL = fédération
     title         VARCHAR(255)   NOT NULL,
     description   TEXT,
     type          activity_type  NOT NULL,
@@ -244,8 +244,8 @@ CREATE INDEX idx_activities_type      ON activities(type);
 -- ============================================================
 
 CREATE TABLE activity_mandatory_members (
-    activity_id UUID NOT NULL REFERENCES activities(id) ON DELETE CASCADE,
-    member_id   UUID NOT NULL REFERENCES members(id),
+    activity_id serial NOT NULL REFERENCES activities(id) ON DELETE CASCADE,
+    member_id   serial NOT NULL REFERENCES members(id),
     PRIMARY KEY (activity_id, member_id)
 );
 
@@ -256,8 +256,8 @@ CREATE TABLE activity_mandatory_members (
 -- ============================================================
 
 CREATE TABLE activity_invited_communities (
-    activity_id  UUID NOT NULL REFERENCES activities(id) ON DELETE CASCADE,
-    community_id UUID NOT NULL REFERENCES communities(id),
+    activity_id  serial NOT NULL REFERENCES activities(id) ON DELETE CASCADE,
+    community_id serial NOT NULL REFERENCES communities(id),
     PRIMARY KEY (activity_id, community_id)
 );
 
@@ -267,9 +267,9 @@ CREATE TABLE activity_invited_communities (
 -- ============================================================
 
 CREATE TABLE attendances (
-    id                 UUID              PRIMARY KEY DEFAULT gen_random_uuid(),
-    activity_id        UUID              NOT NULL REFERENCES activities(id),
-    member_id          UUID              NOT NULL REFERENCES members(id),
+    id                 serial              PRIMARY KEY DEFAULT gen_random_uuid(),
+    activity_id        serial              NOT NULL REFERENCES activities(id),
+    member_id          serial              NOT NULL REFERENCES members(id),
     status             attendance_status NOT NULL,
     absence_reason     TEXT,             -- obligatoire si status = EXCUSED
     is_external_member BOOLEAN           NOT NULL DEFAULT FALSE,
