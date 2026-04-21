@@ -1,25 +1,14 @@
 openapi: 3.0.3
 info:
   title: API - Fédération de Collectivités Agricoles
-  description: |
-    API REST pour la gestion de la fédération nationale de collectivités agricoles de Madagascar.
-
-    Elle couvre les fonctionnalités suivantes :
-    - **A** : Ouverture d'une nouvelle collectivité
-    - **B** : Admission et gestion des membres (mise à jour du 21 avril 2026)
-    - **C** : Cotisations et paiements
-    - **D** : Situation de trésorerie
-    - **E** : Activités des collectivités et de la fédération
-    - **F** : Assiduité des membres
-    - **G** : Statistiques des collectivités
-    - **H** : Statistiques de la fédération (ajout du 21 avril 2026)
-  version: 2.0.0
+  description: "API REST pour la gestion de la fédération nationale de collectivités agricoles de Madagascar."
+  version: 1.0.0
   contact:
     name: Fédération Agricole Madagascar
 
 servers:
-  - url: https://api.federation-agricole.mg/v1
-    description: Serveur de production
+  - url: https://localhost:8080/
+    description: Local Server
 
 tags:
   - name: Communities
