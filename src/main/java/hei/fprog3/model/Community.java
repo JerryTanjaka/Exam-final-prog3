@@ -30,7 +30,6 @@ public class Community {
 
     public Community() {}
 
-
     @Override
     public String toString() {
         return "Community{id=" + id + ", number='" + number + "', name='" + name + "', status=" + status + "}";

@@ -1,15 +1,17 @@
 package hei.fprog3.model;
 
 import hei.fprog3.model.enums.GenderType;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
-/**
- * Représente un membre de la fédération.
- * Table : members
- */
+
+@Getter
+@Setter
+@AllArgsConstructor
 public class Member {
 
     private int id;
