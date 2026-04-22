@@ -1,17 +1,16 @@
 package hei.fprog3.controller;
 
+import hei.fprog3.dto.collectivity.CollectivityIdentity;
 import hei.fprog3.dto.collectivity.CreateCollectivityRequest;
 import hei.fprog3.exception.BadRequestException;
 import hei.fprog3.exception.NotFoundException;
 import hei.fprog3.model.Collectivity;
 import hei.fprog3.service.CollectivityService;
 import hei.fprog3.validator.CollectivityValidator;
+import jakarta.websocket.server.PathParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -42,4 +41,21 @@ public class CollectivityController {
                     .body(e.getMessage());
         }
     }
-}
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> updateIdentity(@PathVariable String id, @RequestBody CollectivityIdentity collectivityIdentity) {
+        try {
+            collectivityValidator.validate(collectivityIdentity);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .header("Content-Type", "application/json")
+                    .body(collectivityService.updateIdentity(id, collectivityIdentity));
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .header("Content-Type", "application/json")
+                    .body(e.getMessage());
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .header("Content-Type", "application/json")
+                    .body(e.getMessage());
+        }
+    }}

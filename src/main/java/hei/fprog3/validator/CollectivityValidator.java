@@ -1,5 +1,6 @@
 package hei.fprog3.validator;
 
+import hei.fprog3.dto.collectivity.CollectivityIdentity;
 import hei.fprog3.dto.collectivity.CollectivityStructureRequest;
 import hei.fprog3.dto.collectivity.CreateCollectivityRequest;
 import hei.fprog3.exception.BadRequestException;
@@ -18,6 +19,7 @@ public class CollectivityValidator {
             throw new BadRequestException("collectivity is null");
         }
         List<String> errors = new ArrayList<>();
+<<<<<<< HEAD
 //        if (collectivity.getCity() == null ||  collectivity.getCity().isEmpty()) {
 //            errors.add("City");
 //        }
@@ -27,6 +29,14 @@ public class CollectivityValidator {
 //        if (collectivity.getSpecialty() == null ||  collectivity.getSpecialty().isEmpty()) {
 //            errors.add("Specialty");
 //        }
+=======
+        if (collectivity.getCity() == null ||  collectivity.getCity().isEmpty()) {
+            errors.add("City");
+        }
+        if (collectivity.getSpecialty() == null ||  collectivity.getSpecialty().isEmpty()) {
+            errors.add("Specialty");
+        }
+>>>>>>> b7ce511aeb5d9dc33c5df0a6b36a174d5c8c9183
         if (!errors.isEmpty()) {
             throw new BadRequestException(String.join(", ", errors) + " are missing");
         }
@@ -49,6 +59,18 @@ public class CollectivityValidator {
     public void validate(List<CreateCollectivityRequest> collectivities) throws BadRequestException {
         for (CreateCollectivityRequest collectivity : collectivities) {
             this.validate(collectivity);
+        }
+    }
+
+    public void validate(CollectivityIdentity collectivityIdentity) throws BadRequestException {
+        if (collectivityIdentity == null) {
+            throw new BadRequestException("collectivityIdentity is null");
+        }
+        if (collectivityIdentity.getName() == null ||  collectivityIdentity.getName().isEmpty()) {
+            throw new BadRequestException("collectivityIdentity.getName() is null");
+        }
+        if (collectivityIdentity.getNumber() == null ||  collectivityIdentity.getNumber().isEmpty()) {
+            throw new BadRequestException("collectivityIdentity.getNumber() is null");
         }
     }
 }
