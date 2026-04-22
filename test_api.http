@@ -258,3 +258,48 @@ Content-Type: application/json
     "paymentMode": "CASH"
   }
 ]
+
+### 13. POST /collectivities/{id}/membershipFees — Erreur 400 : Montant négatif
+POST {{baseUrl}}/collectivities/b2000000-0000-0000-0000-000000000001/membershipFees
+Content-Type: application/json
+
+[
+  {
+    "eligibleFrom": "2024-05-01",
+    "frequency": "MONTHLY",
+    "amount": -500.0,
+    "label": "Frais Invalides"
+  }
+]
+
+### 14. POST /collectivities/{id}/membershipFees — Erreur 400 : Fréquence inconnue
+POST {{baseUrl}}/collectivities/b2000000-0000-0000-0000-000000000001/membershipFees
+Content-Type: application/json
+
+[
+  {
+    "eligibleFrom": "2024-05-01",
+    "frequency": "UNKNOWN_FREQUENCY",
+    "amount": 1000.0,
+    "label": "Frais Invalides"
+  }
+]
+
+### 15. GET /collectivities/{id}/membershipFees — Erreur 404 : Collectivité inexistante
+GET {{baseUrl}}/collectivities/00000000-0000-0000-0000-000000000000/membershipFees
+
+### 16. GET /collectivities/{id}/transactions — Erreur 400 : Paramètres 'from'/'to' manquants
+GET {{baseUrl}}/collectivities/b2000000-0000-0000-0000-000000000001/transactions?from=2024-01-01
+
+### 17. POST /members/{id}/payments — Erreur 404 : Membre inexistant
+POST {{baseUrl}}/members/00000000-0000-0000-0000-000000000000/payments
+Content-Type: application/json
+
+[
+  {
+    "amount": 5000,
+    "membershipFeeIdentifier": "f1000000-0000-0000-0000-000000000001",
+    "accountCreditedIdentifier": "c1000000-0000-0000-0000-000000000001",
+    "paymentMode": "CASH"
+  }
+]

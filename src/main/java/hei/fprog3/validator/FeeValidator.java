@@ -24,6 +24,14 @@ public class FeeValidator {
         if (!errors.isEmpty()) {
             throw new BadRequestException(String.join("\n", errors));
         }
+    }
 
+    public void validate(List<FeeRequest> feeRequests) throws BadRequestException {
+        if (feeRequests == null || feeRequests.isEmpty()) {
+            throw new BadRequestException("Fee Request cannot be empty.");
+        }
+        for (FeeRequest feeRequest : feeRequests) {
+            validate(feeRequest);
+        }
     }
 }

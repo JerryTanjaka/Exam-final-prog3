@@ -61,6 +61,9 @@ public class CollectivityValidator {
     }
 
     public void validate(List<CreateCollectivityRequest> collectivities) throws BadRequestException {
+        if (collectivities == null || collectivities.isEmpty()) {
+            throw new BadRequestException("collectivities is null");
+        }
         for (CreateCollectivityRequest collectivity : collectivities) {
             this.validate(collectivity);
         }

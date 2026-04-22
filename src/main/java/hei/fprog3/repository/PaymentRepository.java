@@ -2,6 +2,7 @@ package hei.fprog3.repository;
 
 import hei.fprog3.datasource.DataSourceConfig;
 import hei.fprog3.dto.payment.PaymentRequest;
+import hei.fprog3.exception.NotFoundException;
 import hei.fprog3.model.FinancialAccount;
 import hei.fprog3.model.Payment;
 import hei.fprog3.model.enums.PaymentMethod;
@@ -17,17 +18,22 @@ import java.util.UUID;
 
 @Repository
 public class PaymentRepository {
+    private final MemberRepository memberRepository;
     private DataSourceConfig dataSource;
     private AccountRepository accountRepository;
 
-    public PaymentRepository(DataSourceConfig dataSource, AccountRepository accountRepository) {
+    public PaymentRepository(DataSourceConfig dataSource, AccountRepository accountRepository, MemberRepository memberRepository) {
         this.dataSource = dataSource;
         this.accountRepository = accountRepository;
+        this.memberRepository = memberRepository;
     }
 
-    public List<Payment> create(List<PaymentRequest> paymentRequests) {
+    public List<Payment> create(List<PaymentRequest> paymentRequests) throws NotFoundException {
         Connection connection = dataSource.getConnection();
         try {
+            for (PaymentRequest request : paymentRequests) {
+                memberRepository.findById(request.getPayerId());
+            }
             connection.setAutoCommit(false);
             List<UUID> generatedPaymentIds = new ArrayList<>();
             for (PaymentRequest paymentRequest : paymentRequests) {

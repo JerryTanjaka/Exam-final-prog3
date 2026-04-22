@@ -13,20 +13,23 @@ import java.util.List;
 
 @Repository
 public class TransactionRepository {
+    private final CollectivityRepository collectivityRepository;
     private DataSourceConfig dataSource;
     private PaymentRepository paymentRepository;
     private MemberRepository memberRepository;
 
-    public TransactionRepository(DataSourceConfig dataSource, PaymentRepository paymentRepository, MemberRepository memberRepository) {
+    public TransactionRepository(DataSourceConfig dataSource, PaymentRepository paymentRepository, MemberRepository memberRepository, CollectivityRepository collectivityRepository) {
         this.dataSource = dataSource;
         this.paymentRepository = paymentRepository;
         this.memberRepository = memberRepository;
+        this.collectivityRepository = collectivityRepository;
     }
 
 
-    public List<Transaction> getTransactionBetween(String id, LocalDate from, LocalDate to) throws NotFoundException {
+    public List<Transaction> getTransactionBetween(String collectivityId, LocalDate from, LocalDate to) throws NotFoundException {
         Connection connection = dataSource.getConnection();
         try {
+            collectivityRepository.exists(collectivityId);
             List<Transaction> transactions = new ArrayList<>();
             PreparedStatement transactionsPs = connection.prepareStatement(
                     """
@@ -36,7 +39,7 @@ public class TransactionRepository {
                     JOIN accounts AS a ON a.id = p.credited_account_id
                     WHERE a.collectivity_id = ?::UUID AND t.creation_date BETWEEN ? AND ?
                     """);
-            transactionsPs.setString(1, id);
+            transactionsPs.setString(1, collectivityId);
             transactionsPs.setDate(2, Date.valueOf(from));
             transactionsPs.setDate(3, Date.valueOf(to));
             ResultSet rs = transactionsPs.executeQuery();

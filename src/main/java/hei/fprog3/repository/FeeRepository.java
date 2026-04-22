@@ -19,20 +19,17 @@ import java.util.UUID;
 
 @Repository
 public class FeeRepository {
+    private final CollectivityRepository collectivityRepository;
     private DataSourceConfig dataSource;
-    public  FeeRepository(DataSourceConfig dataSource) {
+    public  FeeRepository(DataSourceConfig dataSource, CollectivityRepository collectivityRepository) {
         this.dataSource = dataSource;
+        this.collectivityRepository = collectivityRepository;
     }
 
     public List<Fee> getAllCollectivityFees(String id) throws NotFoundException {
         Connection connection = dataSource.getConnection();
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT id FROM collectivities WHERE id = ?::UUID");
-            preparedStatement.setString(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (!resultSet.next()) {
-                throw new NotFoundException("Collectivity with id %s not found".formatted(id));
-            }
+            collectivityRepository.exists(id);
 
             PreparedStatement ps = connection.prepareStatement(
                 """
@@ -62,6 +59,8 @@ public class FeeRepository {
     public List<Fee> create(String collectivityId, List<FeeRequest> feeRequests) throws NotFoundException {
         Connection connection = dataSource.getConnection();
         try {
+            collectivityRepository.exists(collectivityId);
+
             connection.setAutoCommit(false);
             List<Fee> fees = new ArrayList<>();
             List<String> newFeesid = new ArrayList<>();

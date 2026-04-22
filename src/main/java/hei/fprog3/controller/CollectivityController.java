@@ -100,9 +100,14 @@ public class CollectivityController {
     @PostMapping("/{id}/membershipFees")
     public ResponseEntity<?> getMembershipFees(@PathVariable String id, @RequestBody List<FeeRequest> feeRequests) {
         try {
+            feeValidator.validate(feeRequests);
             return ResponseEntity.status(HttpStatus.OK)
                     .header("Content-Type","application/json")
                     .body(collectivityService.createFee(id, feeRequests));
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .header("Content-Type", "application/json")
+                    .body(e.getMessage());
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .header("Content-Type", "application/json")

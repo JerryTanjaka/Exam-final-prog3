@@ -129,9 +129,24 @@ public class CollectivityRepository {
         }
     }
 
+    public void exists(String id) throws NotFoundException {
+        Connection  connection = dataSource.getConnection();
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT id FROM collectivities WHERE id = ?::UUID");
+            preparedStatement.setString(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (!resultSet.next()) {
+                throw new NotFoundException("Collectivity with id %s not found".formatted(id));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public CollectivityResponse updateCollectivityInformation(String id, CollectivityInformation collectivityInformation) throws NotFoundException {
         Connection connection = dataSource.getConnection();
         try {
+            exists(id);
             connection.setAutoCommit(false);
             PreparedStatement collectivitiesPs = connection.prepareStatement(
                     """
