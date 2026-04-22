@@ -25,7 +25,7 @@ public class MemberController {
     }
 
     @PostMapping
-    // IMPORTANT: Member occupation are not fetched from database so its value is null
+    // IMPORTANT: Occupation is set to the latest attributed one
     public ResponseEntity<?> create(@RequestBody List<CreateMemberRequest> members) {
         try {
             memberValidator.validate(members);

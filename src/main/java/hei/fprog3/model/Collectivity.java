@@ -15,7 +15,7 @@ public class Collectivity {
     private String id;
     private String number;
     private String name;
-    private String city;
+    private String location;
     private String specialty;
     private LocalDate creationDate;
 

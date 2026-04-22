@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 @Repository
@@ -23,40 +24,38 @@ public class MemberRepository {
     public List<MemberResponse> create(List<CreateMemberRequest> members) throws NotFoundException {
         Connection connection = dataSource.getConnection();
         try {
-            List<String> newMembersId =  new ArrayList<>();
+            List<MemberResponse> memberResponses = new ArrayList<>();
             connection.setAutoCommit(false);
             for (CreateMemberRequest member : members) {
+                member.setId(UUID.randomUUID().toString());
                 PreparedStatement memberPs = connection.prepareStatement(
                         """
-                        INSERT INTO members (last_name, first_name, birth_date, gender, address, profession, phone, email)
-                        VALUES (?, ?, ?, ?::gender_type, ?, ?, ?, ?)
-                        RETURNING id;
+                        INSERT INTO members (last_name, first_name, birth_date, gender, address, profession, phone, email, id)
+                        VALUES (?, ?, ?, ?::gender_type, ?, ?, ?, ?, ?::UUID)
                         """
                 );
                 memberPs.setString(1, member.getLastName());
                 memberPs.setString(2, member.getFirstName());
                 memberPs.setDate(3, Date.valueOf(member.getBirthDate()));
-                memberPs.setObject(4, member.getGender());
+                memberPs.setString(4, member.getGender().name());
                 memberPs.setString(5, member.getAddress());
                 memberPs.setString(6, member.getProfession());
                 memberPs.setString(7, member.getPhone());
                 memberPs.setString(8, member.getEmail());
-                ResultSet rs = memberPs.executeQuery();
-                while (rs.next()) {
-                    newMembersId.add(rs.getString("id"));
-                }
+                memberPs.setObject(9, member.getId());
+                memberPs.executeUpdate();
 
                 if (member.getCollectivityIdentifier() != null
                         && !member.getCollectivityIdentifier().isEmpty()) {
                     PreparedStatement membershipPs = connection.prepareStatement(
                             """
                             INSERT INTO memberships (member_id, collectivity_id, occupation)
-                            VALUES (?, ?, ?::position_type);
+                            VALUES (?::UUID, ?::UUID, ?::position_type);
                             """
                     );
                     membershipPs.setString(1, member.getId());
                     membershipPs.setString(2, member.getCollectivityIdentifier());
-                    membershipPs.setObject(3, member.getOccupation());
+                    membershipPs.setString(3, member.getOccupation().name());
                     membershipPs.executeUpdate();
                 }
 
@@ -66,7 +65,7 @@ public class MemberRepository {
                         PreparedStatement refereePs = connection.prepareStatement(
                                 """
                                 INSERT INTO referals (member_id, referee_id)
-                                VALUES (?, ?);
+                                VALUES (?::UUID, ?::UUID);
                                 """
                         );
                         refereePs.setString(1, member.getId());
@@ -76,9 +75,8 @@ public class MemberRepository {
                 }
             }
             connection.commit();
-            List<MemberResponse> memberResponses = new ArrayList<>();
-            for (String id : newMembersId) {
-                memberResponses.add(findById(id));
+            for (CreateMemberRequest member : members) {
+                memberResponses.add(findById(member.getId()));
             }
             return memberResponses;
         } catch (SQLException e) {
@@ -94,7 +92,7 @@ public class MemberRepository {
         try {
             PreparedStatement membersPs = connection.prepareStatement("""
                         SELECT id, first_name, last_name, birth_date, gender, address, profession, phone, email
-                        FROM members WHERE id = ?
+                        FROM members WHERE id = ?::UUID
                         """);
             membersPs.setString(1, id);
 
@@ -106,16 +104,20 @@ public class MemberRepository {
                 member.setFirstName(membersRs.getString("first_name"));
                 member.setLastName(membersRs.getString("last_name"));
                 member.setBirthDate(membersRs.getDate("birth_date").toLocalDate());
-                member.setGender(GenderType.valueOf(membersRs.getString("gender_type")));
+                member.setGender(GenderType.valueOf(membersRs.getString("gender")));
                 member.setAddress(membersRs.getString("address"));
                 member.setProfession(membersRs.getString("profession"));
                 member.setPhone(membersRs.getString("phone"));
                 member.setEmail(membersRs.getString("email"));
+                member.setOccupation(getLatestOccupation(id));
             } else {
                 throw new NotFoundException("Member with id %s not found".formatted(id));
             }
 
             member.setReferees(getMemberReferees(id));
+            for (MemberResponse referee : member.getReferees()) {
+                referee.setOccupation(this.getLatestOccupation(referee.getId()));
+            }
 
             return member;
         } catch (SQLException e) {
@@ -128,7 +130,7 @@ public class MemberRepository {
         try {
             PreparedStatement ps = connection.prepareStatement("""
                         SELECT id
-                        FROM memberships WHERE member_id = ? AND collectivity_id = ? AND occupation != 'JUNIOR' AND end_date IS NULL
+                        FROM memberships WHERE member_id = ?::UUID AND collectivity_id = ?::UUID AND occupation != 'JUNIOR' AND end_date IS NULL
                         ORDER BY end_date DESC
                         """);
             ps.setString(1, memberId);
@@ -143,7 +145,7 @@ public class MemberRepository {
     public List<MemberResponse> getMemberReferees(String id) throws NotFoundException {
         Connection connection = dataSource.getConnection();
         try {
-            PreparedStatement referalsPs = connection.prepareStatement("SELECT referee_id FROM referals WHERE member_id = ?;");
+            PreparedStatement referalsPs = connection.prepareStatement("SELECT referee_id FROM referals WHERE member_id = ?::UUID;");
             referalsPs.setString(1, id);
             ResultSet referalsRs = referalsPs.executeQuery();
             List<MemberResponse> referals = new ArrayList<>();
@@ -156,16 +158,15 @@ public class MemberRepository {
         }
     }
 
-    public PositionType getOccupationInCollectivity(String memberId, String collectivityId) {
+    public PositionType getLatestOccupation(String memberId) {
         Connection connection = dataSource.getConnection();
         try {
             PreparedStatement ps = connection.prepareStatement("""
                         SELECT occupation
-                        FROM memberships WHERE member_id = ? AND collectivity_id = ? AND end_date IS NULL
+                        FROM memberships WHERE member_id = ?::UUID AND end_date IS NULL
                         ORDER BY end_date DESC
                         """);
             ps.setString(1, memberId);
-            ps.setString(2, collectivityId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return PositionType.valueOf(rs.getString("occupation"));

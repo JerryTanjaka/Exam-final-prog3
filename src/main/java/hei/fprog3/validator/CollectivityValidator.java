@@ -19,18 +19,12 @@ public class CollectivityValidator {
             throw new BadRequestException("collectivity is null");
         }
         List<String> errors = new ArrayList<>();
-//        if (collectivity.getCity() == null ||  collectivity.getCity().isEmpty()) {
-//            errors.add("City");
-//        }
-//        if (collectivity.getName() == null ||  collectivity.getName().isEmpty()) {
-//            errors.add("Name");
-//        }
-//        if (collectivity.getSpecialty() == null ||  collectivity.getSpecialty().isEmpty()) {
-//            errors.add("Specialty");
-//        }
         if (collectivity.getCity() == null ||  collectivity.getCity().isEmpty()) {
             errors.add("City");
         }
+//        if (collectivity.getName() == null ||  collectivity.getName().isEmpty()) {
+//            errors.add("Name");
+//        }
         if (collectivity.getSpecialty() == null ||  collectivity.getSpecialty().isEmpty()) {
             errors.add("Specialty");
         }

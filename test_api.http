@@ -14,7 +14,8 @@ Content-Type: application/json
 
 [
   {
-    "location": "Fianarantsoa",
+    "city": "Fianarantsoa",
+    "specialty": "Non",
     "federationApproval": true,
     "structure": {
       "president":     "a1000000-0000-0000-0000-000000000001",
@@ -46,7 +47,8 @@ Content-Type: application/json
 
 [
   {
-    "location": "Toamasina",
+    "city": "Toamasina",
+    "specialty": "Non",
     "federationApproval": false,
     "structure": {
       "president":     "a1000000-0000-0000-0000-000000000001",
@@ -139,7 +141,7 @@ Content-Type: application/json
     "gender": "FEMALE",
     "address": "Lot 45 Ambohipo, Antananarivo",
     "profession": "Agricultrice",
-    "phoneNumber": 341112233,
+    "phone": "341112233",
     "email": "aina.rakotondrabe@email.com",
     "occupation": "JUNIOR",
     "collectivityIdentifier": "b2000000-0000-0000-0000-000000000001",
@@ -167,7 +169,7 @@ Content-Type: application/json
     "gender": "MALE",
     "address": "Lot 12 Ivandry, Antananarivo",
     "profession": "Éleveur",
-    "phoneNumber": 342223344,
+    "phone": "342223344",
     "email": "tojo.andriantsoa@email.com",
     "occupation": "JUNIOR",
     "collectivityIdentifier": "b2000000-0000-0000-0000-000000000001",
@@ -194,7 +196,7 @@ Content-Type: application/json
     "gender": "FEMALE",
     "address": "Lot 78 Analakely, Antananarivo",
     "profession": "Maraîchère",
-    "phoneNumber": 343334455,
+    "phone": "343334455",
     "email": "nirina.rabemanantsoa@email.com",
     "occupation": "JUNIOR",
     "collectivityIdentifier": "b2000000-0000-0000-0000-000000000001",
@@ -222,7 +224,7 @@ Content-Type: application/json
     "gender": "MALE",
     "address": "Lot 33 Isotry, Antananarivo",
     "profession": "Riziculteur",
-    "phoneNumber": 344445566,
+    "phone": "344445566",
     "email": "feno.rasolondraibe@email.com",
     "occupation": "JUNIOR",
     "collectivityIdentifier": "99999999-9999-9999-9999-999999999999",

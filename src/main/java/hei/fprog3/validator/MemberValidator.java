@@ -47,6 +47,9 @@ public class MemberValidator {
         if (!errors.isEmpty()) {
             throw new BadRequestException(String.join(", ", errors) + (errors.size() == 1 ? " is" : " are") + " unpaid");
         }
+        if (member.getReferees().size() < 2) {
+            throw new BadRequestException("Not enough referees");
+        }
     }
 
     public void validate(List<CreateMemberRequest> members) throws BadRequestException {

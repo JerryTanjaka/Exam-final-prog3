@@ -25,8 +25,8 @@ CREATE TYPE attendance_status      AS ENUM ('PRESENT', 'ABSENT', 'EXCUSED');
 
 CREATE TABLE collectivities (
     id                              uuid      primary key default  gen_random_uuid(),
-    number                          VARCHAR(50)   NOT NULL UNIQUE,
-    name                            VARCHAR(255)  NOT NULL UNIQUE,
+    number                          VARCHAR(50)   UNIQUE,
+    name                            VARCHAR(255)  UNIQUE,
     city                            VARCHAR(255)  NOT NULL,
     specialty                       VARCHAR(255)  NOT NULL,
     creation_date                   DATE          NOT NULL

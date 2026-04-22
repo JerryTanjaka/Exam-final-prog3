@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 public class DataSourceConfig {
     private final Dotenv dotenv = Dotenv.load();
 
-    @Bean
     public Connection getConnection() {
         try {
             String url = dotenv.get("JDBC_URL");

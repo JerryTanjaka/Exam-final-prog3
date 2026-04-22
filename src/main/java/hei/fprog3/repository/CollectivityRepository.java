@@ -26,13 +26,14 @@ public class CollectivityRepository {
 
     public List<CollectivityResponse> create(List<CreateCollectivityRequest> collectivities) throws NotFoundException {
         Connection connection = dataSource.getConnection();
+        System.out.println(connection.toString());
         try {
             List<String> newCollectivitiesId = new ArrayList<>();
             connection.setAutoCommit(false);
             for (CreateCollectivityRequest collectivity : collectivities) {
                 PreparedStatement collectivitiesPs = connection.prepareStatement(
                         """
-                        INSERT INTO collectivities ( city, specialty)
+                        INSERT INTO collectivities (city, specialty)
                         VALUES (?, ?)
                         RETURNING id;
                         """
@@ -48,26 +49,24 @@ public class CollectivityRepository {
                 for (String memberId : collectivity.getMembers()) {
                     PreparedStatement membershipsPs = connection.prepareStatement(
                             """
-                            INSERT INTO membership (member_id, collectivity_id, occupation, start_date)
-                            VALUES (?, ?, ?::position_type, ?)
+                            INSERT INTO memberships (member_id, collectivity_id, occupation)
+                            VALUES (?, ?, ?::position_type)
                             """
                     );
                     membershipsPs.setString(1, memberId);
                     membershipsPs.setString(2, collectivity.getId());
 
                     if (memberId.equals(collectivity.getStructure().getPresident())) {
-                        membershipsPs.setObject(3, PositionType.PRESIDENT);
+                        membershipsPs.setString(3, PositionType.PRESIDENT.name());
                     } else if (memberId.equals(collectivity.getStructure().getVicePresident())) {
-                        membershipsPs.setObject(3, PositionType.VICE_PRESIDENT);
+                        membershipsPs.setString(3, PositionType.VICE_PRESIDENT.name());
                     } else if (memberId.equals(collectivity.getStructure().getSecretary())) {
-                        membershipsPs.setObject(3, PositionType.SECRETARY);
+                        membershipsPs.setString(3, PositionType.SECRETARY.name());
                     } else if (memberId.equals(collectivity.getStructure().getTreasurer())) {
-                        membershipsPs.setObject(3, PositionType.TREASURER);
+                        membershipsPs.setString(3, PositionType.TREASURER.name());
                     } else {
-                        membershipsPs.setObject(3, PositionType.SENIOR);
+                        membershipsPs.setString(3, PositionType.SENIOR.name());
                     }
-
-                    membershipsPs.setDate(4, Date.valueOf(collectivity.getCreationDate()));
                 }
             }
             connection.commit();
@@ -77,7 +76,6 @@ public class CollectivityRepository {
             }
             return collectivitiesResponse;
         } catch (SQLException e) {
-            dataSource.rollbackConnection(connection);
             throw new RuntimeException(e);
         } finally {
             dataSource.closeConnection(connection);
@@ -89,7 +87,7 @@ public class CollectivityRepository {
         try {
             PreparedStatement collectivitiesPs = connection.prepareStatement("""
                         SELECT id, number, name, city, specialty, creation_date
-                        FROM collectivities WHERE id = ?
+                        FROM collectivities WHERE id = ?::UUID
                         """);
             collectivitiesPs.setString(1, id);
 
@@ -98,8 +96,8 @@ public class CollectivityRepository {
             ResultSet membersRs = collectivitiesPs.executeQuery();
             if (membersRs.next()) {
                 collectivity.setId(membersRs.getString("id"));
-                collectivity.getIdentity().setNumber(membersRs.getString("number"));
-                collectivity.getIdentity().setName(membersRs.getString("name"));
+                CollectivityIdentity collectivityIdentity = new CollectivityIdentity(membersRs.getString("name"), membersRs.getString("number"));
+                collectivity.setIdentity(collectivityIdentity);
                 collectivity.setCity(membersRs.getString("city"));
                 collectivity.setSpecialty(membersRs.getString("specialty"));
                 collectivity.setCreationDate(membersRs.getDate("creation_date").toLocalDate());
@@ -108,7 +106,7 @@ public class CollectivityRepository {
             List<Member> members = new ArrayList<>();
             PreparedStatement membershipsPs = connection.prepareStatement("""
                         SELECT id, member_id, occupation
-                        FROM memberships WHERE collectivity_id = ?
+                        FROM memberships WHERE collectivity_id = ?::UUID
                         """);
             membershipsPs.setString(1, id);
             ResultSet membershipsRs = membershipsPs.executeQuery();
@@ -132,7 +130,7 @@ public class CollectivityRepository {
             connection.setAutoCommit(false);
             PreparedStatement collectivitiesPs = connection.prepareStatement(
                     """
-                    UPDATE collectivity SET name = ?, number = ?
+                    UPDATE collectivities SET name = ?, number = ?
                     WHERE id = ?
                     """
             );
