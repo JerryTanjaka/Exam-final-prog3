@@ -4,10 +4,8 @@
 
 @baseUrl = http://localhost:8080
 
-### ============================================================
 ### 1. POST /collectivities — Cas nominal (succès 201)
 ### 10 membres dont 5 avec ancienneté > 6 mois, approbation OK
-### ============================================================
 
 POST {{baseUrl}}/collectivities
 Content-Type: application/json
@@ -38,10 +36,7 @@ Content-Type: application/json
   }
 ]
 
-### ============================================================
 ### 2. POST /collectivities — Erreur 400 : pas d'approbation
-### ============================================================
-
 POST {{baseUrl}}/collectivities
 Content-Type: application/json
 
@@ -71,10 +66,7 @@ Content-Type: application/json
   }
 ]
 
-### ============================================================
 ### 3. POST /collectivities — Erreur 400 : structure manquante
-### ============================================================
-
 POST {{baseUrl}}/collectivities
 Content-Type: application/json
 
@@ -98,10 +90,7 @@ Content-Type: application/json
   }
 ]
 
-### ============================================================
 ### 4. POST /collectivities — Erreur 404 : membre inexistant
-### ============================================================
-
 POST {{baseUrl}}/collectivities
 Content-Type: application/json
 
@@ -127,10 +116,8 @@ Content-Type: application/json
   }
 ]
 
-### ============================================================
 ### 5. POST /members — Cas nominal (succès 201)
 ### 2 parrains SENIOR de la même collectivité cible (cas 1)
-### ============================================================
 
 POST {{baseUrl}}/members
 Content-Type: application/json
@@ -156,10 +143,7 @@ Content-Type: application/json
   }
 ]
 
-### ============================================================
 ### 6. POST /members — Erreur 400 : un seul parrain (< 2 requis)
-### ============================================================
-
 POST {{baseUrl}}/members
 Content-Type: application/json
 
@@ -183,10 +167,7 @@ Content-Type: application/json
   }
 ]
 
-### ============================================================
 ### 7. POST /members — Erreur 400 : frais d'adhésion non réglés
-### ============================================================
-
 POST {{baseUrl}}/members
 Content-Type: application/json
 
@@ -211,10 +192,7 @@ Content-Type: application/json
   }
 ]
 
-### ============================================================
 ### 8. POST /members — Erreur 404 : collectivité inexistante
-### ============================================================
-
 POST {{baseUrl}}/members
 Content-Type: application/json
 
@@ -248,3 +226,35 @@ Content-Type: application/json
   "name": "Hello",
   "number": "1243564789"
 }
+
+### 9. GET /collectivities/{id}/membershipFees — Récupérer les frais d'adhésion
+GET {{baseUrl}}/collectivities/b2000000-0000-0000-0000-000000000001/membershipFees
+
+### 10. POST /collectivities/{id}/membershipFees — Créer de nouveaux frais d'adhésion
+POST {{baseUrl}}/collectivities/b2000000-0000-0000-0000-000000000001/membershipFees
+Content-Type: application/json
+
+[
+  {
+    "eligibleFrom": "2024-05-01",
+    "frequency": "MONTHLY",
+    "amount": 7500.0,
+    "label": "Cotisation Exceptionnelle Mai"
+  }
+]
+
+### 11. GET /collectivities/{id}/transactions — Récupérer les transactions sur une période
+GET {{baseUrl}}/collectivities/b2000000-0000-0000-0000-000000000001/transactions?from=2024-01-01&to=2024-12-31
+
+### 12. POST /members/{id}/payments — Créer un paiement pour un membre
+POST {{baseUrl}}/members/a1000000-0000-0000-0000-000000000001/payments
+Content-Type: application/json
+
+[
+  {
+    "amount": 5000,
+    "membershipFeeIdentifier": "f1000000-0000-0000-0000-000000000001",
+    "accountCreditedIdentifier": "c1000000-0000-0000-0000-000000000001",
+    "paymentMode": "CASH"
+  }
+]

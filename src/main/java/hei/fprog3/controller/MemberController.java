@@ -47,12 +47,12 @@ public class MemberController {
     }
 
     @PostMapping("/{id}/payments")
-    public ResponseEntity<?> createPayments(@PathVariable(name = "id") String memberId,
+    public ResponseEntity<?> createPayments(@PathVariable(name = "id") String id,
                                             @RequestBody List<PaymentRequest> paymentRequests) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED)
                     .header("Content-Type", "application/json")
-                    .body(paymentService.create(paymentRequests));
+                    .body(paymentService.create(id, paymentRequests));
         } catch (RuntimeException e) {
             return ResponseEntity.internalServerError()
                     .header("Content-Type", "application/json")

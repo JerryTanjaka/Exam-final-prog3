@@ -95,8 +95,8 @@ public class CollectivityValidator {
         if (from == null || to == null) {
             throw new BadRequestException("from and to cannot be null");
         }
-        if (from.isBefore(to)) {
-            throw new BadRequestException("from is before to");
+        if (to.isBefore(from)) {
+            throw new BadRequestException("to is before from");
         }
     }
 }

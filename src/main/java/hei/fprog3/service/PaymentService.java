@@ -15,7 +15,10 @@ public class PaymentService {
         this.paymentRepository = paymentRepository;
     }
 
-    public List<Payment> create(List<PaymentRequest> paymentRequests) {
+    public List<Payment> create(String id, List<PaymentRequest> paymentRequests) {
+        for (PaymentRequest paymentRequest : paymentRequests) {
+            paymentRequest.setPayerId(id);
+        }
         return paymentRepository.create(paymentRequests);
     }
 }

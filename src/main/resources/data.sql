@@ -39,3 +39,42 @@ VALUES
     (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000008', 'b2000000-0000-0000-0000-000000000001', 'SENIOR',         '2024-01-01'),
     (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000009', 'b2000000-0000-0000-0000-000000000001', 'JUNIOR',         '2024-01-01'),
     (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000010', 'b2000000-0000-0000-0000-000000000001', 'JUNIOR',         '2024-01-01');
+
+-- ============================================================
+-- MOCK DATA v0.0.3
+-- ============================================================
+
+-- Fees
+INSERT INTO fees (id, eligible_from, amount, label, frequency, status)
+VALUES
+    ('f1000000-0000-0000-0000-000000000001', '2024-01-01', 5000.00, 'Cotisation Mensuelle', 'MONTHLY', 'ACTIVE'),
+    ('f1000000-0000-0000-0000-000000000002', '2024-01-01', 10000.00, 'Frais d''inscription', 'PUNCTUALLY', 'ACTIVE');
+
+-- Link Fees to Collectivity
+INSERT INTO collectivityFee (id, collectivity_id, fee_id)
+VALUES
+    (gen_random_uuid(), 'b2000000-0000-0000-0000-000000000001', 'f1000000-0000-0000-0000-000000000001'),
+    (gen_random_uuid(), 'b2000000-0000-0000-0000-000000000001', 'f1000000-0000-0000-0000-000000000002');
+
+-- Accounts
+INSERT INTO accounts (id, collectivity_id, type, balance, holder_name)
+VALUES
+    ('c1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000001', 'CASH', 0.00, 'Caisse Antananarivo');
+
+INSERT INTO accounts (id, collectivity_id, type, balance, holder_name, bank_name, bank_account_number)
+VALUES
+    ('c1000000-0000-0000-0000-000000000002', 'b2000000-0000-0000-0000-000000000001', 'BANK', 0.00, 'Compte BOA Antananarivo', 'BOA', '12345678901234567890123');
+
+INSERT INTO accounts (id, collectivity_id, type, balance, holder_name, mobile_banking_service, mobile_number)
+VALUES
+    ('c1000000-0000-0000-0000-000000000003', 'b2000000-0000-0000-0000-000000000001', 'MOBILE_MONEY', 0.00, 'MVola Antananarivo', 'MVOLA', '0340000001');
+
+-- Payments
+INSERT INTO payments (id, amount, membership_fee_id, credited_account_id, payment_method, creation_date)
+VALUES
+    ('e1000000-0000-0000-0000-000000000001', 5000.00, 'f1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000001', 'CASH', '2024-04-20');
+
+-- Transactions
+INSERT INTO transactions (id, member_id, payment_id, creation_date)
+VALUES
+    ('d1000000-0000-0000-0000-000000000001', 'a1000000-0000-0000-0000-000000000001', 'e1000000-0000-0000-0000-000000000001', '2024-04-20');
