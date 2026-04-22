@@ -13,7 +13,6 @@ import java.util.List;
 public class CollectivityResponse extends CollectivityBase {
     private CollectivityStructureResponse structure;
     private List<Member> members;
-    private CollectivityIdentity identity;
-
+    private CollectivityInformation identity;
     public CollectivityResponse() {}
 }

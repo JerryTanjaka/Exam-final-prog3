@@ -1,13 +1,12 @@
 package hei.fprog3.repository;
 
 import hei.fprog3.datasource.DataSourceConfig;
-import hei.fprog3.dto.collectivity.CollectivityIdentity;
+import hei.fprog3.dto.collectivity.CollectivityInformation;
 import hei.fprog3.dto.collectivity.CollectivityResponse;
 import hei.fprog3.dto.collectivity.CreateCollectivityRequest;
 import hei.fprog3.dto.member.MemberResponse;
 import hei.fprog3.exception.NotFoundException;
 import hei.fprog3.model.Member;
-import hei.fprog3.model.enums.GenderType;
 import hei.fprog3.model.enums.PositionType;
 import org.springframework.stereotype.Repository;
 
@@ -96,8 +95,8 @@ public class CollectivityRepository {
             ResultSet membersRs = collectivitiesPs.executeQuery();
             if (membersRs.next()) {
                 collectivity.setId(membersRs.getString("id"));
-                CollectivityIdentity collectivityIdentity = new CollectivityIdentity(membersRs.getString("name"), membersRs.getString("number"));
-                collectivity.setIdentity(collectivityIdentity);
+                CollectivityInformation collectivityInformation = new CollectivityInformation(membersRs.getString("name"), membersRs.getInt("number"));
+                collectivity.setIdentity(collectivityInformation);
                 collectivity.setCity(membersRs.getString("city"));
                 collectivity.setSpecialty(membersRs.getString("specialty"));
                 collectivity.setCreationDate(membersRs.getDate("creation_date").toLocalDate());
@@ -124,22 +123,24 @@ public class CollectivityRepository {
         }
     }
 
-    public CollectivityResponse updateCollectivityIdentity(String id, CollectivityIdentity collectivityIdentity) throws NotFoundException {
+    public CollectivityResponse updateCollectivityIdentity(String id, CollectivityInformation collectivityIdentity) throws NotFoundException {
         Connection connection = dataSource.getConnection();
         try {
             connection.setAutoCommit(false);
             PreparedStatement collectivitiesPs = connection.prepareStatement(
                     """
                     UPDATE collectivities SET name = ?, number = ?
-                    WHERE id = ?
-                    """
+                            WHERE id = ?::UUID
+                        """
             );
             collectivitiesPs.setString(1, collectivityIdentity.getName());
             collectivitiesPs.setObject(2, collectivityIdentity.getNumber());
             collectivitiesPs.setString(3, id);
-            ResultSet rs = collectivitiesPs.executeQuery();
+
+            collectivitiesPs.executeUpdate();
+
             connection.commit();
-            return findById(id);
+            return this.findById(id);
         } catch (SQLException e) {
             dataSource.rollbackConnection(connection);
             throw new RuntimeException(e);

@@ -61,3 +61,11 @@ VALUES
     (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000008', 'b2000000-0000-0000-0000-000000000001', 'SENIOR',         '2024-01-01'),
     (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000009', 'b2000000-0000-0000-0000-000000000001', 'JUNIOR',         '2024-01-01'),
     (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000010', 'b2000000-0000-0000-0000-000000000001', 'JUNIOR',         '2024-01-01');
+-- 1. On remplace les textes vides par NULL
+UPDATE collectivities
+SET number = NULL
+WHERE number = '';
+
+-- 2. Maintenant on peut changer le type sans erreur
+ALTER TABLE collectivities
+    ALTER COLUMN number TYPE INTEGER USING number::integer;

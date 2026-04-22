@@ -1,11 +1,9 @@
 package hei.fprog3.validator;
 
-import hei.fprog3.dto.collectivity.CollectivityIdentity;
 import hei.fprog3.dto.collectivity.CollectivityInformation;
 import hei.fprog3.dto.collectivity.CollectivityStructureRequest;
 import hei.fprog3.dto.collectivity.CreateCollectivityRequest;
 import hei.fprog3.exception.BadRequestException;
-import hei.fprog3.model.Collectivity;
 import hei.fprog3.repository.CollectivityRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -57,22 +55,22 @@ public class CollectivityValidator {
         }
     }
 
-    public void validate(CollectivityIdentity collectivityIdentity) throws BadRequestException {
-        if (collectivityIdentity == null) {
-            throw new BadRequestException("collectivityIdentity is null");
+    public void validate(CollectivityInformation collectivityInformation) throws BadRequestException {
+        if (collectivityInformation == null) {
+            throw new BadRequestException("collectivityInformation is null");
         }
-        if (collectivityIdentity.getName() == null ||  collectivityIdentity.getName().isEmpty()) {
-            throw new BadRequestException("collectivityIdentity.getName() is null");
+        if (collectivityInformation.getName() == null ||  collectivityInformation.getName().isEmpty()) {
+            throw new BadRequestException("collectivityInformation.getName() is null");
         }
-        if (collectivityIdentity.getNumber() == null ||  collectivityIdentity.getNumber().isEmpty()) {
-            throw new BadRequestException("collectivityIdentity.getNumber() is null");
+        if (collectivityInformation.getNumber() == null) {
+            throw new BadRequestException("Collectivity number is required");
+        }
+        if (collectivityInformation.getNumber() <= 0) {
+            throw new BadRequestException("Collectivity number must be greater than 0");
         }
     }
 
 
-    /**
-     * Nouvelle méthode pour valider la mise à jour (v0.0.2)
-     */
     public void validateUpdate(String id, CollectivityInformation info) throws BadRequestException {
         if (info == null) {
             throw new BadRequestException("Information is null");
@@ -81,11 +79,12 @@ public class CollectivityValidator {
         if (info.getName() == null || info.getName().trim().isEmpty()) {
             throw new BadRequestException("Name is required");
         }
-        if (info.getNumber() <= 0) {
-            throw new BadRequestException("Number must be greater than 0");
+        if (info.getNumber() == null) {
+            throw new BadRequestException("Collectivity number is required");
         }
-
-        // 2. Validation de l'unicité (Règle du YAML : 400 if name or number already used)
+        if (info.getNumber() <= 0) {
+            throw new BadRequestException("Collectivity number must be greater than 0");
+        }
         if (collectivityRepository.existsByName(info.getName(), id)) {
             throw new BadRequestException("Name '" + info.getName() + "' is already used by another collectivity");
         }
