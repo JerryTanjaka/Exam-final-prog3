@@ -5,6 +5,7 @@ import hei.fprog3.dto.collectivity.CollectivityStructureRequest;
 import hei.fprog3.dto.collectivity.CreateCollectivityRequest;
 import hei.fprog3.exception.BadRequestException;
 import hei.fprog3.model.Collectivity;
+import hei.fprog3.repository.MemberRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -12,19 +13,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-@AllArgsConstructor
 public class CollectivityValidator {
+    private MemberRepository memberRepository;
+    public CollectivityValidator(MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
+    }
+
     public void validate(CreateCollectivityRequest collectivity) throws BadRequestException {
         if (collectivity == null) {
             throw new BadRequestException("collectivity is null");
         }
         List<String> errors = new ArrayList<>();
-        if (collectivity.getCity() == null ||  collectivity.getCity().isEmpty()) {
-            errors.add("City");
+        if (collectivity.getLocation() == null ||  collectivity.getLocation().isEmpty()) {
+            errors.add("location");
         }
-//        if (collectivity.getName() == null ||  collectivity.getName().isEmpty()) {
-//            errors.add("Name");
-//        }
         if (collectivity.getSpecialty() == null ||  collectivity.getSpecialty().isEmpty()) {
             errors.add("Specialty");
         }
@@ -45,6 +47,14 @@ public class CollectivityValidator {
                 (collectivityStructure.getVicePresident() == null || collectivityStructure.getVicePresident().isEmpty())) {
             throw new BadRequestException("Structure is invalid");
         }
+        int oldEnoughMember = 0;
+        for (String member : collectivity.getMembers()) {
+            if (oldEnoughMember >= 5) return;
+            if (memberRepository.isLongTimeMember(member)) {
+                oldEnoughMember++;
+            }
+        }
+        throw new BadRequestException("Not enough old members");
     }
 
     public void validate(List<CreateCollectivityRequest> collectivities) throws BadRequestException {

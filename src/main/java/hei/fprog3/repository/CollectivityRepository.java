@@ -3,17 +3,18 @@ package hei.fprog3.repository;
 import hei.fprog3.datasource.DataSourceConfig;
 import hei.fprog3.dto.collectivity.CollectivityIdentity;
 import hei.fprog3.dto.collectivity.CollectivityResponse;
+import hei.fprog3.dto.collectivity.CollectivityStructureResponse;
 import hei.fprog3.dto.collectivity.CreateCollectivityRequest;
 import hei.fprog3.dto.member.MemberResponse;
 import hei.fprog3.exception.NotFoundException;
 import hei.fprog3.model.Member;
-import hei.fprog3.model.enums.GenderType;
 import hei.fprog3.model.enums.PositionType;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public class CollectivityRepository {
@@ -28,29 +29,26 @@ public class CollectivityRepository {
         Connection connection = dataSource.getConnection();
         System.out.println(connection.toString());
         try {
-            List<String> newCollectivitiesId = new ArrayList<>();
             connection.setAutoCommit(false);
+            List<CollectivityResponse> collectivitiesResponse = new ArrayList<>();
             for (CreateCollectivityRequest collectivity : collectivities) {
+                collectivity.setId(UUID.randomUUID().toString());
                 PreparedStatement collectivitiesPs = connection.prepareStatement(
                         """
-                        INSERT INTO collectivities (city, specialty)
-                        VALUES (?, ?)
-                        RETURNING id;
+                        INSERT INTO collectivities (id, location, specialty)
+                        VALUES (?::UUID, ?, ?)
                         """
                 );
-
-                collectivitiesPs.setString(1, collectivity.getCity());
-                collectivitiesPs.setObject(2, collectivity.getSpecialty());
-                ResultSet rs = collectivitiesPs.executeQuery();
-                while (rs.next()) {
-                    newCollectivitiesId.add(rs.getString("id"));
-                }
+                collectivitiesPs.setString(1, collectivity.getId());
+                collectivitiesPs.setString(2, collectivity.getLocation());
+                collectivitiesPs.setObject(3, collectivity.getSpecialty());
+                collectivitiesPs.execute();
 
                 for (String memberId : collectivity.getMembers()) {
                     PreparedStatement membershipsPs = connection.prepareStatement(
                             """
                             INSERT INTO memberships (member_id, collectivity_id, occupation)
-                            VALUES (?, ?, ?::position_type)
+                            VALUES (?::UUID, ?::UUID, ?::position_type)
                             """
                     );
                     membershipsPs.setString(1, memberId);
@@ -67,12 +65,12 @@ public class CollectivityRepository {
                     } else {
                         membershipsPs.setString(3, PositionType.SENIOR.name());
                     }
+                    membershipsPs.execute();
                 }
             }
             connection.commit();
-            List<CollectivityResponse> collectivitiesResponse = new ArrayList<>();
-            for (String id : newCollectivitiesId) {
-                collectivitiesResponse.add(findById(id));
+            for (CreateCollectivityRequest collectivity : collectivities) {
+                collectivitiesResponse.add(findById(collectivity.getId()));
             }
             return collectivitiesResponse;
         } catch (SQLException e) {
@@ -86,7 +84,7 @@ public class CollectivityRepository {
         Connection connection = dataSource.getConnection();
         try {
             PreparedStatement collectivitiesPs = connection.prepareStatement("""
-                        SELECT id, number, name, city, specialty, creation_date
+                        SELECT id, number, name, location, specialty, creation_date
                         FROM collectivities WHERE id = ?::UUID
                         """);
             collectivitiesPs.setString(1, id);
@@ -98,7 +96,7 @@ public class CollectivityRepository {
                 collectivity.setId(membersRs.getString("id"));
                 CollectivityIdentity collectivityIdentity = new CollectivityIdentity(membersRs.getString("name"), membersRs.getString("number"));
                 collectivity.setIdentity(collectivityIdentity);
-                collectivity.setCity(membersRs.getString("city"));
+                collectivity.setLocation(membersRs.getString("location"));
                 collectivity.setSpecialty(membersRs.getString("specialty"));
                 collectivity.setCreationDate(membersRs.getDate("creation_date").toLocalDate());
             }
@@ -111,12 +109,23 @@ public class CollectivityRepository {
             membershipsPs.setString(1, id);
             ResultSet membershipsRs = membershipsPs.executeQuery();
 
+            CollectivityStructureResponse collectivityStructureResponse = new CollectivityStructureResponse();
             while (membershipsRs.next()) {
                 MemberResponse member = memberRepository.findById(membershipsRs.getString("member_id"));
                 member.setOccupation(PositionType.valueOf(membershipsRs.getString("occupation")));
+                if (PositionType.valueOf(membershipsRs.getString("occupation")).equals(PositionType.PRESIDENT)) {
+                    collectivityStructureResponse.setPresident(member);
+                } else if (PositionType.valueOf(membershipsRs.getString("occupation")).equals(PositionType.VICE_PRESIDENT)) {
+                    collectivityStructureResponse.setVicePresident(member);
+                } else if (PositionType.valueOf(membershipsRs.getString("occupation")).equals(PositionType.SECRETARY)) {
+                    collectivityStructureResponse.setSecretary(member);
+                } else if (PositionType.valueOf(membershipsRs.getString("occupation")).equals(PositionType.TREASURER)) {
+                    collectivityStructureResponse.setTreasurer(member);
+                }
                 members.add(member);
             }
 
+            collectivity.setStructure(collectivityStructureResponse);
             collectivity.setMembers(members);
             return collectivity;
         } catch (SQLException e) {
@@ -131,13 +140,13 @@ public class CollectivityRepository {
             PreparedStatement collectivitiesPs = connection.prepareStatement(
                     """
                     UPDATE collectivities SET name = ?, number = ?
-                    WHERE id = ?
+                    WHERE id = ?::UUID
                     """
             );
             collectivitiesPs.setString(1, collectivityIdentity.getName());
             collectivitiesPs.setObject(2, collectivityIdentity.getNumber());
             collectivitiesPs.setString(3, id);
-            ResultSet rs = collectivitiesPs.executeQuery();
+            collectivitiesPs.executeUpdate();
             connection.commit();
             return findById(id);
         } catch (SQLException e) {

@@ -10,21 +10,9 @@ ALTER TABLE collectivities
     ALTER COLUMN name DROP NOT NULL;
 
 -- 2. Relancer les inserts
-INSERT INTO collectivities (id, city, specialty, creation_date)
+INSERT INTO collectivities (id, "location", specialty, creation_date)
 VALUES ('b2000000-0000-0000-0000-000000000001', 'Antananarivo', 'Riziculture', '2024-01-01');
 
-INSERT INTO memberships (id, member_id, collectivity_id, occupation, start_date)
-VALUES
-    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000001', 'PRESIDENT',      '2024-01-01'),
-    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000002', 'b2000000-0000-0000-0000-000000000001', 'VICE_PRESIDENT', '2024-01-01'),
-    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000003', 'b2000000-0000-0000-0000-000000000001', 'TREASURER',      '2024-01-01'),
-    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000004', 'b2000000-0000-0000-0000-000000000001', 'SECRETARY',      '2024-01-01'),
-    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000005', 'b2000000-0000-0000-0000-000000000001', 'SENIOR',         '2024-01-01'),
-    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000006', 'b2000000-0000-0000-0000-000000000001', 'SENIOR',         '2024-01-01'),
-    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000007', 'b2000000-0000-0000-0000-000000000001', 'SENIOR',         '2024-01-01'),
-    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000008', 'b2000000-0000-0000-0000-000000000001', 'SENIOR',         '2024-01-01'),
-    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000009', 'b2000000-0000-0000-0000-000000000001', 'JUNIOR',         '2024-01-01'),
-    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000010', 'b2000000-0000-0000-0000-000000000001', 'JUNIOR',         '2024-01-01');
 INSERT INTO members (id, last_name, first_name, birth_date, gender, address, profession, phone, email)
 VALUES
     ('a1000000-0000-0000-0000-000000000001', 'RAKOTO', 'Jean', '1990-01-15', 'MALE', 'Antananarivo', 'Agriculteur', '0341234567', 'jean.rakoto@email.com'),
@@ -44,8 +32,7 @@ VALUES
 -- et occupation SENIOR pour pouvoir parrainer (condition B-2)
 -- ============================================================
 
--- On a besoin d'une collectivité existante d'abord
-INSERT INTO collectivities (id, city, specialty, creation_date)
+INSERT INTO collectivities (id, location, specialty, creation_date)
 VALUES ('b2000000-0000-0000-0000-000000000001', 'Antananarivo', 'Riziculture', '2024-01-01');
 
 -- Les 10 membres dans cette collectivité existante depuis > 6 mois
