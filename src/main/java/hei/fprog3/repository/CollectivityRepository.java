@@ -1,9 +1,7 @@
 package hei.fprog3.repository;
 
 import hei.fprog3.datasource.DataSourceConfig;
-import hei.fprog3.dto.collectivity.CollectivityInformation;
-import hei.fprog3.dto.collectivity.CollectivityResponse;
-import hei.fprog3.dto.collectivity.CreateCollectivityRequest;
+import hei.fprog3.dto.collectivity.*;
 import hei.fprog3.dto.member.MemberResponse;
 import hei.fprog3.exception.NotFoundException;
 import hei.fprog3.model.Member;
@@ -13,11 +11,12 @@ import org.springframework.stereotype.Repository;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public class CollectivityRepository {
-    private final DataSourceConfig dataSource;
-    private final MemberRepository memberRepository;
+    private DataSourceConfig dataSource;
+    private MemberRepository memberRepository;
     public  CollectivityRepository(DataSourceConfig dataSource,  MemberRepository memberRepository) {
         this.dataSource = dataSource;
         this.memberRepository =memberRepository;
@@ -25,37 +24,31 @@ public class CollectivityRepository {
 
     public List<CollectivityResponse> create(List<CreateCollectivityRequest> collectivities) throws NotFoundException {
         Connection connection = dataSource.getConnection();
-        System.out.println(connection.toString());
         try {
-            List<String> newCollectivitiesId = new ArrayList<>();
             connection.setAutoCommit(false);
+            List<CollectivityResponse> collectivitiesResponse = new ArrayList<>();
             for (CreateCollectivityRequest collectivity : collectivities) {
+                collectivity.setId(UUID.randomUUID().toString());
                 PreparedStatement collectivitiesPs = connection.prepareStatement(
                         """
-                        INSERT INTO collectivities (city, specialty)
-                        VALUES (?, ?)
-                        RETURNING id;
+                        INSERT INTO collectivities (id, location, specialty)
+                        VALUES (?::UUID, ?, ?)
                         """
                 );
-
-                collectivitiesPs.setString(1, collectivity.getCity());
-                collectivitiesPs.setObject(2, collectivity.getSpecialty());
-                ResultSet rs = collectivitiesPs.executeQuery();
-                String generatedId = null;
-                while (rs.next()) {
-                    generatedId = rs.getString("id");
-                    newCollectivitiesId.add(generatedId);
-                }
+                collectivitiesPs.setString(1, collectivity.getId());
+                collectivitiesPs.setString(2, collectivity.getLocation());
+                collectivitiesPs.setObject(3, collectivity.getSpecialty());
+                collectivitiesPs.execute();
 
                 for (String memberId : collectivity.getMembers()) {
                     PreparedStatement membershipsPs = connection.prepareStatement(
                             """
                             INSERT INTO memberships (member_id, collectivity_id, occupation)
-                            VALUES (?, ?, ?::position_type)
+                            VALUES (?::UUID, ?::UUID, ?::position_type)
                             """
                     );
                     membershipsPs.setString(1, memberId);
-                    membershipsPs.setString(2, generatedId);
+                    membershipsPs.setString(2, collectivity.getId());
 
                     if (memberId.equals(collectivity.getStructure().getPresident())) {
                         membershipsPs.setString(3, PositionType.PRESIDENT.name());
@@ -68,16 +61,16 @@ public class CollectivityRepository {
                     } else {
                         membershipsPs.setString(3, PositionType.SENIOR.name());
                     }
-                    membershipsPs.executeUpdate();
+                    membershipsPs.execute();
                 }
             }
             connection.commit();
-            List<CollectivityResponse> collectivitiesResponse = new ArrayList<>();
-            for (String id : newCollectivitiesId) {
-                collectivitiesResponse.add(findById(id));
+            for (CreateCollectivityRequest collectivity : collectivities) {
+                collectivitiesResponse.add(findById(collectivity.getId()));
             }
             return collectivitiesResponse;
         } catch (SQLException e) {
+            dataSource.rollbackConnection(connection);
             throw new RuntimeException(e);
         } finally {
             dataSource.closeConnection(connection);
@@ -88,7 +81,7 @@ public class CollectivityRepository {
         Connection connection = dataSource.getConnection();
         try {
             PreparedStatement collectivitiesPs = connection.prepareStatement("""
-                        SELECT id, number, name, city, specialty, creation_date
+                        SELECT id, number, name, location, specialty, creation_date
                         FROM collectivities WHERE id = ?::UUID
                         """);
             collectivitiesPs.setString(1, id);
@@ -98,9 +91,9 @@ public class CollectivityRepository {
             ResultSet membersRs = collectivitiesPs.executeQuery();
             if (membersRs.next()) {
                 collectivity.setId(membersRs.getString("id"));
-                CollectivityInformation collectivityInformation = new CollectivityInformation(membersRs.getString("name"), membersRs.getInt("number"));
+                CollectivityInformation collectivityInformation = new CollectivityInformation(membersRs.getString("name"), membersRs.getString("number"));
                 collectivity.setIdentity(collectivityInformation);
-                collectivity.setCity(membersRs.getString("city"));
+                collectivity.setLocation(membersRs.getString("location"));
                 collectivity.setSpecialty(membersRs.getString("specialty"));
                 collectivity.setCreationDate(membersRs.getDate("creation_date").toLocalDate());
             }
@@ -113,35 +106,63 @@ public class CollectivityRepository {
             membershipsPs.setString(1, id);
             ResultSet membershipsRs = membershipsPs.executeQuery();
 
+            CollectivityStructureResponse collectivityStructureResponse = new CollectivityStructureResponse();
             while (membershipsRs.next()) {
                 MemberResponse member = memberRepository.findById(membershipsRs.getString("member_id"));
                 member.setOccupation(PositionType.valueOf(membershipsRs.getString("occupation")));
+                if (PositionType.valueOf(membershipsRs.getString("occupation")).equals(PositionType.PRESIDENT)) {
+                    collectivityStructureResponse.setPresident(member);
+                } else if (PositionType.valueOf(membershipsRs.getString("occupation")).equals(PositionType.VICE_PRESIDENT)) {
+                    collectivityStructureResponse.setVicePresident(member);
+                } else if (PositionType.valueOf(membershipsRs.getString("occupation")).equals(PositionType.SECRETARY)) {
+                    collectivityStructureResponse.setSecretary(member);
+                } else if (PositionType.valueOf(membershipsRs.getString("occupation")).equals(PositionType.TREASURER)) {
+                    collectivityStructureResponse.setTreasurer(member);
+                }
                 members.add(member);
             }
 
+            collectivity.setStructure(collectivityStructureResponse);
             collectivity.setMembers(members);
             return collectivity;
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            dataSource.closeConnection(connection);
         }
     }
 
-    public CollectivityResponse updateCollectivityIdentity(String id, CollectivityInformation collectivityIdentity) throws NotFoundException {
+    public void exists(String id) throws NotFoundException {
+        Connection  connection = dataSource.getConnection();
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT id FROM collectivities WHERE id = ?::UUID");
+            preparedStatement.setString(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (!resultSet.next()) {
+                throw new NotFoundException("Collectivity with id %s not found".formatted(id));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            dataSource.closeConnection(connection);
+        }
+    }
+
+    public CollectivityResponse updateCollectivityInformation(String id, CollectivityInformation collectivityInformation) throws NotFoundException {
         Connection connection = dataSource.getConnection();
         try {
+            exists(id);
             connection.setAutoCommit(false);
             PreparedStatement collectivitiesPs = connection.prepareStatement(
                     """
                     UPDATE collectivities SET name = ?, number = ?
-                            WHERE id = ?::UUID
-                        """
+                    WHERE id = ?::UUID
+                    """
             );
-            collectivitiesPs.setString(1, collectivityIdentity.getName());
-            collectivitiesPs.setObject(2, collectivityIdentity.getNumber());
+            collectivitiesPs.setString(1, collectivityInformation.getName());
+            collectivitiesPs.setObject(2, collectivityInformation.getNumber());
             collectivitiesPs.setString(3, id);
-
             collectivitiesPs.executeUpdate();
-
             connection.commit();
             return findById(id);
         } catch (SQLException e) {
@@ -169,13 +190,13 @@ public class CollectivityRepository {
         }
     }
 
-    public boolean existsByNumber(int number, String excludeId) {
+    public boolean existsByNumber(String number, String excludeId) {
         Connection connection = dataSource.getConnection();
         try {
             PreparedStatement ps = connection.prepareStatement(
                     "SELECT COUNT(id) FROM collectivities WHERE number = ? AND id != ?::UUID"
             );
-            ps.setInt(1, number);
+            ps.setString(1, number);
             ps.setString(2, excludeId);
             ResultSet rs = ps.executeQuery();
             return rs.next() && rs.getInt(1) > 0;

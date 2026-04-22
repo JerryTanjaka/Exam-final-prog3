@@ -53,6 +53,9 @@ public class MemberValidator {
     }
 
     public void validate(List<CreateMemberRequest> members) throws BadRequestException {
+        if (members == null || members.isEmpty()) {
+            throw new BadRequestException("No members are provided");
+        }
         for (CreateMemberRequest member : members) {
             validate(member);
         }

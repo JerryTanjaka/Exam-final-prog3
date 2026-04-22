@@ -3,28 +3,10 @@
 -- pour pouvoir créer une collectivité et parrainer
 -- ============================================================
 -- 1. Corriger la contrainte
-ALTER TABLE collectivities
-    ALTER COLUMN number DROP NOT NULL;
-
-ALTER TABLE collectivities
-    ALTER COLUMN name DROP NOT NULL;
-
 -- 2. Relancer les inserts
-INSERT INTO collectivities (id, city, specialty, creation_date)
+INSERT INTO collectivities (id, "location", specialty, creation_date)
 VALUES ('b2000000-0000-0000-0000-000000000001', 'Antananarivo', 'Riziculture', '2024-01-01');
 
-INSERT INTO memberships (id, member_id, collectivity_id, occupation, start_date)
-VALUES
-    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000001', 'PRESIDENT',      '2024-01-01'),
-    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000002', 'b2000000-0000-0000-0000-000000000001', 'VICE_PRESIDENT', '2024-01-01'),
-    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000003', 'b2000000-0000-0000-0000-000000000001', 'TREASURER',      '2024-01-01'),
-    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000004', 'b2000000-0000-0000-0000-000000000001', 'SECRETARY',      '2024-01-01'),
-    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000005', 'b2000000-0000-0000-0000-000000000001', 'SENIOR',         '2024-01-01'),
-    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000006', 'b2000000-0000-0000-0000-000000000001', 'SENIOR',         '2024-01-01'),
-    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000007', 'b2000000-0000-0000-0000-000000000001', 'SENIOR',         '2024-01-01'),
-    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000008', 'b2000000-0000-0000-0000-000000000001', 'SENIOR',         '2024-01-01'),
-    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000009', 'b2000000-0000-0000-0000-000000000001', 'JUNIOR',         '2024-01-01'),
-    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000010', 'b2000000-0000-0000-0000-000000000001', 'JUNIOR',         '2024-01-01');
 INSERT INTO members (id, last_name, first_name, birth_date, gender, address, profession, phone, email)
 VALUES
     ('a1000000-0000-0000-0000-000000000001', 'RAKOTO', 'Jean', '1990-01-15', 'MALE', 'Antananarivo', 'Agriculteur', '0341234567', 'jean.rakoto@email.com'),
@@ -44,10 +26,6 @@ VALUES
 -- et occupation SENIOR pour pouvoir parrainer (condition B-2)
 -- ============================================================
 
--- On a besoin d'une collectivité existante d'abord
-INSERT INTO collectivities (id, city, specialty, creation_date)
-VALUES ('b2000000-0000-0000-0000-000000000001', 'Antananarivo', 'Riziculture', '2024-01-01');
-
 -- Les 10 membres dans cette collectivité existante depuis > 6 mois
 INSERT INTO memberships (id, member_id, collectivity_id, occupation, start_date)
 VALUES
@@ -61,31 +39,42 @@ VALUES
     (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000008', 'b2000000-0000-0000-0000-000000000001', 'SENIOR',         '2024-01-01'),
     (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000009', 'b2000000-0000-0000-0000-000000000001', 'JUNIOR',         '2024-01-01'),
     (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000010', 'b2000000-0000-0000-0000-000000000001', 'JUNIOR',         '2024-01-01');
--- 1. On remplace les textes vides par NULL
-UPDATE collectivities
-SET number = NULL
-WHERE number = '';
 
--- 2. Maintenant on peut changer le type sans erreur
-ALTER TABLE collectivities
-    ALTER COLUMN number TYPE INTEGER USING number::integer;
-DROP TABLE IF EXISTS referals;
+-- ============================================================
+-- MOCK DATA v0.0.3
+-- ============================================================
 
-CREATE TABLE referals (
-                          id           uuid             PRIMARY KEY DEFAULT gen_random_uuid(),
-                          member_id    uuid             NOT NULL REFERENCES members(id),
-                          referee_id   uuid             NOT NULL REFERENCES members(id),
-                          UNIQUE (member_id, referee_id)
-);
-
--- 1. Assurons-nous d'abord que la collectivité de test existe
-INSERT INTO collectivities (id, city, specialty, name, number, creation_date)
-VALUES ('b2000000-0000-0000-0000-000000000001', 'Antananarivo', 'Riziculture', 'Union des Riziculteurs', 101, '2026-01-01')
-ON CONFLICT DO NOTHING;
-
--- 2. Insertion de frais existants pour tester le GET
-INSERT INTO membership_fees (id, collectivity_id, label, amount, fee_frequency, eligible_from, status)
+-- Fees
+INSERT INTO fees (id, eligible_from, amount, label, frequency, status)
 VALUES
-    (gen_random_uuid(), 'b2000000-0000-0000-0000-000000000001', 'Cotisation de base', 5000.0, 'MONTHLY', '2026-01-01', 'ACTIVE'),
-    (gen_random_uuid(), 'b2000000-0000-0000-0000-000000000001', 'Fond de solidarité', 20000.0, 'ANNUALLY', '2026-01-01', 'ACTIVE');
+    ('f1000000-0000-0000-0000-000000000001', '2024-01-01', 5000.00, 'Cotisation Mensuelle', 'MONTHLY', 'ACTIVE'),
+    ('f1000000-0000-0000-0000-000000000002', '2024-01-01', 10000.00, 'Frais d''inscription', 'PUNCTUALLY', 'ACTIVE');
 
+-- Link Fees to Collectivity
+INSERT INTO collectivityFee (id, collectivity_id, fee_id)
+VALUES
+    (gen_random_uuid(), 'b2000000-0000-0000-0000-000000000001', 'f1000000-0000-0000-0000-000000000001'),
+    (gen_random_uuid(), 'b2000000-0000-0000-0000-000000000001', 'f1000000-0000-0000-0000-000000000002');
+
+-- Accounts
+INSERT INTO accounts (id, collectivity_id, type, balance, holder_name)
+VALUES
+    ('c1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000001', 'CASH', 0.00, 'Caisse Antananarivo');
+
+INSERT INTO accounts (id, collectivity_id, type, balance, holder_name, bank_name, bank_account_number)
+VALUES
+    ('c1000000-0000-0000-0000-000000000002', 'b2000000-0000-0000-0000-000000000001', 'BANK', 0.00, 'Compte BOA Antananarivo', 'BOA', '12345678901234567890123');
+
+INSERT INTO accounts (id, collectivity_id, type, balance, holder_name, mobile_banking_service, mobile_number)
+VALUES
+    ('c1000000-0000-0000-0000-000000000003', 'b2000000-0000-0000-0000-000000000001', 'MOBILE_MONEY', 0.00, 'MVola Antananarivo', 'MVOLA', '0340000001');
+
+-- Payments
+INSERT INTO payments (id, amount, membership_fee_id, credited_account_id, payment_method, creation_date)
+VALUES
+    ('e1000000-0000-0000-0000-000000000001', 5000.00, 'f1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000001', 'CASH', '2024-04-20');
+
+-- Transactions
+INSERT INTO transactions (id, member_id, payment_id, creation_date)
+VALUES
+    ('d1000000-0000-0000-0000-000000000001', 'a1000000-0000-0000-0000-000000000001', 'e1000000-0000-0000-0000-000000000001', '2024-04-20');

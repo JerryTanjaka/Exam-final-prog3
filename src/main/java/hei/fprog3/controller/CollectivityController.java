@@ -2,17 +2,17 @@ package hei.fprog3.controller;
 
 import hei.fprog3.dto.collectivity.CollectivityInformation;
 import hei.fprog3.dto.collectivity.CreateCollectivityRequest;
-import hei.fprog3.dto.fees.CreateMembershipFee;
+import hei.fprog3.dto.fee.FeeRequest;
 import hei.fprog3.exception.BadRequestException;
 import hei.fprog3.exception.NotFoundException;
 import hei.fprog3.service.CollectivityService;
-import hei.fprog3.service.MembershipFeeService;
 import hei.fprog3.validator.CollectivityValidator;
-import hei.fprog3.validator.MembershipFeeValidator;
+import hei.fprog3.validator.FeeValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -20,14 +20,11 @@ import java.util.List;
 public class CollectivityController {
     public CollectivityService collectivityService;
     public CollectivityValidator  collectivityValidator;
-    private final MembershipFeeService membershipFeeService;
-    private final MembershipFeeValidator membershipFeeValidator;
-    public CollectivityController(CollectivityService cs, CollectivityValidator cv,
-                                  MembershipFeeService mfs, MembershipFeeValidator mfv) {
-        this.collectivityService = cs;
-        this.collectivityValidator = cv;
-        this.membershipFeeService = mfs;
-        this.membershipFeeValidator = mfv;
+    public FeeValidator  feeValidator;
+    public CollectivityController(CollectivityService collectivityService,  CollectivityValidator collectivityValidator,  FeeValidator feeValidator) {
+        this.collectivityService = collectivityService;
+        this.collectivityValidator = collectivityValidator;
+        this.feeValidator = feeValidator;
     }
 
     @PostMapping
@@ -51,20 +48,47 @@ public class CollectivityController {
     @PutMapping("/{id}/informations")
     public ResponseEntity<?> updateInformation(@PathVariable String id, @RequestBody CollectivityInformation info) {
         try {
-            collectivityValidator.validateUpdate(id,info);
-            return ResponseEntity.ok(collectivityService.updateInformation(id, info));
+            collectivityValidator.validate(id, info);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .header("Content-Type", "application/json")
+                    .body(collectivityService.updateInfromation(id, info));
         } catch (BadRequestException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .header("Content-Type", "application/json")
+                    .body(e.getMessage());
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .header("Content-Type", "application/json")
+                    .body(e.getMessage());
         }
     }
-    @GetMapping("/{id}/membershipFees")
-    public ResponseEntity<?> getFees(@PathVariable String id) {
+
+    @GetMapping("/{id}/transactions")
+    public ResponseEntity<?> getTransactionsBetween(@PathVariable String id,
+                                                    @RequestParam(required = false) LocalDate from,
+                                                    @RequestParam(required = false) LocalDate to) {
         try {
+            collectivityValidator.validateTransactionParameters(id, from, to);
             return ResponseEntity.status(HttpStatus.OK)
                     .header("Content-Type", "application/json")
-                    .body(membershipFeeService.getFeesByCollectivity(id));
+                    .body(collectivityService.getTransactionBetween(id, from, to));
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .header("Content-Type", "application/json")
+                    .body(e.getMessage());
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .header("Content-Type", "application/json")
+                    .body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}/membershipFees")
+    public ResponseEntity<?> getMembershipFees(@PathVariable String id) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .header("Content-Type","application/json")
+                    .body(collectivityService.getAllFees(id));
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .header("Content-Type", "application/json")
@@ -73,13 +97,12 @@ public class CollectivityController {
     }
 
     @PostMapping("/{id}/membershipFees")
-    public ResponseEntity<?> createFees(@PathVariable String id, @RequestBody List<CreateMembershipFee> fees) {
+    public ResponseEntity<?> getMembershipFees(@PathVariable String id, @RequestBody List<FeeRequest> feeRequests) {
         try {
-            membershipFeeValidator.validate(fees);
+            feeValidator.validate(feeRequests);
             return ResponseEntity.status(HttpStatus.OK)
-                    .header("Content-Type", "application/json")
-                    .body(membershipFeeService.createFees(id, fees));
-
+                    .header("Content-Type","application/json")
+                    .body(collectivityService.createFee(id, feeRequests));
         } catch (BadRequestException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .header("Content-Type", "application/json")

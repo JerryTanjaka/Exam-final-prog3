@@ -1,4 +1,4 @@
-package hei.fprog3.dto.collectivity;
+package hei.fprog3.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CollectivityInformation {
-    private String name;
-    private String number;
+public class Transaction extends Payment {
+    private Member memberDebited;
 }

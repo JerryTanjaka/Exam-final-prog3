@@ -3,19 +3,16 @@
 ### ============================================================
 
 @baseUrl = http://localhost:8080
-@collectivityId = b2000000-0000-0000-0000-000000000001
 
-### ============================================================
 ### 1. POST /collectivities — Cas nominal (succès 201)
 ### 10 membres dont 5 avec ancienneté > 6 mois, approbation OK
-### ============================================================
 
 POST {{baseUrl}}/collectivities
 Content-Type: application/json
 
 [
   {
-    "city": "Fianarantsoa",
+    "location": "Fianarantsoa",
     "specialty": "Non",
     "federationApproval": true,
     "structure": {
@@ -39,16 +36,13 @@ Content-Type: application/json
   }
 ]
 
-### ============================================================
 ### 2. POST /collectivities — Erreur 400 : pas d'approbation
-### ============================================================
-
 POST {{baseUrl}}/collectivities
 Content-Type: application/json
 
 [
   {
-    "city": "Toamasina",
+    "location": "Toamasina",
     "specialty": "Non",
     "federationApproval": false,
     "structure": {
@@ -72,16 +66,14 @@ Content-Type: application/json
   }
 ]
 
-### ============================================================
 ### 3. POST /collectivities — Erreur 400 : structure manquante
-### ============================================================
-
 POST {{baseUrl}}/collectivities
 Content-Type: application/json
 
 [
   {
     "location": "Mahajanga",
+    "specialty": "No",
     "federationApproval": true,
     "members": [
       "a1000000-0000-0000-0000-000000000001",
@@ -98,10 +90,7 @@ Content-Type: application/json
   }
 ]
 
-### ============================================================
 ### 4. POST /collectivities — Erreur 404 : membre inexistant
-### ============================================================
-
 POST {{baseUrl}}/collectivities
 Content-Type: application/json
 
@@ -109,6 +98,7 @@ Content-Type: application/json
   {
     "location": "Antsiranana",
     "federationApproval": true,
+    "specialty": "non",
     "structure": {
       "president":     "a1000000-0000-0000-0000-000000000001",
       "vicePresident": "a1000000-0000-0000-0000-000000000002",
@@ -126,10 +116,8 @@ Content-Type: application/json
   }
 ]
 
-### ============================================================
 ### 5. POST /members — Cas nominal (succès 201)
 ### 2 parrains SENIOR de la même collectivité cible (cas 1)
-### ============================================================
 
 POST {{baseUrl}}/members
 Content-Type: application/json
@@ -155,10 +143,7 @@ Content-Type: application/json
   }
 ]
 
-### ============================================================
 ### 6. POST /members — Erreur 400 : un seul parrain (< 2 requis)
-### ============================================================
-
 POST {{baseUrl}}/members
 Content-Type: application/json
 
@@ -182,10 +167,7 @@ Content-Type: application/json
   }
 ]
 
-### ============================================================
 ### 7. POST /members — Erreur 400 : frais d'adhésion non réglés
-### ============================================================
-
 POST {{baseUrl}}/members
 Content-Type: application/json
 
@@ -210,10 +192,7 @@ Content-Type: application/json
   }
 ]
 
-### ============================================================
 ### 8. POST /members — Erreur 404 : collectivité inexistante
-### ============================================================
-
 POST {{baseUrl}}/members
 Content-Type: application/json
 
@@ -237,51 +216,90 @@ Content-Type: application/json
     "membershipDuesPaid": true
   }
 ]
-###here the put
 
-### 1. Succès : Mise à jour complète (Nom et Numéro)
-PUT {{baseUrl}}/collectivities/{{collectivityId}}/informations
+
+### PUT
+PUT {{baseUrl}}/collectivities/b2000000-0000-0000-0000-000000000001/informations
 Content-Type: application/json
 
 {
-  "name": "Fédération de Fianarantsoa",
-  "number": 301
+  "name": "Hello",
+  "number": "1243564789"
 }
 
-### 2. Erreur 400 : Nom manquant
-PUT {{baseUrl}}/collectivities/{{collectivityId}}/informations
+### 9. GET /collectivities/{id}/membershipFees — Récupérer les frais d'adhésion
+GET {{baseUrl}}/collectivities/b2000000-0000-0000-0000-000000000001/membershipFees
+
+### 10. POST /collectivities/{id}/membershipFees — Créer de nouveaux frais d'adhésion
+POST {{baseUrl}}/collectivities/b2000000-0000-0000-0000-000000000001/membershipFees
 Content-Type: application/json
 
-{
-  "name": "",
-  "number": 302
-}
+[
+  {
+    "eligibleFrom": "2024-05-01",
+    "frequency": "MONTHLY",
+    "amount": 7500.0,
+    "label": "Cotisation Exceptionnelle Mai"
+  }
+]
 
-### 3. Erreur 400 : Numéro invalide (0 ou négatif)
-PUT {{baseUrl}}/collectivities/{{collectivityId}}/informations
+### 11. GET /collectivities/{id}/transactions — Récupérer les transactions sur une période
+GET {{baseUrl}}/collectivities/b2000000-0000-0000-0000-000000000001/transactions?from=2024-01-01&to=2024-12-31
+
+### 12. POST /members/{id}/payments — Créer un paiement pour un membre
+POST {{baseUrl}}/members/a1000000-0000-0000-0000-000000000001/payments
 Content-Type: application/json
 
-{
-  "name": "Nouvelle Collectivité",
-  "number": 0
-}
+[
+  {
+    "amount": 5000,
+    "membershipFeeIdentifier": "f1000000-0000-0000-0000-000000000001",
+    "accountCreditedIdentifier": "c1000000-0000-0000-0000-000000000001",
+    "paymentMode": "CASH"
+  }
+]
 
-### 4. Erreur 404 : ID de collectivité inexistant
-PUT {{baseUrl}}/collectivities/99999999-9999-9999-9999-999999999999/informations
+### 13. POST /collectivities/{id}/membershipFees — Erreur 400 : Montant négatif
+POST {{baseUrl}}/collectivities/b2000000-0000-0000-0000-000000000001/membershipFees
 Content-Type: application/json
 
-{
-  "name": "Test Inexistant",
-  "number": 500
-}
+[
+  {
+    "eligibleFrom": "2024-05-01",
+    "frequency": "MONTHLY",
+    "amount": -500.0,
+    "label": "Frais Invalides"
+  }
+]
 
-### 5. Erreur 400 : Nom déjà utilisé (Unicité)
-# Note : Pour tester ceci, assure-toi que "Fédération de Fianarantsoa"
-# appartient déjà à une AUTRE collectivité que celle de l'ID.
-PUT {{baseUrl}}/collectivities/{{collectivityId}}/informations
+### 14. POST /collectivities/{id}/membershipFees — Erreur 400 : Fréquence inconnue
+POST {{baseUrl}}/collectivities/b2000000-0000-0000-0000-000000000001/membershipFees
 Content-Type: application/json
 
-{
-  "name": "Fédération de Fianarantsoa",
-  "number": 999
-}
+[
+  {
+    "eligibleFrom": "2024-05-01",
+    "frequency": "UNKNOWN_FREQUENCY",
+    "amount": 1000.0,
+    "label": "Frais Invalides"
+  }
+]
+
+### 15. GET /collectivities/{id}/membershipFees — Erreur 404 : Collectivité inexistante
+GET {{baseUrl}}/collectivities/00000000-0000-0000-0000-000000000000/membershipFees
+
+### 16. GET /collectivities/{id}/transactions — Erreur 400 : Paramètres 'from'/'to' manquants
+GET {{baseUrl}}/collectivities/b2000000-0000-0000-0000-000000000001/transactions?from=2024-01-01
+
+### 17. POST /members/{id}/payments — Erreur 404 : Membre inexistant
+POST {{baseUrl}}/members/00000000-0000-0000-0000-000000000000/payments
+Content-Type: application/json
+
+[
+  {
+    "amount": 5000,
+    "membershipFeeIdentifier": "f1000000-0000-0000-0000-000000000001",
+    "accountCreditedIdentifier": "c1000000-0000-0000-0000-000000000001",
+    "paymentMode": "CASH"
+  }
+]
