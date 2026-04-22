@@ -5,17 +5,15 @@ import hei.fprog3.dto.collectivity.CollectivityInformation;
 import hei.fprog3.dto.collectivity.CreateCollectivityRequest;
 import hei.fprog3.exception.BadRequestException;
 import hei.fprog3.exception.NotFoundException;
-import hei.fprog3.model.Collectivity;
 import hei.fprog3.service.CollectivityService;
 import hei.fprog3.validator.CollectivityValidator;
-import jakarta.websocket.server.PathParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//@RestController
+@RestController
 @RequestMapping("/collectivities")
 public class CollectivityController {
     public CollectivityService collectivityService;
@@ -43,13 +41,13 @@ public class CollectivityController {
         }
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<?> updateIdentity(@PathVariable String id, @RequestBody CollectivityIdentity collectivityIdentity) {
+    @PutMapping("/{id}/informations")
+    public ResponseEntity<?> updateInformation(@PathVariable String id, @RequestBody CollectivityInformation info) {
         try {
-            collectivityValidator.validate(collectivityIdentity);
+            collectivityValidator.validate(id, info);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .header("Content-Type", "application/json")
-                    .body(collectivityService.updateIdentity(id, collectivityIdentity));
+                    .body(collectivityService.updateInfromation(id, info));
         } catch (BadRequestException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .header("Content-Type", "application/json")
@@ -58,17 +56,6 @@ public class CollectivityController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .header("Content-Type", "application/json")
                     .body(e.getMessage());
-        }
-    }
-    @PutMapping("/{id}/informations")
-    public ResponseEntity<?> updateInformation(@PathVariable String id, @RequestBody CollectivityInformation info) {
-        try {
-            collectivityValidator.validate(info);
-            return ResponseEntity.ok(collectivityService.updateInformation(id, info));
-        } catch (BadRequestException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 }

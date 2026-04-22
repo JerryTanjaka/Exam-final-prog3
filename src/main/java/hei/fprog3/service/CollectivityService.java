@@ -1,6 +1,6 @@
 package hei.fprog3.service;
 
-import hei.fprog3.dto.collectivity.CollectivityIdentity;
+import hei.fprog3.dto.collectivity.CollectivityInformation;
 import hei.fprog3.dto.collectivity.CollectivityResponse;
 import hei.fprog3.dto.collectivity.CreateCollectivityRequest;
 import hei.fprog3.exception.NotFoundException;
@@ -21,7 +21,7 @@ public class CollectivityService {
         return collectivityRepository.create(collectivities);
     }
 
-    public CollectivityResponse updateIdentity(String id, CollectivityIdentity  collectivityIdentity) throws NotFoundException {
-        return collectivityRepository.updateCollectivityIdentity(id, collectivityIdentity);
+    public CollectivityResponse updateInfromation(String id, CollectivityInformation information) throws NotFoundException {
+        return collectivityRepository.updateCollectivityInformation(id, information);
     }
 }

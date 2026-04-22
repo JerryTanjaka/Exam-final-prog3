@@ -14,7 +14,7 @@ Content-Type: application/json
 
 [
   {
-    "city": "Fianarantsoa",
+    "location": "Fianarantsoa",
     "specialty": "Non",
     "federationApproval": true,
     "structure": {
@@ -47,7 +47,7 @@ Content-Type: application/json
 
 [
   {
-    "city": "Toamasina",
+    "location": "Toamasina",
     "specialty": "Non",
     "federationApproval": false,
     "structure": {
@@ -81,6 +81,7 @@ Content-Type: application/json
 [
   {
     "location": "Mahajanga",
+    "specialty": "No",
     "federationApproval": true,
     "members": [
       "a1000000-0000-0000-0000-000000000001",
@@ -108,6 +109,7 @@ Content-Type: application/json
   {
     "location": "Antsiranana",
     "federationApproval": true,
+    "specialty": "non",
     "structure": {
       "president":     "a1000000-0000-0000-0000-000000000001",
       "vicePresident": "a1000000-0000-0000-0000-000000000002",
@@ -236,3 +238,13 @@ Content-Type: application/json
     "membershipDuesPaid": true
   }
 ]
+
+
+### PUT
+PUT {{baseUrl}}/collectivities/0f76a032-b1b3-4776-8908-714c2cb75154
+Content-Type: application/json
+
+{
+  "name": "Hello",
+  "number": "1243564789"
+}

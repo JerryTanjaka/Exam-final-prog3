@@ -13,7 +13,7 @@ import java.time.LocalDate;
 public class CollectivityBase {
 
     private String id;
-    private String city;
+    private String location;
     private String specialty;
     private LocalDate creationDate;
 

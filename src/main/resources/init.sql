@@ -2,8 +2,7 @@
 -- Fédération de Collectivités Agricoles — Script d'initialisation
 -- Base : PostgreSQL 14+
 -- ============================================================
-ALTER TABLE collectivities
-    ALTER COLUMN creation_date SET DEFAULT CURRENT_DATE;
+
 -- ============================================================
 -- TYPES ÉNUMÉRÉS
 -- ============================================================
@@ -24,12 +23,12 @@ CREATE TYPE attendance_status      AS ENUM ('PRESENT', 'ABSENT', 'EXCUSED');
 -- ============================================================
 
 CREATE TABLE collectivities (
-    id                              uuid      primary key default  gen_random_uuid(),
+    id                              UUID          PRIMARY KEY DEFAULT  gen_random_uuid(),
     number                          VARCHAR(50)   UNIQUE,
     name                            VARCHAR(255)  UNIQUE,
-    city                            VARCHAR(255)  NOT NULL,
+    location                        VARCHAR(255)  NOT NULL,
     specialty                       VARCHAR(255)  NOT NULL,
-    creation_date                   DATE        default  CURRENT_DATE
+    creation_date                   DATE          NOT NULL DEFAULT NOW()
 );
 
 -- ============================================================
@@ -37,7 +36,7 @@ CREATE TABLE collectivities (
 -- ============================================================
 
 CREATE TABLE members (
-    id                               uuid      primary key default  gen_random_uuid(),
+    id                               UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
     last_name                        VARCHAR(255)  NOT NULL,
     first_name                       VARCHAR(255)  NOT NULL,
     birth_date                       DATE          NOT NULL,
@@ -49,12 +48,12 @@ CREATE TABLE members (
 );
 
 CREATE TABLE memberships (
-    id                               uuid      primary key default  gen_random_uuid(),
-    member_id         uuid          NOT NULL REFERENCES members(id),
-    collectivity_id   uuid           NOT NULL REFERENCES collectivities(id),
-    occupation      position_type   NOT NULL,
-    start_date      DATE            NOT NULL DEFAULT NOW(),
-    end_date        DATE,
+    id                UUID            PRIMARY KEY DEFAULT gen_random_uuid(),
+    member_id         UUID            NOT NULL REFERENCES members(id),
+    collectivity_id   UUID            NOT NULL REFERENCES collectivities(id),
+    occupation        position_type   NOT NULL,
+    start_date        DATE            NOT NULL DEFAULT NOW(),
+    end_date          DATE,
     UNIQUE (member_id, collectivity_id)
 );
 
@@ -66,9 +65,9 @@ CREATE TABLE memberships (
 -- ============================================================
 
 CREATE TABLE referals (
-    id           CHAR(14)         PRIMARY KEY,
-    member_id    CHAR(14)         NOT NULL REFERENCES members(id),  -- candidat
-    referee_id   CHAR(14)         NOT NULL REFERENCES members(id),  -- parrain confirmé
+    id           UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    member_id    UUID         NOT NULL REFERENCES members(id),  -- candidat
+    referee_id   UUID         NOT NULL REFERENCES members(id),  -- parrain confirmé
     UNIQUE (member_id, referee_id)
 );
 

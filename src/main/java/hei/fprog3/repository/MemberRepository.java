@@ -9,6 +9,7 @@ import hei.fprog3.model.enums.PositionType;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -137,6 +138,29 @@ public class MemberRepository {
             ps.setString(2, collectivityId);
             ResultSet rs = ps.executeQuery();
             return rs.next();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean isLongTimeMember(String memberId) {
+        Connection connection = dataSource.getConnection();
+        try {
+            PreparedStatement ps = connection.prepareStatement("""
+                        SELECT id, start_date, end_date
+                        FROM memberships WHERE member_id = ?::UUID
+                        ORDER BY end_date DESC
+                        """);
+            ps.setString(1, memberId);
+            ResultSet rs = ps.executeQuery();
+            long daysAsMember = 0;
+            while (rs.next()) {
+                if (daysAsMember >= 180) return true;
+                var startDate = rs.getDate("start_date").toLocalDate();
+                var endDate = (rs.getDate("end_date") == null) ? LocalDate.now() : rs.getDate("start_date").toLocalDate();
+                daysAsMember += endDate.toEpochDay() - startDate.toEpochDay();
+            }
+            return false;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
