@@ -9,7 +9,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class FinancialAccount {
-    public String id;
-    public double amount;
+public class Transaction extends Payment {
+    private Member member;
 }

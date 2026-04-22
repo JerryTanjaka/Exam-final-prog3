@@ -1,16 +1,15 @@
 package hei.fprog3.controller;
 
 import hei.fprog3.dto.member.CreateMemberRequest;
+import hei.fprog3.dto.payment.PaymentRequest;
 import hei.fprog3.exception.BadRequestException;
 import hei.fprog3.exception.NotFoundException;
 import hei.fprog3.service.MemberService;
+import hei.fprog3.service.PaymentService;
 import hei.fprog3.validator.MemberValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -19,9 +18,13 @@ import java.util.List;
 public class MemberController {
     public MemberService memberService;
     public MemberValidator memberValidator;
-    public MemberController(MemberService memberService, MemberValidator memberValidator) {
+
+    public PaymentService paymentService;
+
+    public MemberController(MemberService memberService, MemberValidator memberValidator, PaymentService paymentService) {
         this.memberService = memberService;
         this.memberValidator = memberValidator;
+        this.paymentService = paymentService;
     }
 
     @PostMapping
@@ -38,6 +41,20 @@ public class MemberController {
                     .body(e.getMessage());
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .header("Content-Type", "application/json")
+                    .body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/payments")
+    public ResponseEntity<?> createPayments(@PathVariable(name = "id") String memberId,
+                                            @RequestBody List<PaymentRequest> paymentRequests) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .header("Content-Type", "application/json")
+                    .body(paymentService.create(paymentRequests));
+        } catch (RuntimeException e) {
+            return ResponseEntity.internalServerError()
                     .header("Content-Type", "application/json")
                     .body(e.getMessage());
         }

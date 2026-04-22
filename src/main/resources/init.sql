@@ -72,61 +72,35 @@ CREATE TABLE referals (
 );
 
 CREATE TABLE accounts (
-    id                   UUID             PRIMARY KEY DEFAULT gen_random_uuid(),
-    collectivity_id      UUID             NOT NULL REFERENCES collectivities(id),  -- NULL = fédération
-    type                 account_type     NOT NULL,
-    balance              NUMERIC(15,2)    NOT NULL DEFAULT 0,
-    -- Champs communs BANK + MOBILE_MONEY
-    holder_name          VARCHAR(255),
-    -- Champs bancaires
-    bank_name            bank_name,
-    bank_account_number  CHAR(23),
-    -- Champs mobile money
-    mobile_money_service mobile_money_service,
-    phone_number         VARCHAR(50),
-);
+    id                      UUID             PRIMARY KEY DEFAULT gen_random_uuid(),
+    collectivity_id         UUID             NOT NULL REFERENCES collectivities(id),  -- NULL = fédération
+    type                    account_type     NOT NULL,
+    balance                 NUMERIC(15,2)    NOT NULL DEFAULT 0,
 
--- Une seule caisse par collectivité
-CREATE UNIQUE INDEX idx_unique_cash_per_collectivity
-    ON accounts (collectivity_id)
-    WHERE type = 'CASH' AND collectivity_id IS NOT NULL;
+    holder_name             VARCHAR(255),
 
--- Une seule caisse pour la fédération
-CREATE UNIQUE INDEX idx_unique_cash_federation
-    ON accounts ((type))
-    WHERE type = 'CASH' AND collectivity_id IS NULL;
+    bank_name               bank_name,
+    bank_account_number     CHAR(23),
 
--- ============================================================
--- TABLE : federation_contribution_rates
--- Historique des taux de reversement à la fédération
--- Taux actif = ligne dont effective_date est la plus récente <= CURRENT_DATE
--- ============================================================
-
-CREATE TABLE federation_contribution_rates (
-    id             CHAR(14)     PRIMARY KEY,
-    rate           NUMERIC(5,4) NOT NULL CHECK (rate >= 0 AND rate <= 1),
-    effective_date DATE         NOT NULL,
-);
-
--- ============================================================
--- TABLE : collectivity_contributions
--- Encaissements de cotisations enregistrés par le trésorier
--- ============================================================
-
-CREATE TABLE collectivity_contributions (
-    id                      CHAR(14)          PRIMARY KEY,
-    collectivity_id         CHAR(14)          NOT NULL REFERENCES collectivities(id),
-    type                    contribution_type NOT NULL,
-    amount                  NUMERIC(15,2)     NOT NULL,
+    mobile_banking_service  mobile_money_service,
+    mobile_number           VARCHAR(50),
 );
 
 CREATE TABLE payments (
-    id CHAR(14) PRIMARY KEY,
-    member_id CHAR(14) NOT NULL,
-    contribution_id CHAR(14) NOT NULL,
-    payment_method payment_method NOT NULL,
-    payment_date DATE NOT NULL DEFAULT NOW()
-)
+    id                  UUID            PRIMARY KEY DEFAULT gen_random_uuid(),
+    amount              NUMERIC(15,2)   NOT NULL,
+    membership_fee_id   UUID            NOT NULL,
+    credited_account_id UUID            NOT NULL,
+    payment_method      payment_method  NOT NULL,
+    creation_date       DATE            NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE transactions (
+    id              UUID    PRIMARY KEY DEFAULT gen_random_uuid(),
+    member_id       UUID    NOT NULL,
+    payment_id      UUID    NOT NULL,
+    creation_date   DATE    NOT NULL DEFAULT NOW()
+);
 
 -- ============================================================
 -- TABLE : activities
