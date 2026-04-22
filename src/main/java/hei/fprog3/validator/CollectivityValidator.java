@@ -1,5 +1,6 @@
 package hei.fprog3.validator;
 
+import hei.fprog3.dto.collectivity.CollectivityIdentity;
 import hei.fprog3.dto.collectivity.CollectivityStructureRequest;
 import hei.fprog3.dto.collectivity.CreateCollectivityRequest;
 import hei.fprog3.exception.BadRequestException;
@@ -20,9 +21,6 @@ public class CollectivityValidator {
         List<String> errors = new ArrayList<>();
         if (collectivity.getCity() == null ||  collectivity.getCity().isEmpty()) {
             errors.add("City");
-        }
-        if (collectivity.getName() == null ||  collectivity.getName().isEmpty()) {
-            errors.add("Name");
         }
         if (collectivity.getSpecialty() == null ||  collectivity.getSpecialty().isEmpty()) {
             errors.add("Specialty");
@@ -49,6 +47,18 @@ public class CollectivityValidator {
     public void validate(List<CreateCollectivityRequest> collectivities) throws BadRequestException {
         for (CreateCollectivityRequest collectivity : collectivities) {
             this.validate(collectivity);
+        }
+    }
+
+    public void validate(CollectivityIdentity collectivityIdentity) throws BadRequestException {
+        if (collectivityIdentity == null) {
+            throw new BadRequestException("collectivityIdentity is null");
+        }
+        if (collectivityIdentity.getName() == null ||  collectivityIdentity.getName().isEmpty()) {
+            throw new BadRequestException("collectivityIdentity.getName() is null");
+        }
+        if (collectivityIdentity.getNumber() == null ||  collectivityIdentity.getNumber().isEmpty()) {
+            throw new BadRequestException("collectivityIdentity.getNumber() is null");
         }
     }
 }

@@ -1,6 +1,7 @@
 package hei.fprog3.repository;
 
 import hei.fprog3.datasource.DataSourceConfig;
+import hei.fprog3.dto.collectivity.CollectivityIdentity;
 import hei.fprog3.dto.collectivity.CollectivityResponse;
 import hei.fprog3.dto.collectivity.CreateCollectivityRequest;
 import hei.fprog3.dto.member.MemberResponse;
@@ -31,16 +32,14 @@ public class CollectivityRepository {
             for (CreateCollectivityRequest collectivity : collectivities) {
                 PreparedStatement collectivitiesPs = connection.prepareStatement(
                         """
-                        INSERT INTO collectivity (number, name, city, specialty, creation_date)
-                        VALUES (?, ?, ?, ?, ?)
+                        INSERT INTO collectivity (city, specialty, creation_date)
+                        VALUES (?, ?, ?)
                         RETURNING id;
                         """
                 );
-                collectivitiesPs.setString(1, collectivity.getNumber());
-                collectivitiesPs.setString(2, collectivity.getName());
-                collectivitiesPs.setString(3, collectivity.getCity());
-                collectivitiesPs.setObject(4, collectivity.getSpecialty());
-                collectivitiesPs.setDate(5, Date.valueOf(collectivity.getCreationDate()));
+                collectivitiesPs.setString(1, collectivity.getCity());
+                collectivitiesPs.setObject(2, collectivity.getSpecialty());
+                collectivitiesPs.setDate(3, Date.valueOf(collectivity.getCreationDate()));
                 ResultSet rs = collectivitiesPs.executeQuery();
                 while (rs.next()) {
                     newCollectivitiesId.add(rs.getString("id"));
@@ -99,8 +98,8 @@ public class CollectivityRepository {
             ResultSet membersRs = collectivitiesPs.executeQuery();
             if (membersRs.next()) {
                 collectivity.setId(membersRs.getString("id"));
-                collectivity.setNumber(membersRs.getString("number"));
-                collectivity.setName(membersRs.getString("name"));
+                collectivity.getIdentity().setNumber(membersRs.getString("number"));
+                collectivity.getIdentity().setName(membersRs.getString("name"));
                 collectivity.setCity(membersRs.getString("city"));
                 collectivity.setSpecialty(membersRs.getString("specialty"));
                 collectivity.setCreationDate(membersRs.getDate("creation_date").toLocalDate());
@@ -124,6 +123,30 @@ public class CollectivityRepository {
             return collectivity;
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public CollectivityResponse updateCollectivityIdentity(String id, CollectivityIdentity collectivityIdentity) throws NotFoundException {
+        Connection connection = dataSource.getConnection();
+        try {
+            connection.setAutoCommit(false);
+            PreparedStatement collectivitiesPs = connection.prepareStatement(
+                    """
+                    UPDATE collectivity SET name = ?, number = ?
+                    WHERE id = ?
+                    """
+            );
+            collectivitiesPs.setString(1, collectivityIdentity.getName());
+            collectivitiesPs.setObject(2, collectivityIdentity.getNumber());
+            collectivitiesPs.setString(3, id);
+            ResultSet rs = collectivitiesPs.executeQuery();
+            connection.commit();
+            return findById(id);
+        } catch (SQLException e) {
+            dataSource.rollbackConnection(connection);
+            throw new RuntimeException(e);
+        } finally {
+            dataSource.closeConnection(connection);
         }
     }
 

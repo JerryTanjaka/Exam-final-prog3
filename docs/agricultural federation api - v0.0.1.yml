@@ -35,6 +35,32 @@ paths:
           description: Collectivity without federation approval or structure missing.
         404:
           description: Member not found.
+  '/collectivities/{id}':
+    patch:
+      parameters:
+        - required: true
+          in: path
+          name: id
+          schema:
+            type: string
+      summary: Attribute collectivity name and number
+      description: Pass collectivity name and number
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectivityIdentity'
+      responses:
+        201:
+          description: Updated collectivity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collectivity'
+        400:
+          description: Invalid identity informations
+        404:
+          description: Member not found.
   '/members':
     post:
       summary: Create list of members
@@ -88,6 +114,13 @@ components:
           $ref: '#/components/schemas/MemberIdentifier'
         secretary:
           $ref: '#/components/schemas/MemberIdentifier'
+    CollectivityIdentity:
+      type: object
+      properties:
+        name:
+          type: string
+        number:
+          type: string
     CollectivityStructure:
       type: object
       properties:
@@ -106,6 +139,8 @@ components:
           type: string
         location:
           type: string
+        identity:
+          $ref: "#/components/schemas/CollectivityIdentity"
         structure:
           $ref: '#/components/schemas/CollectivityStructure'
         members:
