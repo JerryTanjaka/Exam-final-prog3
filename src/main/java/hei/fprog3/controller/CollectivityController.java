@@ -17,9 +17,14 @@ import java.util.List;
 public class CollectivityController {
     public CollectivityService collectivityService;
     public CollectivityValidator  collectivityValidator;
-    public CollectivityController(CollectivityService collectivityService,  CollectivityValidator collectivityValidator) {
-        this.collectivityService = collectivityService;
-        this.collectivityValidator = collectivityValidator;
+    private final MembershipFeeService membershipFeeService;
+    private final MembershipFeeValidator membershipFeeValidator;
+    public CollectivityController(CollectivityService cs, CollectivityValidator cv,
+                                  MembershipFeeService mfs, MembershipFeeValidator mfv) {
+        this.collectivityService = cs;
+        this.collectivityValidator = cv;
+        this.membershipFeeService = mfs;
+        this.membershipFeeValidator = mfv;
     }
 
     @PostMapping
@@ -45,6 +50,26 @@ public class CollectivityController {
         try {
             collectivityValidator.validateUpdate(id,info);
             return ResponseEntity.ok(collectivityService.updateInformation(id, info));
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+    @GetMapping("/{id}/membershipFees")
+    public ResponseEntity<?> getMembershipFees(@PathVariable String id) {
+        try {
+            return ResponseEntity.ok(membershipFeeService.getFeesByCollectivity(id));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/membershipFees")
+    public ResponseEntity<?> createMembershipFees(@PathVariable String id, @RequestBody List<CreateMembershipFee> fees) {
+        try {
+            membershipFeeValidator.validate(fees); // Validation métier
+            return ResponseEntity.ok(membershipFeeService.createFees(id, fees));
         } catch (BadRequestException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (NotFoundException e) {
