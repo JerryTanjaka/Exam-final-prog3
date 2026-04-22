@@ -71,41 +71,9 @@ CREATE TABLE referals (
     UNIQUE (member_id, referee_id)
 );
 
--- ============================================================
--- TABLE : mandates
--- Mandat annuel d'une collectivité (1 mandat = 1 année civile)
--- Règle : un membre ne peut pas occuper le même poste > 2 fois au total
--- ============================================================
-
-/*
-CREATE TABLE mandates (
-    id                CHAR(14      PRIMARY KEY,
-    collectivity_id   CHAR(14      NOT NULL REFERENCES collectivities(id),
-    year              INTEGER   NOT NULL,
-    president_id      CHAR(14      NOT NULL REFERENCES members(id),
-    vice_president_id CHAR(14      NOT NULL REFERENCES members(id),
-    treasurer_id      CHAR(14      NOT NULL REFERENCES members(id),
-    secretary_id      CHAR(14      NOT NULL REFERENCES members(id),
-    start_date        DATE      NOT NULL,
-    end_date          DATE      NOT NULL,
-    UNIQUE (collectivity_id, year)
-);
-*/
-
--- ============================================================
--- TABLE : collectivity_changes
--- Historique des changements de collectivité d'un membre
--- ============================================================
-
--- ============================================================
--- TABLE : accounts
--- Comptes d'une collectivité ou de la fédération
--- collectivity_id = NULL  =>  compte de la fédération
--- ============================================================
-
 CREATE TABLE accounts (
-    id                   CHAR(14)         PRIMARY KEY,
-    collectivity_id      CHAR(14)         REFERENCES collectivities(id),  -- NULL = fédération
+    id                   UUID             PRIMARY KEY DEFAULT gen_random_uuid(),
+    collectivity_id      UUID             NOT NULL REFERENCES collectivities(id),  -- NULL = fédération
     type                 account_type     NOT NULL,
     balance              NUMERIC(15,2)    NOT NULL DEFAULT 0,
     -- Champs communs BANK + MOBILE_MONEY
@@ -116,9 +84,6 @@ CREATE TABLE accounts (
     -- Champs mobile money
     mobile_money_service mobile_money_service,
     phone_number         VARCHAR(50),
-
-    CONSTRAINT chk_bank_account_number
-        CHECK (bank_account_number IS NULL OR bank_account_number ~ '^\d{23}$')
 );
 
 -- Une seule caisse par collectivité
