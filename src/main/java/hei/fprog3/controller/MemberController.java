@@ -25,7 +25,6 @@ public class MemberController {
     }
 
     @PostMapping
-    // IMPORTANT: Occupation is set to the latest attributed one
     public ResponseEntity<?> create(@RequestBody List<CreateMemberRequest> members) {
         try {
             memberValidator.validate(members);

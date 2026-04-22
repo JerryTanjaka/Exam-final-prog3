@@ -1,7 +1,6 @@
 package hei.fprog3.validator;
 
 import hei.fprog3.dto.fees.CreateMembershipFee;
-import hei.fprog3.dto.financial.CreateMembershipFee;
 import hei.fprog3.exception.BadRequestException;
 import hei.fprog3.model.enums.Frequency; // À créer (voir étape 3)
 import org.springframework.stereotype.Component;

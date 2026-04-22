@@ -16,8 +16,8 @@ import java.util.List;
 
 @Repository
 public class CollectivityRepository {
-    private DataSourceConfig dataSource;
-    private MemberRepository memberRepository;
+    private final DataSourceConfig dataSource;
+    private final MemberRepository memberRepository;
     public  CollectivityRepository(DataSourceConfig dataSource,  MemberRepository memberRepository) {
         this.dataSource = dataSource;
         this.memberRepository =memberRepository;
