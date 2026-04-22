@@ -1,0 +1,82 @@
+### Variables globales
+@baseUrl = http://localhost:8080
+@validCollectivityId = b2000000-0000-0000-0000-000000000001
+@invalidCollectivityId = 99999999-9999-9999-9999-999999999999
+
+### ============================================================
+### 1. POST /membershipFees — CAS NOMINAL (SUCCÈS 200)
+### ============================================================
+POST {{baseUrl}}/collectivities/{{validCollectivityId}}/membershipFees
+Content-Type: application/json
+
+[
+  {
+    "label": "Cotisation Spéciale 2026",
+    "amount": 15000.50,
+    "frequency": "MONTHLY",
+    "eligibleFrom": "2026-06-01"
+  },
+  {
+    "label": "Droit d'entrée",
+    "amount": 100000,
+    "frequency": "PUNCTUALLY",
+    "eligibleFrom": "2026-04-22"
+  }
+]
+
+### ============================================================
+### 2. POST /membershipFees — ERREUR 400 (MONTANT NÉGATIF)
+### ============================================================
+POST {{baseUrl}}/collectivities/{{validCollectivityId}}/membershipFees
+Content-Type: application/json
+
+[
+  {
+    "label": "Frais illégaux",
+    "amount": -500,
+    "frequency": "WEEKLY",
+    "eligibleFrom": "2026-01-01"
+  }
+]
+
+### ============================================================
+### 3. POST /membershipFees — ERREUR 400 (FRÉQUENCE INCONNUE)
+### ============================================================
+POST {{baseUrl}}/collectivities/{{validCollectivityId}}/membershipFees
+Content-Type: application/json
+
+[
+  {
+    "label": "Frais bizarre",
+    "amount": 1000,
+    "frequency": "EVERY_DAY",
+    "eligibleFrom": "2026-01-01"
+  }
+]
+
+### ============================================================
+### 4. POST /membershipFees — ERREUR 404 (COLLECTIVITÉ INEXISTANTE)
+### ============================================================
+POST {{baseUrl}}/collectivities/{{invalidCollectivityId}}/membershipFees
+Content-Type: application/json
+
+[
+  {
+    "label": "Frais fantôme",
+    "amount": 1000,
+    "frequency": "MONTHLY",
+    "eligibleFrom": "2026-01-01"
+  }
+]
+
+### ============================================================
+### 5. GET /membershipFees — CAS NOMINAL (SUCCÈS 200)
+### ============================================================
+GET {{baseUrl}}/collectivities/{{validCollectivityId}}/membershipFees
+Accept: application/json
+
+### ============================================================
+### 6. GET /membershipFees — ERREUR 404 (COLLECTIVITÉ INEXISTANTE)
+### ============================================================
+GET {{baseUrl}}/collectivities/{{invalidCollectivityId}}/membershipFees
+Accept: application/json

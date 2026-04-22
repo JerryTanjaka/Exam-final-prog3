@@ -77,3 +77,15 @@ CREATE TABLE referals (
                           referee_id   uuid             NOT NULL REFERENCES members(id),
                           UNIQUE (member_id, referee_id)
 );
+
+-- 1. Assurons-nous d'abord que la collectivité de test existe
+INSERT INTO collectivities (id, city, specialty, name, number, creation_date)
+VALUES ('b2000000-0000-0000-0000-000000000001', 'Antananarivo', 'Riziculture', 'Union des Riziculteurs', 101, '2026-01-01')
+ON CONFLICT DO NOTHING;
+
+-- 2. Insertion de frais existants pour tester le GET
+INSERT INTO membership_fees (id, collectivity_id, label, amount, fee_frequency, eligible_from, status)
+VALUES
+    (gen_random_uuid(), 'b2000000-0000-0000-0000-000000000001', 'Cotisation de base', 5000.0, 'MONTHLY', '2026-01-01', 'ACTIVE'),
+    (gen_random_uuid(), 'b2000000-0000-0000-0000-000000000001', 'Fond de solidarité', 20000.0, 'ANNUALLY', '2026-01-01', 'ACTIVE');
+
