@@ -10,5 +10,5 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Transaction extends Payment {
-    private Member member;
+    private Member memberDebited;
 }

@@ -9,6 +9,7 @@ import hei.fprog3.repository.CollectivityRepository;
 import hei.fprog3.repository.MemberRepository;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,6 +85,18 @@ public class CollectivityValidator {
 
         if (collectivityRepository.existsByNumber(info.getNumber(), id)) {
             throw new BadRequestException("Number '" + info.getNumber() + "' is already used by another collectivity");
+        }
+    }
+
+    public void validateTransactionParameters(String id, LocalDate from, LocalDate to) throws BadRequestException {
+        if (id == null || id.isEmpty()) {
+            throw new BadRequestException("id is required");
+        }
+        if (from == null || to == null) {
+            throw new BadRequestException("from and to cannot be null");
+        }
+        if (from.isBefore(to)) {
+            throw new BadRequestException("from is before to");
         }
     }
 }

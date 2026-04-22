@@ -155,12 +155,12 @@ public class MemberRepository {
             ResultSet rs = ps.executeQuery();
             long daysAsMember = 0;
             while (rs.next()) {
-                if (daysAsMember >= 180) return true;
                 var startDate = rs.getDate("start_date").toLocalDate();
-                var endDate = (rs.getDate("end_date") == null) ? LocalDate.now() : rs.getDate("start_date").toLocalDate();
+                var endDate = (rs.getDate("end_date") == null) ? LocalDate.now() : rs.getDate("end_date").toLocalDate();
+                System.out.println(endDate.toEpochDay() -  startDate.toEpochDay());
                 daysAsMember += endDate.toEpochDay() - startDate.toEpochDay();
             }
-            return false;
+            return (daysAsMember >= 180);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

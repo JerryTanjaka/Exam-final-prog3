@@ -83,7 +83,7 @@ CREATE TABLE accounts (
     bank_account_number     CHAR(23),
 
     mobile_banking_service  mobile_money_service,
-    mobile_number           VARCHAR(50),
+    mobile_number           VARCHAR(50)
 );
 
 CREATE TABLE payments (

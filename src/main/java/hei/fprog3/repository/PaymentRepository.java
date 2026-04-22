@@ -81,7 +81,8 @@ public class PaymentRepository {
             PreparedStatement paymentsPs = connection.prepareStatement(
                         """
                         SELECT id, amount, payment_method, creation_date, accounts.id AS account_id
-                        FROM payments AS p JOIN accounts ON payments.credited_account_id = account_id
+                        FROM payments AS p
+                        JOIN accounts ON payments.credited_account_id = account_id
                         WHERE id = ?::UUID
                         """);
             paymentsPs.setString(1, paymentId);
