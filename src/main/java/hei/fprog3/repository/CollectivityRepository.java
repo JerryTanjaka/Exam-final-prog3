@@ -18,7 +18,10 @@ import java.util.List;
 public class CollectivityRepository {
     private DataSourceConfig dataSource;
     private MemberRepository memberRepository;
-    public  CollectivityRepository(DataSourceConfig dataSource,  MemberRepository memberRepository) {}
+    public  CollectivityRepository(DataSourceConfig dataSource,  MemberRepository memberRepository) {
+        this.dataSource = dataSource;
+        this.memberRepository =memberRepository;
+    }
 
     public List<CollectivityResponse> create(List<CreateCollectivityRequest> collectivities) throws NotFoundException {
         Connection connection = dataSource.getConnection();

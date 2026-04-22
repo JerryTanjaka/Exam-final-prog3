@@ -16,7 +16,9 @@ import java.util.List;
 @Repository
 public class MemberRepository {
     private DataSourceConfig dataSource;
-    public MemberRepository(DataSourceConfig dataSource) {}
+    public MemberRepository(DataSourceConfig dataSource) {
+        this.dataSource = dataSource;
+    }
 
     public List<MemberResponse> create(List<CreateMemberRequest> members) throws NotFoundException {
         Connection connection = dataSource.getConnection();

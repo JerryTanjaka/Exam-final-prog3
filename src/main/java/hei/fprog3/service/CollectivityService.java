@@ -12,7 +12,9 @@ import java.util.List;
 public class CollectivityService {
     private CollectivityRepository collectivityRepository;
 
-    public CollectivityService(CollectivityRepository collectivityRepository) {}
+    public CollectivityService(CollectivityRepository collectivityRepository) {
+        this.collectivityRepository = collectivityRepository;
+    }
 
     public List<CollectivityResponse> create(List<CreateCollectivityRequest> collectivities) throws NotFoundException {
         return collectivityRepository.create(collectivities);

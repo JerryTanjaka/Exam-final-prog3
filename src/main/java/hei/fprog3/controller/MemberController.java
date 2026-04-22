@@ -19,7 +19,10 @@ import java.util.List;
 public class MemberController {
     public MemberService memberService;
     public MemberValidator memberValidator;
-    public MemberController(MemberService memberService, MemberValidator memberValidator) {}
+    public MemberController(MemberService memberService, MemberValidator memberValidator) {
+        this.memberService = memberService;
+        this.memberValidator = memberValidator;
+    }
 
     @PostMapping
     // IMPORTANT: Member occupation are not fetched from database so its value is null

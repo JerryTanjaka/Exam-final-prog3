@@ -20,7 +20,10 @@ import java.util.List;
 public class CollectivityController {
     public CollectivityService collectivityService;
     public CollectivityValidator  collectivityValidator;
-    public CollectivityController(CollectivityService collectivityService,  CollectivityValidator collectivityValidator) {}
+    public CollectivityController(CollectivityService collectivityService,  CollectivityValidator collectivityValidator) {
+        this.collectivityService = collectivityService;
+        this.collectivityValidator = collectivityValidator;
+    }
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody List<CreateCollectivityRequest> collectivities) {

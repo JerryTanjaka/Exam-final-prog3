@@ -12,7 +12,9 @@ import java.util.List;
 @Service
 public class MemberService {
     private MemberRepository memberRepository;
-    public MemberService(MemberRepository memberRepository) {}
+    public MemberService(MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
+    }
 
     public List<MemberResponse> create(List<CreateMemberRequest> members) throws BadRequestException, NotFoundException {
         for  (CreateMemberRequest createMemberRequest : members) {
