@@ -3,10 +3,12 @@ package hei.fprog3.controller;
 import hei.fprog3.dto.collectivity.CollectivityIdentity;
 import hei.fprog3.dto.collectivity.CollectivityInformation;
 import hei.fprog3.dto.collectivity.CreateCollectivityRequest;
+import hei.fprog3.dto.fee.FeeRequest;
 import hei.fprog3.exception.BadRequestException;
 import hei.fprog3.exception.NotFoundException;
 import hei.fprog3.service.CollectivityService;
 import hei.fprog3.validator.CollectivityValidator;
+import hei.fprog3.validator.FeeValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,9 +21,11 @@ import java.util.List;
 public class CollectivityController {
     public CollectivityService collectivityService;
     public CollectivityValidator  collectivityValidator;
-    public CollectivityController(CollectivityService collectivityService,  CollectivityValidator collectivityValidator) {
+    public FeeValidator  feeValidator;
+    public CollectivityController(CollectivityService collectivityService,  CollectivityValidator collectivityValidator,  FeeValidator feeValidator) {
         this.collectivityService = collectivityService;
         this.collectivityValidator = collectivityValidator;
+        this.feeValidator = feeValidator;
     }
 
     @PostMapping
@@ -73,6 +77,32 @@ public class CollectivityController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .header("Content-Type", "application/json")
                     .body(e.getMessage());
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .header("Content-Type", "application/json")
+                    .body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}/membershipFees")
+    public ResponseEntity<?> getMembershipFees(@PathVariable String id) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .header("Content-Type","application/json")
+                    .body(collectivityService.getAllFees(id));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .header("Content-Type", "application/json")
+                    .body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/membershipFees")
+    public ResponseEntity<?> getMembershipFees(@PathVariable String id, @RequestBody List<FeeRequest> feeRequests) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .header("Content-Type","application/json")
+                    .body(collectivityService.createFee(id, feeRequests));
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .header("Content-Type", "application/json")

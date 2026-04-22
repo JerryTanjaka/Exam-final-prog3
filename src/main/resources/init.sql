@@ -110,7 +110,7 @@ CREATE TABLE fees (
 );
 
 CREATE TABLE collectivityFee (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    collectivity_id UUID NOT NULL REFERENCES collectivities(id),
-    fee_id UUID NOT NULL REFERENCES fees(id)
+    id              UUID    PRIMARY KEY DEFAULT gen_random_uuid(),
+    collectivity_id UUID    NOT NULL REFERENCES collectivities(id),
+    fee_id          UUID    NOT NULL REFERENCES fees(id)
 );

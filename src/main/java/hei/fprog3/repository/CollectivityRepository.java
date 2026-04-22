@@ -24,7 +24,6 @@ public class CollectivityRepository {
 
     public List<CollectivityResponse> create(List<CreateCollectivityRequest> collectivities) throws NotFoundException {
         Connection connection = dataSource.getConnection();
-        System.out.println(connection.toString());
         try {
             connection.setAutoCommit(false);
             List<CollectivityResponse> collectivitiesResponse = new ArrayList<>();
