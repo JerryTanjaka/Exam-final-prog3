@@ -69,3 +69,11 @@ WHERE number = '';
 -- 2. Maintenant on peut changer le type sans erreur
 ALTER TABLE collectivities
     ALTER COLUMN number TYPE INTEGER USING number::integer;
+DROP TABLE IF EXISTS referals;
+
+CREATE TABLE referals (
+                          id           uuid             PRIMARY KEY DEFAULT gen_random_uuid(),
+                          member_id    uuid             NOT NULL REFERENCES members(id),
+                          referee_id   uuid             NOT NULL REFERENCES members(id),
+                          UNIQUE (member_id, referee_id)
+);

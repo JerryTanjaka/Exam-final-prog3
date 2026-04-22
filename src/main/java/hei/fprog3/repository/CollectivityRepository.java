@@ -41,8 +41,10 @@ public class CollectivityRepository {
                 collectivitiesPs.setString(1, collectivity.getCity());
                 collectivitiesPs.setObject(2, collectivity.getSpecialty());
                 ResultSet rs = collectivitiesPs.executeQuery();
+                String generatedId = null;
                 while (rs.next()) {
-                    newCollectivitiesId.add(rs.getString("id"));
+                    generatedId = rs.getString("id");
+                    newCollectivitiesId.add(generatedId);
                 }
 
                 for (String memberId : collectivity.getMembers()) {
@@ -53,7 +55,7 @@ public class CollectivityRepository {
                             """
                     );
                     membershipsPs.setString(1, memberId);
-                    membershipsPs.setString(2, collectivity.getId());
+                    membershipsPs.setString(2, generatedId);
 
                     if (memberId.equals(collectivity.getStructure().getPresident())) {
                         membershipsPs.setString(3, PositionType.PRESIDENT.name());
@@ -66,6 +68,7 @@ public class CollectivityRepository {
                     } else {
                         membershipsPs.setString(3, PositionType.SENIOR.name());
                     }
+                    membershipsPs.executeUpdate();
                 }
             }
             connection.commit();
@@ -140,7 +143,7 @@ public class CollectivityRepository {
             collectivitiesPs.executeUpdate();
 
             connection.commit();
-            return this.findById(id);
+            return findById(id);
         } catch (SQLException e) {
             dataSource.rollbackConnection(connection);
             throw new RuntimeException(e);
