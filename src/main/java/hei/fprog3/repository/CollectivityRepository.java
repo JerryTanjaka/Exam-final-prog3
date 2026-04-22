@@ -31,8 +31,8 @@ public class CollectivityRepository {
             for (CreateCollectivityRequest collectivity : collectivities) {
                 PreparedStatement collectivitiesPs = connection.prepareStatement(
                         """
-                        INSERT INTO collectivity (number, name, city, specialty, creation_date)
-                        VALUES (?, ?, ?, ?, ?)
+                        INSERT INTO collectivities (number, name, city, specialty)
+                        VALUES (?, ?, ?, ?)
                         RETURNING id;
                         """
                 );
@@ -40,7 +40,7 @@ public class CollectivityRepository {
                 collectivitiesPs.setString(2, collectivity.getName());
                 collectivitiesPs.setString(3, collectivity.getCity());
                 collectivitiesPs.setObject(4, collectivity.getSpecialty());
-                collectivitiesPs.setDate(5, Date.valueOf(collectivity.getCreationDate()));
+
                 ResultSet rs = collectivitiesPs.executeQuery();
                 while (rs.next()) {
                     newCollectivitiesId.add(rs.getString("id"));
@@ -90,7 +90,7 @@ public class CollectivityRepository {
         try {
             PreparedStatement collectivitiesPs = connection.prepareStatement("""
                         SELECT id, number, name, city, specialty, creation_date
-                        FROM collectivity WHERE id = ?
+                        FROM collectivities WHERE id = ?
                         """);
             collectivitiesPs.setString(1, id);
 

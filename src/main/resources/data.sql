@@ -2,7 +2,29 @@
 -- MEMBRES DE BASE (déjà dans la fédération depuis > 6 mois)
 -- pour pouvoir créer une collectivité et parrainer
 -- ============================================================
+-- 1. Corriger la contrainte
+ALTER TABLE collectivities
+    ALTER COLUMN number DROP NOT NULL;
 
+ALTER TABLE collectivities
+    ALTER COLUMN name DROP NOT NULL;
+
+-- 2. Relancer les inserts
+INSERT INTO collectivities (id, city, specialty, creation_date)
+VALUES ('b2000000-0000-0000-0000-000000000001', 'Antananarivo', 'Riziculture', '2024-01-01');
+
+INSERT INTO memberships (id, member_id, collectivity_id, occupation, start_date)
+VALUES
+    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000001', 'PRESIDENT',      '2024-01-01'),
+    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000002', 'b2000000-0000-0000-0000-000000000001', 'VICE_PRESIDENT', '2024-01-01'),
+    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000003', 'b2000000-0000-0000-0000-000000000001', 'TREASURER',      '2024-01-01'),
+    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000004', 'b2000000-0000-0000-0000-000000000001', 'SECRETARY',      '2024-01-01'),
+    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000005', 'b2000000-0000-0000-0000-000000000001', 'SENIOR',         '2024-01-01'),
+    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000006', 'b2000000-0000-0000-0000-000000000001', 'SENIOR',         '2024-01-01'),
+    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000007', 'b2000000-0000-0000-0000-000000000001', 'SENIOR',         '2024-01-01'),
+    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000008', 'b2000000-0000-0000-0000-000000000001', 'SENIOR',         '2024-01-01'),
+    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000009', 'b2000000-0000-0000-0000-000000000001', 'JUNIOR',         '2024-01-01'),
+    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000010', 'b2000000-0000-0000-0000-000000000001', 'JUNIOR',         '2024-01-01');
 INSERT INTO members (id, last_name, first_name, birth_date, gender, address, profession, phone, email)
 VALUES
     ('a1000000-0000-0000-0000-000000000001', 'RAKOTO', 'Jean', '1990-01-15', 'MALE', 'Antananarivo', 'Agriculteur', '0341234567', 'jean.rakoto@email.com'),

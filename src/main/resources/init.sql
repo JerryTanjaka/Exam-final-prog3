@@ -2,7 +2,8 @@
 -- Fédération de Collectivités Agricoles — Script d'initialisation
 -- Base : PostgreSQL 14+
 -- ============================================================
-
+ALTER TABLE collectivities
+    ALTER COLUMN creation_date SET DEFAULT CURRENT_DATE;
 -- ============================================================
 -- TYPES ÉNUMÉRÉS
 -- ============================================================
