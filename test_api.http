@@ -1,0 +1,236 @@
+### ============================================================
+### Fédération de Collectivités Agricoles — Test API v0.0.1
+### ============================================================
+
+@baseUrl = http://localhost:8080
+
+### ============================================================
+### 1. POST /collectivities — Cas nominal (succès 201)
+### 10 membres dont 5 avec ancienneté > 6 mois, approbation OK
+### ============================================================
+
+POST {{baseUrl}}/collectivities
+Content-Type: application/json
+
+[
+  {
+    "location": "Fianarantsoa",
+    "federationApproval": true,
+    "structure": {
+      "president":     "a1000000-0000-0000-0000-000000000001",
+      "vicePresident": "a1000000-0000-0000-0000-000000000002",
+      "treasurer":     "a1000000-0000-0000-0000-000000000003",
+      "secretary":     "a1000000-0000-0000-0000-000000000004"
+    },
+    "members": [
+      "a1000000-0000-0000-0000-000000000001",
+      "a1000000-0000-0000-0000-000000000002",
+      "a1000000-0000-0000-0000-000000000003",
+      "a1000000-0000-0000-0000-000000000004",
+      "a1000000-0000-0000-0000-000000000005",
+      "a1000000-0000-0000-0000-000000000006",
+      "a1000000-0000-0000-0000-000000000007",
+      "a1000000-0000-0000-0000-000000000008",
+      "a1000000-0000-0000-0000-000000000009",
+      "a1000000-0000-0000-0000-000000000010"
+    ]
+  }
+]
+
+### ============================================================
+### 2. POST /collectivities — Erreur 400 : pas d'approbation
+### ============================================================
+
+POST {{baseUrl}}/collectivities
+Content-Type: application/json
+
+[
+  {
+    "location": "Toamasina",
+    "federationApproval": false,
+    "structure": {
+      "president":     "a1000000-0000-0000-0000-000000000001",
+      "vicePresident": "a1000000-0000-0000-0000-000000000002",
+      "treasurer":     "a1000000-0000-0000-0000-000000000003",
+      "secretary":     "a1000000-0000-0000-0000-000000000004"
+    },
+    "members": [
+      "a1000000-0000-0000-0000-000000000001",
+      "a1000000-0000-0000-0000-000000000002",
+      "a1000000-0000-0000-0000-000000000003",
+      "a1000000-0000-0000-0000-000000000004",
+      "a1000000-0000-0000-0000-000000000005",
+      "a1000000-0000-0000-0000-000000000006",
+      "a1000000-0000-0000-0000-000000000007",
+      "a1000000-0000-0000-0000-000000000008",
+      "a1000000-0000-0000-0000-000000000009",
+      "a1000000-0000-0000-0000-000000000010"
+    ]
+  }
+]
+
+### ============================================================
+### 3. POST /collectivities — Erreur 400 : structure manquante
+### ============================================================
+
+POST {{baseUrl}}/collectivities
+Content-Type: application/json
+
+[
+  {
+    "location": "Mahajanga",
+    "federationApproval": true,
+    "members": [
+      "a1000000-0000-0000-0000-000000000001",
+      "a1000000-0000-0000-0000-000000000002",
+      "a1000000-0000-0000-0000-000000000003",
+      "a1000000-0000-0000-0000-000000000004",
+      "a1000000-0000-0000-0000-000000000005",
+      "a1000000-0000-0000-0000-000000000006",
+      "a1000000-0000-0000-0000-000000000007",
+      "a1000000-0000-0000-0000-000000000008",
+      "a1000000-0000-0000-0000-000000000009",
+      "a1000000-0000-0000-0000-000000000010"
+    ]
+  }
+]
+
+### ============================================================
+### 4. POST /collectivities — Erreur 404 : membre inexistant
+### ============================================================
+
+POST {{baseUrl}}/collectivities
+Content-Type: application/json
+
+[
+  {
+    "location": "Antsiranana",
+    "federationApproval": true,
+    "structure": {
+      "president":     "a1000000-0000-0000-0000-000000000001",
+      "vicePresident": "a1000000-0000-0000-0000-000000000002",
+      "treasurer":     "a1000000-0000-0000-0000-000000000003",
+      "secretary":     "a1000000-0000-0000-0000-000000000004"
+    },
+    "members": [
+      "a1000000-0000-0000-0000-000000000001",
+      "a1000000-0000-0000-0000-000000000002",
+      "a1000000-0000-0000-0000-000000000003",
+      "a1000000-0000-0000-0000-000000000004",
+      "a1000000-0000-0000-0000-000000000005",
+      "99999999-9999-9999-9999-999999999999"
+    ]
+  }
+]
+
+### ============================================================
+### 5. POST /members — Cas nominal (succès 201)
+### 2 parrains SENIOR de la même collectivité cible (cas 1)
+### ============================================================
+
+POST {{baseUrl}}/members
+Content-Type: application/json
+
+[
+  {
+    "firstName": "Aina",
+    "lastName": "RAKOTONDRABE",
+    "birthDate": "2000-03-12",
+    "gender": "FEMALE",
+    "address": "Lot 45 Ambohipo, Antananarivo",
+    "profession": "Agricultrice",
+    "phoneNumber": 341112233,
+    "email": "aina.rakotondrabe@email.com",
+    "occupation": "JUNIOR",
+    "collectivityIdentifier": "b2000000-0000-0000-0000-000000000001",
+    "referees": [
+      "a1000000-0000-0000-0000-000000000005",
+      "a1000000-0000-0000-0000-000000000006"
+    ],
+    "registrationFeePaid": true,
+    "membershipDuesPaid": true
+  }
+]
+
+### ============================================================
+### 6. POST /members — Erreur 400 : un seul parrain (< 2 requis)
+### ============================================================
+
+POST {{baseUrl}}/members
+Content-Type: application/json
+
+[
+  {
+    "firstName": "Tojo",
+    "lastName": "ANDRIANTSOA",
+    "birthDate": "1998-07-19",
+    "gender": "MALE",
+    "address": "Lot 12 Ivandry, Antananarivo",
+    "profession": "Éleveur",
+    "phoneNumber": 342223344,
+    "email": "tojo.andriantsoa@email.com",
+    "occupation": "JUNIOR",
+    "collectivityIdentifier": "b2000000-0000-0000-0000-000000000001",
+    "referees": [
+      "a1000000-0000-0000-0000-000000000005"
+    ],
+    "registrationFeePaid": true,
+    "membershipDuesPaid": true
+  }
+]
+
+### ============================================================
+### 7. POST /members — Erreur 400 : frais d'adhésion non réglés
+### ============================================================
+
+POST {{baseUrl}}/members
+Content-Type: application/json
+
+[
+  {
+    "firstName": "Nirina",
+    "lastName": "RABEMANANTSOA",
+    "birthDate": "1999-11-03",
+    "gender": "FEMALE",
+    "address": "Lot 78 Analakely, Antananarivo",
+    "profession": "Maraîchère",
+    "phoneNumber": 343334455,
+    "email": "nirina.rabemanantsoa@email.com",
+    "occupation": "JUNIOR",
+    "collectivityIdentifier": "b2000000-0000-0000-0000-000000000001",
+    "referees": [
+      "a1000000-0000-0000-0000-000000000005",
+      "a1000000-0000-0000-0000-000000000006"
+    ],
+    "registrationFeePaid": false,
+    "membershipDuesPaid": false
+  }
+]
+
+### ============================================================
+### 8. POST /members — Erreur 404 : collectivité inexistante
+### ============================================================
+
+POST {{baseUrl}}/members
+Content-Type: application/json
+
+[
+  {
+    "firstName": "Feno",
+    "lastName": "RASOLONDRAIBE",
+    "birthDate": "1997-04-25",
+    "gender": "MALE",
+    "address": "Lot 33 Isotry, Antananarivo",
+    "profession": "Riziculteur",
+    "phoneNumber": 344445566,
+    "email": "feno.rasolondraibe@email.com",
+    "occupation": "JUNIOR",
+    "collectivityIdentifier": "99999999-9999-9999-9999-999999999999",
+    "referees": [
+      "a1000000-0000-0000-0000-000000000005",
+      "a1000000-0000-0000-0000-000000000006"
+    ],
+    "registrationFeePaid": true,
+    "membershipDuesPaid": true
+  }
+]

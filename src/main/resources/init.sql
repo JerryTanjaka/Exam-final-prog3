@@ -23,12 +23,12 @@ CREATE TYPE attendance_status      AS ENUM ('PRESENT', 'ABSENT', 'EXCUSED');
 -- ============================================================
 
 CREATE TABLE collectivities (
-    id                              CHAR(14)      PRIMARY KEY,
+    id                              uuid      primary key default  gen_random_uuid(),
     number                          VARCHAR(50)   NOT NULL UNIQUE,
     name                            VARCHAR(255)  NOT NULL UNIQUE,
     city                            VARCHAR(255)  NOT NULL,
     specialty                       VARCHAR(255)  NOT NULL,
-    creation_date                   DATE          NOT NULL,
+    creation_date                   DATE          NOT NULL
 );
 
 -- ============================================================
@@ -36,7 +36,7 @@ CREATE TABLE collectivities (
 -- ============================================================
 
 CREATE TABLE members (
-    id                               CHAR(14)      PRIMARY KEY,
+    id                               uuid      primary key default  gen_random_uuid(),
     last_name                        VARCHAR(255)  NOT NULL,
     first_name                       VARCHAR(255)  NOT NULL,
     birth_date                       DATE          NOT NULL,
@@ -44,18 +44,18 @@ CREATE TABLE members (
     address                          TEXT          NOT NULL,
     profession                       VARCHAR(255)  NOT NULL,
     phone                            VARCHAR(50)   NOT NULL,
-    email                            VARCHAR(255)  NOT NULL UNIQUE,
+    email                            VARCHAR(255)  NOT NULL UNIQUE
 );
 
 CREATE TABLE memberships (
-    id              CHAR(14)        PRIMARY KEY,
-    member_id       CHAR(14)        NOT NULL REFERENCES members(id),
-    collectivity_id CHAR(14)        NOT NULL REFERENCES collectivities(id),
-    occupation      position_type   NOT NULL
+    id                               uuid      primary key default  gen_random_uuid(),
+    member_id         uuid          NOT NULL REFERENCES members(id),
+    collectivity_id   uuid           NOT NULL REFERENCES collectivities(id),
+    occupation      position_type   NOT NULL,
     start_date      DATE            NOT NULL DEFAULT NOW(),
     end_date        DATE,
     UNIQUE (member_id, collectivity_id)
-)
+);
 
 -- ============================================================
 -- TABLE : referals
