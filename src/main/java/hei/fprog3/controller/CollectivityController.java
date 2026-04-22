@@ -1,6 +1,7 @@
 package hei.fprog3.controller;
 
 import hei.fprog3.dto.collectivity.CollectivityIdentity;
+import hei.fprog3.dto.collectivity.CollectivityInformation;
 import hei.fprog3.dto.collectivity.CreateCollectivityRequest;
 import hei.fprog3.exception.BadRequestException;
 import hei.fprog3.exception.NotFoundException;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
+//@RestController
 @RequestMapping("/collectivities")
 public class CollectivityController {
     public CollectivityService collectivityService;
@@ -58,4 +59,16 @@ public class CollectivityController {
                     .header("Content-Type", "application/json")
                     .body(e.getMessage());
         }
-    }}
+    }
+    @PutMapping("/{id}/informations")
+    public ResponseEntity<?> updateInformation(@PathVariable String id, @RequestBody CollectivityInformation info) {
+        try {
+            collectivityValidator.validate(info);
+            return ResponseEntity.ok(collectivityService.updateInformation(id, info));
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+}

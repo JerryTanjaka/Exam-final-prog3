@@ -1,10 +1,12 @@
 package hei.fprog3.validator;
 
 import hei.fprog3.dto.collectivity.CollectivityIdentity;
+import hei.fprog3.dto.collectivity.CollectivityInformation;
 import hei.fprog3.dto.collectivity.CollectivityStructureRequest;
 import hei.fprog3.dto.collectivity.CreateCollectivityRequest;
 import hei.fprog3.exception.BadRequestException;
 import hei.fprog3.model.Collectivity;
+import hei.fprog3.repository.CollectivityRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +16,8 @@ import java.util.List;
 @Component
 @AllArgsConstructor
 public class CollectivityValidator {
+    private final CollectivityRepository collectivityRepository;
+
     public void validate(CreateCollectivityRequest collectivity) throws BadRequestException {
         if (collectivity == null) {
             throw new BadRequestException("collectivity is null");
@@ -64,4 +68,32 @@ public class CollectivityValidator {
             throw new BadRequestException("collectivityIdentity.getNumber() is null");
         }
     }
+
+
+    /**
+     * Nouvelle méthode pour valider la mise à jour (v0.0.2)
+     */
+    public void validateUpdate(String id, CollectivityInformation info) throws BadRequestException {
+        if (info == null) {
+            throw new BadRequestException("Information is null");
+        }
+
+        if (info.getName() == null || info.getName().trim().isEmpty()) {
+            throw new BadRequestException("Name is required");
+        }
+        if (info.getNumber() <= 0) {
+            throw new BadRequestException("Number must be greater than 0");
+        }
+
+        // 2. Validation de l'unicité (Règle du YAML : 400 if name or number already used)
+        if (collectivityRepository.existsByName(info.getName(), id)) {
+            throw new BadRequestException("Name '" + info.getName() + "' is already used by another collectivity");
+        }
+
+        if (collectivityRepository.existsByNumber(info.getNumber(), id)) {
+            throw new BadRequestException("Number '" + info.getNumber() + "' is already used by another collectivity");
+        }
+    }
+
+
 }

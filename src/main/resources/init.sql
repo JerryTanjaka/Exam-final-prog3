@@ -29,7 +29,7 @@ CREATE TABLE collectivities (
     name                            VARCHAR(255)  UNIQUE,
     city                            VARCHAR(255)  NOT NULL,
     specialty                       VARCHAR(255)  NOT NULL,
-    creation_date                   DATE          NOT NULL
+    creation_date                   DATE        default  CURRENT_DATE
 );
 
 -- ============================================================

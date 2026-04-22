@@ -148,4 +148,38 @@ public class CollectivityRepository {
         }
     }
 
+    public boolean existsByName(String name, String excludeId) {
+        Connection connection = dataSource.getConnection();
+        try {
+            PreparedStatement ps = connection.prepareStatement(
+                    "SELECT COUNT(id) FROM collectivities WHERE name = ? AND id != ?::UUID"
+            );
+            ps.setString(1, name);
+            ps.setString(2, excludeId);
+            ResultSet rs = ps.executeQuery();
+            return rs.next() && rs.getInt(1) > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            dataSource.closeConnection(connection);
+        }
+    }
+
+    public boolean existsByNumber(int number, String excludeId) {
+        Connection connection = dataSource.getConnection();
+        try {
+            PreparedStatement ps = connection.prepareStatement(
+                    "SELECT COUNT(id) FROM collectivities WHERE number = ? AND id != ?::UUID"
+            );
+            ps.setInt(1, number);
+            ps.setString(2, excludeId);
+            ResultSet rs = ps.executeQuery();
+            return rs.next() && rs.getInt(1) > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            dataSource.closeConnection(connection);
+        }
+    }
+
 }
