@@ -113,4 +113,17 @@ public class CollectivityController {
                     .body(e.getMessage());
         }
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getCollectivity(@PathVariable String id) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .header("Content-Type","application/json")
+                    .body(collectivityService.findById(id));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .header("Content-Type", "application/json")
+                    .body(e.getMessage());
+        }
+    }
 }

@@ -329,3 +329,9 @@ Content-Type: application/json
     "paymentMode": "BANK_TRANSFER"
   }
 ]
+
+### 20. GET /collectivities/{id} -- Returns a collecticity
+GET {{baseUrl}}/collectivities/b2000000-0000-0000-0000-000000000001
+
+### 21. GET /collectivities/{id} -- Not Found Error
+GET {{baseUrl}}/collectivities/b2000000-0000-0000-0000-000000000100

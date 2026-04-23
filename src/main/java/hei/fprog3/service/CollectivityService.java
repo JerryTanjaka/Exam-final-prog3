@@ -46,4 +46,8 @@ public class CollectivityService {
     public List<Fee> createFee(String id, List<FeeRequest> feeRequests) throws NotFoundException {
         return feeRepository.create(id, feeRequests);
     }
+
+    public CollectivityResponse findById(String id) throws NotFoundException {
+        return collectivityRepository.findById(id);
+    }
 }

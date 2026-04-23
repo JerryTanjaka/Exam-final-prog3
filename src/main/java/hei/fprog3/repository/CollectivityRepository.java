@@ -88,15 +88,18 @@ public class CollectivityRepository {
 
             CollectivityResponse collectivity = new CollectivityResponse();
 
-            ResultSet membersRs = collectivitiesPs.executeQuery();
-            if (membersRs.next()) {
-                collectivity.setId(membersRs.getString("id"));
-                CollectivityInformation collectivityInformation = new CollectivityInformation(membersRs.getString("name"), membersRs.getString("number"));
-                collectivity.setIdentity(collectivityInformation);
-                collectivity.setLocation(membersRs.getString("location"));
-                collectivity.setSpecialty(membersRs.getString("specialty"));
-                collectivity.setCreationDate(membersRs.getDate("creation_date").toLocalDate());
+            ResultSet collectivitiesRs = collectivitiesPs.executeQuery();
+
+            if (!collectivitiesRs.next()) {
+                throw new NotFoundException("Collectivity not found");
             }
+
+            collectivity.setId(collectivitiesRs.getString("id"));
+            CollectivityInformation collectivityInformation = new CollectivityInformation(collectivitiesRs.getString("name"), collectivitiesRs.getString("number"));
+            collectivity.setIdentity(collectivityInformation);
+            collectivity.setLocation(collectivitiesRs.getString("location"));
+            collectivity.setSpecialty(collectivitiesRs.getString("specialty"));
+            collectivity.setCreationDate(collectivitiesRs.getDate("creation_date").toLocalDate());
 
             List<Member> members = new ArrayList<>();
             PreparedStatement membershipsPs = connection.prepareStatement("""
