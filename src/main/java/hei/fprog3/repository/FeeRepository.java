@@ -63,34 +63,40 @@ public class FeeRepository {
 
             connection.setAutoCommit(false);
             List<String> newFeesid = new ArrayList<>();
+
+            PreparedStatement feesPs = connection.prepareStatement(
+                    """
+                    INSERT INTO fees (id, eligible_from, amount, label, frequency, status)
+                    VALUES (?::UUID, ?, ?::FLOAT, ?, ?::fee_frequency_type, ?::activity_status)
+                    """
+            );
+
+            PreparedStatement collectivityFeePs = connection.prepareStatement(
+                    """
+                    INSERT INTO collectivityfee (collectivity_id, fee_id)
+                    VALUES (?::UUID, ?::UUID)
+                    """
+            );
+
             for (FeeRequest feeRequest : feeRequests) {
                 String newFeeId = UUID.randomUUID().toString();
                 newFeesid.add(newFeeId);
-                PreparedStatement feesPs = connection.prepareStatement(
-                        """
-                        INSERT INTO fees (id, eligible_from, amount, label, frequency, status)
-                        VALUES (?::UUID, ?, ?::FLOAT, ?, ?::fee_frequency_type, ?::activity_status)
-                        """
-                );
                 feesPs.setString(1, newFeeId);
                 feesPs.setDate(2, Date.valueOf(feeRequest.getEligibleFrom()));
                 feesPs.setDouble(3, feeRequest.getAmount());
                 feesPs.setString(4, feeRequest.getLabel());
                 feesPs.setString(5, feeRequest.getFrequency().name());
                 feesPs.setString(6, ((feeRequest.getEligibleFrom() == null || feeRequest.getEligibleFrom().isAfter(LocalDate.now())) ? StatusType.INACTIVE.name() : StatusType.ACTIVE.name()));
-                feesPs.execute();
+                feesPs.addBatch();
 
-                PreparedStatement collectivityFeePs = connection.prepareStatement(
-                        """
-                        INSERT INTO collectivityfee (collectivity_id, fee_id)
-                        VALUES (?::UUID, ?::UUID)
-                        """
-                );
                 collectivityFeePs.setString(1, collectivityId);
                 collectivityFeePs.setString(2, newFeeId);
-                collectivityFeePs.execute();
-
+                collectivityFeePs.addBatch();
             }
+
+            feesPs.executeBatch();
+            collectivityFeePs.executeBatch();
+
             connection.commit();
             List<Fee> newFees = new ArrayList<>();
             for (String id : newFeesid) {

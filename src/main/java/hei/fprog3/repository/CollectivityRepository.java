@@ -27,26 +27,31 @@ public class CollectivityRepository {
         try {
             connection.setAutoCommit(false);
             List<CollectivityResponse> collectivitiesResponse = new ArrayList<>();
+
+            PreparedStatement collectivitiesPs = connection.prepareStatement(
+                    """
+                    INSERT INTO collectivities (id, location, specialty)
+                    VALUES (?::UUID, ?, ?)
+                    """
+            );
+
+            PreparedStatement membershipsPs = connection.prepareStatement(
+                    """
+                    INSERT INTO memberships (member_id, collectivity_id, occupation)
+                    VALUES (?::UUID, ?::UUID, ?::position_type)
+                    """
+            );
+
             for (CreateCollectivityRequest collectivity : collectivities) {
                 collectivity.setId(UUID.randomUUID().toString());
-                PreparedStatement collectivitiesPs = connection.prepareStatement(
-                        """
-                        INSERT INTO collectivities (id, location, specialty)
-                        VALUES (?::UUID, ?, ?)
-                        """
-                );
                 collectivitiesPs.setString(1, collectivity.getId());
                 collectivitiesPs.setString(2, collectivity.getLocation());
                 collectivitiesPs.setObject(3, collectivity.getSpecialty());
-                collectivitiesPs.execute();
+                collectivitiesPs.addBatch();
 
                 for (String memberId : collectivity.getMembers()) {
-                    PreparedStatement membershipsPs = connection.prepareStatement(
-                            """
-                            INSERT INTO memberships (member_id, collectivity_id, occupation)
-                            VALUES (?::UUID, ?::UUID, ?::position_type)
-                            """
-                    );
+                    memberRepository.findById(memberId);
+
                     membershipsPs.setString(1, memberId);
                     membershipsPs.setString(2, collectivity.getId());
 
@@ -61,9 +66,13 @@ public class CollectivityRepository {
                     } else {
                         membershipsPs.setString(3, PositionType.SENIOR.name());
                     }
-                    membershipsPs.execute();
+                    membershipsPs.addBatch();
                 }
             }
+
+            collectivitiesPs.executeBatch();
+            membershipsPs.executeBatch();
+
             connection.commit();
             for (CreateCollectivityRequest collectivity : collectivities) {
                 collectivitiesResponse.add(findById(collectivity.getId()));

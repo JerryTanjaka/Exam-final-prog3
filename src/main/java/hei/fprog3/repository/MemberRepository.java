@@ -28,18 +28,36 @@ public class MemberRepository {
         try {
             List<MemberResponse> memberResponses = new ArrayList<>();
             connection.setAutoCommit(false);
+
+            PreparedStatement memberPs = connection.prepareStatement(
+                    """
+                    INSERT INTO members (last_name, first_name, birth_date, gender, address, profession, phone, email, id)
+                    VALUES (?, ?, ?, ?::gender_type, ?, ?, ?, ?, ?::UUID)
+                    """
+            );
+
+            PreparedStatement membershipPs = connection.prepareStatement(
+                    """
+                    INSERT INTO memberships (member_id, collectivity_id, occupation)
+                    VALUES (?::UUID, ?::UUID, ?::position_type);
+                    """
+            );
+
+            PreparedStatement refereePs = connection.prepareStatement(
+                    """
+                    INSERT INTO referals (member_id, referee_id)
+                    VALUES (?::UUID, ?::UUID);
+                    """
+            );
+
             for (CreateMemberRequest member : members) {
                 member.setId(UUID.randomUUID().toString());
+
                 if (isEmailUsed(member.getEmail(), connection
                 )) {
                     throw new BadRequestException("Email already used");
                 };
-                PreparedStatement memberPs = connection.prepareStatement(
-                        """
-                        INSERT INTO members (last_name, first_name, birth_date, gender, address, profession, phone, email, id)
-                        VALUES (?, ?, ?, ?::gender_type, ?, ?, ?, ?, ?::UUID)
-                        """
-                );
+
                 memberPs.setString(1, member.getLastName());
                 memberPs.setString(2, member.getFirstName());
                 memberPs.setDate(3, Date.valueOf(member.getBirthDate()));
@@ -49,37 +67,30 @@ public class MemberRepository {
                 memberPs.setString(7, member.getPhone());
                 memberPs.setString(8, member.getEmail());
                 memberPs.setObject(9, member.getId());
-                memberPs.executeUpdate();
+                memberPs.addBatch();
 
                 if (member.getCollectivityIdentifier() != null
                         && !member.getCollectivityIdentifier().isEmpty()) {
-                    PreparedStatement membershipPs = connection.prepareStatement(
-                            """
-                            INSERT INTO memberships (member_id, collectivity_id, occupation)
-                            VALUES (?::UUID, ?::UUID, ?::position_type);
-                            """
-                    );
                     membershipPs.setString(1, member.getId());
                     membershipPs.setString(2, member.getCollectivityIdentifier());
                     membershipPs.setString(3, member.getOccupation().name());
-                    membershipPs.executeUpdate();
+                    membershipPs.addBatch();
                 }
 
                 if (member.getReferees() != null
                         && !member.getReferees().isEmpty()) {
                     for  (String refereeId : member.getReferees()) {
-                        PreparedStatement refereePs = connection.prepareStatement(
-                                """
-                                INSERT INTO referals (member_id, referee_id)
-                                VALUES (?::UUID, ?::UUID);
-                                """
-                        );
                         refereePs.setString(1, member.getId());
                         refereePs.setString(2, refereeId);
-                        refereePs.executeUpdate();
+                        refereePs.addBatch();
                     }
                 }
             }
+
+            memberPs.executeBatch();
+            membershipPs.executeBatch();
+            refereePs.executeBatch();
+
             connection.commit();
             for (CreateMemberRequest member : members) {
                 memberResponses.add(findById(member.getId()));

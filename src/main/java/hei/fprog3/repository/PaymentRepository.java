@@ -36,40 +36,51 @@ public class PaymentRepository {
             }
             connection.setAutoCommit(false);
             List<UUID> generatedPaymentIds = new ArrayList<>();
+
+            PreparedStatement paymentPs = connection.prepareStatement(
+                    """
+                    INSERT INTO payments (id, membership_fee_id, credited_account_id, amount, payment_method)
+                    VALUES (?::UUID, ?::UUID, ?::UUID, ?::FLOAT, ?::payment_method);
+                    """
+            );
+
+            PreparedStatement transactionPs = connection.prepareStatement(
+                        """
+                        INSERT INTO transactions (member_id, payment_id)
+                        VALUES (?::UUID, ?::UUID);
+                        """
+            );
+
+            PreparedStatement accountsPs = connection.prepareStatement(
+                    """
+                    UPDATE accounts SET balance = balance + ?::FLOAT WHERE id = ?::UUID
+                    """
+            );
+
             for (PaymentRequest paymentRequest : paymentRequests) {
                 UUID newPaymentId = UUID.randomUUID();
                 generatedPaymentIds.add(newPaymentId);
 
-                PreparedStatement paymentPs = connection.prepareStatement(
-                        """
-                        INSERT INTO payments (id, membership_fee_id, credited_account_id, amount, payment_method)
-                        VALUES (?::UUID, ?::UUID, ?::UUID, ?::FLOAT, ?::payment_method);
-                        """
-                );
                 paymentPs.setString(1, newPaymentId.toString());
                 paymentPs.setString(2, paymentRequest.getMembershipFeeIdentifier());
                 paymentPs.setString(3, paymentRequest.getAccountCreditedIdentifier());
                 paymentPs.setDouble(4, paymentRequest.getAmount());
                 paymentPs.setString(5, paymentRequest.getPaymentMode().name());
-                paymentPs.executeUpdate();
+                paymentPs.addBatch();
 
-                PreparedStatement transactionPs = connection.prepareStatement("""
-                        INSERT INTO transactions (member_id, payment_id)
-                        VALUES (?::UUID, ?::UUID);
-                        """);
                 transactionPs.setString(1, paymentRequest.getPayerId());
                 transactionPs.setString(2, newPaymentId.toString());
-                transactionPs.executeUpdate();
+                transactionPs.addBatch();
 
-                PreparedStatement accountsPs = connection.prepareStatement(
-                        """
-                        UPDATE accounts SET balance = balance + ?::FLOAT WHERE id = ?::UUID
-                        """);
                 accountsPs.setDouble(1, paymentRequest.getAmount());
                 accountsPs.setString(2, paymentRequest.getAccountCreditedIdentifier());
-                accountsPs.executeUpdate();
-
+                accountsPs.addBatch();
             }
+
+            paymentPs.executeBatch();
+            transactionPs.executeBatch();
+            accountsPs.executeBatch();
+
             connection.commit();
             List<Payment> payments = new ArrayList<>();
             for (UUID paymentId : generatedPaymentIds) {
