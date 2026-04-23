@@ -146,39 +146,6 @@ paths:
           description: Provided query parameters occur some exceptions.
         404:
           description: Collectivity not found.
-  '/collectivities/{id}/financialAccounts':
-    get:
-      summary: Retrieve financial accounts of a specific collectivity
-      description: |
-        Returns the list of financial accounts (cash, mobile banking, or bank)
-        belonging to the collectivity. The optional query parameter `at` allows
-        retrieving account balances as they were at a given date. If `at` is
-        omitted, the current balance is returned.
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: string
-          required: true
-        - in: query
-          name: at
-          schema:
-            type: string
-            format: date
-          required: false
-      responses:
-        200:
-          description: List of financial accounts for the specific collectivity
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/FinancialAccount'
-        400:
-          description: Provided query parameter `at` has an invalid date format.
-        404:
-          description: Collectivity not found.
 
   '/collectivities/{id}':
     get:
@@ -210,6 +177,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: query
+          name: at
+          schema:
+            type: string
+            format: date
+          required: false
       responses:
         200:
           description: Returns the list of financial account
