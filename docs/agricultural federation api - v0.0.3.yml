@@ -146,6 +146,49 @@ paths:
           description: Provided query parameters occur some exceptions.
         404:
           description: Collectivity not found.
+
+  '/collectivities/{id}':
+    get:
+      summary: Get a collectivity
+      description: Get the collectivity with the id specified in path
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Returns the collectivity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collectivity'
+        404:
+          description: Collectivity not found.
+
+  '/collectivities/{id}/financialAccounts':
+    get:
+      summary: Retrieve all financial account of a collectivity
+      description: Get a collectivity financial accounts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Returns the list of financial account
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                    $ref: "#/components/schemas/FinancialAccount"
+        404:
+          description: Collectivity not found.
+
   '/members':
     post:
       summary: Create list of members
