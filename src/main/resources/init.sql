@@ -21,12 +21,12 @@ CREATE TYPE activity_status        AS ENUM ('ACTIVE', 'INACTIVE');
 -- ============================================================
 
 CREATE TABLE collectivities (
-    id                              UUID          PRIMARY KEY DEFAULT  gen_random_uuid(),
-    number                          VARCHAR(50)   UNIQUE,
-    name                            VARCHAR(255)  UNIQUE,
-    location                        VARCHAR(255)  NOT NULL,
-    specialty                       VARCHAR(255)  NOT NULL,
-    creation_date                   DATE          NOT NULL DEFAULT NOW()
+                                id                              VARCHAR(50)   PRIMARY KEY,
+                                number                          VARCHAR(50)   UNIQUE,
+                                name                            VARCHAR(255)  UNIQUE,
+                                location                        VARCHAR(255)  NOT NULL,
+                                specialty                       VARCHAR(255)  NOT NULL,
+                                creation_date                   DATE          NOT NULL DEFAULT NOW()
 );
 
 -- ============================================================
@@ -34,83 +34,104 @@ CREATE TABLE collectivities (
 -- ============================================================
 
 CREATE TABLE members (
-    id                               UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
-    last_name                        VARCHAR(255)  NOT NULL,
-    first_name                       VARCHAR(255)  NOT NULL,
-    birth_date                       DATE          NOT NULL,
-    gender                           gender_type   NOT NULL,
-    address                          TEXT          NOT NULL,
-    profession                       VARCHAR(255)  NOT NULL,
-    phone                            VARCHAR(50)   NOT NULL,
-    email                            VARCHAR(255)  NOT NULL UNIQUE
+                         id                               VARCHAR(50)   PRIMARY KEY,
+                         last_name                        VARCHAR(255)  NOT NULL,
+                         first_name                       VARCHAR(255)  NOT NULL,
+                         birth_date                       DATE          NOT NULL,
+                         gender                           gender_type   NOT NULL,
+                         address                          TEXT          NOT NULL,
+                         profession                       VARCHAR(255)  NOT NULL,
+                         phone                            VARCHAR(50)   NOT NULL,
+                         email                            VARCHAR(255)  NOT NULL UNIQUE
 );
 
+-- ============================================================
+-- TABLE : memberships
+-- ============================================================
+
 CREATE TABLE memberships (
-    id                UUID            PRIMARY KEY DEFAULT gen_random_uuid(),
-    member_id         UUID            NOT NULL REFERENCES members(id),
-    collectivity_id   UUID            NOT NULL REFERENCES collectivities(id),
-    occupation        position_type   NOT NULL,
-    start_date        DATE            NOT NULL DEFAULT NOW(),
-    end_date          DATE,
-    UNIQUE (member_id, collectivity_id)
+                             id                VARCHAR(50)     PRIMARY KEY DEFAULT gen_random_uuid()::VARCHAR,
+                             member_id         VARCHAR(50)     NOT NULL REFERENCES members(id),
+                             collectivity_id   VARCHAR(50)     NOT NULL REFERENCES collectivities(id),
+                             occupation        position_type   NOT NULL,
+                             start_date        DATE            NOT NULL DEFAULT NOW(),
+                             end_date          DATE,
+                             UNIQUE (member_id, collectivity_id)
 );
 
 -- ============================================================
 -- TABLE : referals
--- Parrainage d'un candidat par un membre confirmé (ancienneté > 90j)
--- Règle B-2 : >= 2 parrains, dont autant issus de la collectivité cible
---             que de collectivités extérieures
 -- ============================================================
 
 CREATE TABLE referals (
-    id           UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
-    member_id    UUID         NOT NULL REFERENCES members(id),  -- candidat
-    referee_id   UUID         NOT NULL REFERENCES members(id),  -- parrain confirmé
-    UNIQUE (member_id, referee_id)
+                          id           VARCHAR(50)   PRIMARY KEY DEFAULT gen_random_uuid()::VARCHAR,
+                          member_id    VARCHAR(50)   NOT NULL REFERENCES members(id),
+                          referee_id   VARCHAR(50)   NOT NULL REFERENCES members(id),
+                          UNIQUE (member_id, referee_id)
 );
+
+-- ============================================================
+-- TABLE : accounts
+-- ============================================================
 
 CREATE TABLE accounts (
-    id                      UUID             PRIMARY KEY DEFAULT gen_random_uuid(),
-    collectivity_id         UUID             NOT NULL REFERENCES collectivities(id),  -- NULL = fédération
-    type                    account_type     NOT NULL,
-    balance                 NUMERIC(15,2)    NOT NULL DEFAULT 0,
+                          id                      VARCHAR(50)          PRIMARY KEY,
+                          collectivity_id         VARCHAR(50)          NOT NULL REFERENCES collectivities(id),
+                          type                    account_type         NOT NULL,
+                          balance                 NUMERIC(15,2)        NOT NULL DEFAULT 0,
 
-    holder_name             VARCHAR(255),
+                          holder_name             VARCHAR(255),
 
-    bank_name               bank_name,
-    bank_account_number     CHAR(23),
+                          bank_name               bank_name,
+                          bank_account_number     CHAR(23),
 
-    mobile_banking_service  mobile_money_service,
-    mobile_number           VARCHAR(50)
+                          mobile_banking_service  mobile_money_service,
+                          mobile_number           VARCHAR(50)
 );
 
-CREATE TABLE payments (
-    id                  UUID            PRIMARY KEY DEFAULT gen_random_uuid(),
-    amount              NUMERIC(15,2)   NOT NULL,
-    membership_fee_id   UUID            NOT NULL,
-    credited_account_id UUID            NOT NULL,
-    payment_method      payment_method  NOT NULL,
-    creation_date       DATE            NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE transactions (
-    id              UUID    PRIMARY KEY DEFAULT gen_random_uuid(),
-    member_id       UUID    NOT NULL,
-    payment_id      UUID    NOT NULL,
-    creation_date   DATE    NOT NULL DEFAULT NOW()
-);
+-- ============================================================
+-- TABLE : fees
+-- ============================================================
 
 CREATE TABLE fees (
-    id              UUID            PRIMARY KEY DEFAULT  gen_random_uuid(),
-    eligible_from   DATE            NOT NULL,
-    amount          NUMERIC(15,2)   NOT NULL,
-    label           VARCHAR(255)    NOT NULL,
-    frequency       fee_frequency_type NOT NULL,
-    status          activity_status NOT NULL
+                      id              VARCHAR(50)        PRIMARY KEY,
+                      eligible_from   DATE               NOT NULL,
+                      amount          NUMERIC(15,2)      NOT NULL,
+                      label           VARCHAR(255)       NOT NULL,
+                      frequency       fee_frequency_type NOT NULL,
+                      status          activity_status    NOT NULL
 );
 
+-- ============================================================
+-- TABLE : collectivityFee
+-- ============================================================
+
 CREATE TABLE collectivityFee (
-    id              UUID    PRIMARY KEY DEFAULT gen_random_uuid(),
-    collectivity_id UUID    NOT NULL REFERENCES collectivities(id),
-    fee_id          UUID    NOT NULL REFERENCES fees(id)
+                                 id              VARCHAR(50)   PRIMARY KEY DEFAULT gen_random_uuid()::VARCHAR,
+                                 collectivity_id VARCHAR(50)   NOT NULL REFERENCES collectivities(id),
+                                 fee_id          VARCHAR(50)   NOT NULL REFERENCES fees(id)
+);
+
+-- ============================================================
+-- TABLE : payments
+-- ============================================================
+
+CREATE TABLE payments (
+                          id                  VARCHAR(50)     PRIMARY KEY,
+                          amount              NUMERIC(15,2)   NOT NULL,
+                          membership_fee_id   VARCHAR(50)     NOT NULL,
+                          credited_account_id VARCHAR(50)     NOT NULL,
+                          payment_method      payment_method  NOT NULL,
+                          creation_date       DATE            NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================
+-- TABLE : transactions
+-- ============================================================
+
+CREATE TABLE transactions (
+                              id              VARCHAR(50)   PRIMARY KEY DEFAULT gen_random_uuid()::VARCHAR,
+                              member_id       VARCHAR(50)   NOT NULL,
+                              payment_id      VARCHAR(50)   NOT NULL,
+                              creation_date   DATE          NOT NULL DEFAULT NOW()
 );
