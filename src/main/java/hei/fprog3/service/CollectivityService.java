@@ -6,7 +6,9 @@ import hei.fprog3.dto.collectivity.CreateCollectivityRequest;
 import hei.fprog3.dto.fee.FeeRequest;
 import hei.fprog3.exception.NotFoundException;
 import hei.fprog3.model.Fee;
+import hei.fprog3.model.FinancialAccount;
 import hei.fprog3.model.Transaction;
+import hei.fprog3.repository.AccountRepository;
 import hei.fprog3.repository.CollectivityRepository;
 import hei.fprog3.repository.FeeRepository;
 import hei.fprog3.repository.TransactionRepository;
@@ -20,11 +22,14 @@ public class CollectivityService {
     private CollectivityRepository collectivityRepository;
     private TransactionRepository transactionRepository;
     private FeeRepository feeRepository;
+    private AccountRepository accountRepository; // ← ajout
 
-    public CollectivityService(CollectivityRepository collectivityRepository, TransactionRepository transactionRepository, FeeRepository feeRepository) {
+
+    public CollectivityService(CollectivityRepository collectivityRepository, TransactionRepository transactionRepository, FeeRepository feeRepository, AccountRepository accountRepository) {
         this.collectivityRepository = collectivityRepository;
         this.transactionRepository = transactionRepository;
         this.feeRepository = feeRepository;
+        this.accountRepository= accountRepository;
     }
 
     public List<CollectivityResponse> create(List<CreateCollectivityRequest> collectivities) throws NotFoundException {
@@ -49,5 +54,9 @@ public class CollectivityService {
 
     public CollectivityResponse findById(String id) throws NotFoundException {
         return collectivityRepository.findById(id);
+    }
+    public List<FinancialAccount> getFinancialAccounts(String id, LocalDate at) throws NotFoundException {
+        collectivityRepository.exists(id);
+        return accountRepository.findByCollectivityId(id, at);
     }
 }

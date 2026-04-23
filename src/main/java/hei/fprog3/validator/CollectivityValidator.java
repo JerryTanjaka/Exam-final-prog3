@@ -101,4 +101,13 @@ public class CollectivityValidator {
             throw new BadRequestException("to is before from");
         }
     }
+    public void validateFinancialAccountParameters(String id, LocalDate at) throws BadRequestException {
+        if (id == null || id.isEmpty()) {
+            throw new BadRequestException("id is required");
+        }
+
+        if (at != null && at.isAfter(LocalDate.now())) {
+            throw new BadRequestException("Parameter 'at' cannot be in the future");
+        }
+    }
 }
