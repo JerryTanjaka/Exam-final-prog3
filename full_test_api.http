@@ -1,0 +1,613 @@
+### ============================================================
+### Fédération de Collectivités Agricoles — Test API v0.0.3
+### ============================================================
+
+@baseUrl = http://localhost:8080
+@validCollectivityId   = b2000000-0000-0000-0000-000000000001
+@invalidCollectivityId = 99999999-9999-9999-9999-999999999999
+@validMemberId         = a1000000-0000-0000-0000-000000000001
+@invalidMemberId       = 00000000-0000-0000-0000-000000000000
+@feeId1                = f1000000-0000-0000-0000-000000000001
+@feeId2                = f1000000-0000-0000-0000-000000000002
+@feeId3                = f1000000-0000-0000-0000-000000000003
+@cashAccountId         = c1000000-0000-0000-0000-000000000001
+@bankAccountId         = c1000000-0000-0000-0000-000000000002
+@mobileAccountId       = c1000000-0000-0000-0000-000000000003
+
+
+### ============================================================
+### A — POST /collectivities
+### ============================================================
+
+### A-1. Cas nominal — 201 Created
+### 10 membres dont 5 avec ancienneté > 6 mois, approbation OK
+POST {{baseUrl}}/collectivities
+Content-Type: application/json
+
+[
+  {
+    "location": "Fianarantsoa",
+    "specialty": "Riziculture",
+    "federationApproval": true,
+    "structure": {
+      "president":     "a1000000-0000-0000-0000-000000000001",
+      "vicePresident": "a1000000-0000-0000-0000-000000000002",
+      "treasurer":     "a1000000-0000-0000-0000-000000000003",
+      "secretary":     "a1000000-0000-0000-0000-000000000004"
+    },
+    "members": [
+      "a1000000-0000-0000-0000-000000000001",
+      "a1000000-0000-0000-0000-000000000002",
+      "a1000000-0000-0000-0000-000000000003",
+      "a1000000-0000-0000-0000-000000000004",
+      "a1000000-0000-0000-0000-000000000005",
+      "a1000000-0000-0000-0000-000000000006",
+      "a1000000-0000-0000-0000-000000000007",
+      "a1000000-0000-0000-0000-000000000008",
+      "a1000000-0000-0000-0000-000000000009",
+      "a1000000-0000-0000-0000-000000000010"
+    ]
+  }
+]
+
+###
+
+### A-2. Erreur 400 — Pas d'approbation de la fédération
+POST {{baseUrl}}/collectivities
+Content-Type: application/json
+
+[
+  {
+    "location": "Toamasina",
+    "specialty": "Élevage",
+    "federationApproval": false,
+    "structure": {
+      "president":     "a1000000-0000-0000-0000-000000000001",
+      "vicePresident": "a1000000-0000-0000-0000-000000000002",
+      "treasurer":     "a1000000-0000-0000-0000-000000000003",
+      "secretary":     "a1000000-0000-0000-0000-000000000004"
+    },
+    "members": [
+      "a1000000-0000-0000-0000-000000000001",
+      "a1000000-0000-0000-0000-000000000002",
+      "a1000000-0000-0000-0000-000000000003",
+      "a1000000-0000-0000-0000-000000000004",
+      "a1000000-0000-0000-0000-000000000005",
+      "a1000000-0000-0000-0000-000000000006",
+      "a1000000-0000-0000-0000-000000000007",
+      "a1000000-0000-0000-0000-000000000008",
+      "a1000000-0000-0000-0000-000000000009",
+      "a1000000-0000-0000-0000-000000000010"
+    ]
+  }
+]
+
+###
+
+### A-3. Erreur 400 — Structure manquante
+POST {{baseUrl}}/collectivities
+Content-Type: application/json
+
+[
+  {
+    "location": "Mahajanga",
+    "specialty": "Maraîchage",
+    "federationApproval": true,
+    "members": [
+      "a1000000-0000-0000-0000-000000000001",
+      "a1000000-0000-0000-0000-000000000002",
+      "a1000000-0000-0000-0000-000000000003",
+      "a1000000-0000-0000-0000-000000000004",
+      "a1000000-0000-0000-0000-000000000005",
+      "a1000000-0000-0000-0000-000000000006",
+      "a1000000-0000-0000-0000-000000000007",
+      "a1000000-0000-0000-0000-000000000008",
+      "a1000000-0000-0000-0000-000000000009",
+      "a1000000-0000-0000-0000-000000000010"
+    ]
+  }
+]
+
+###
+
+### A-4. Erreur 404 — Membre inexistant dans la liste
+POST {{baseUrl}}/collectivities
+Content-Type: application/json
+
+[
+  {
+    "location": "Antsiranana",
+    "specialty": "Apiculture",
+    "federationApproval": true,
+    "structure": {
+      "president":     "a1000000-0000-0000-0000-000000000001",
+      "vicePresident": "a1000000-0000-0000-0000-000000000002",
+      "treasurer":     "a1000000-0000-0000-0000-000000000003",
+      "secretary":     "a1000000-0000-0000-0000-000000000004"
+    },
+    "members": [
+      "a1000000-0000-0000-0000-000000000001",
+      "a1000000-0000-0000-0000-000000000002",
+      "a1000000-0000-0000-0000-000000000003",
+      "a1000000-0000-0000-0000-000000000004",
+      "a1000000-0000-0000-0000-000000000005",
+      "99999999-9999-9999-9999-999999999999"
+    ]
+  }
+]
+
+###
+
+
+### ============================================================
+### J — PUT /collectivities/{id}/informations
+### ============================================================
+
+### J-1. Cas nominal — 200 OK — Attribution nom et numéro
+PUT {{baseUrl}}/collectivities/{{validCollectivityId}}/informations
+Content-Type: application/json
+
+{
+  "name": "Collectivité Antananarivo Nord",
+  "number": "COL-2024-001"
+}
+
+###
+
+### J-2. Erreur 400 — Nom déjà utilisé par une autre collectivité
+PUT {{baseUrl}}/collectivities/{{validCollectivityId}}/informations
+Content-Type: application/json
+
+{
+  "name": "Collectivité Antananarivo Nord",
+  "number": "COL-2024-002"
+}
+
+###
+
+### J-3. Erreur 400 — Numéro déjà utilisé par une autre collectivité
+PUT {{baseUrl}}/collectivities/{{validCollectivityId}}/informations
+Content-Type: application/json
+
+{
+  "name": "Nouvelle Collectivité",
+  "number": "COL-2024-001"
+}
+
+###
+
+### J-4. Erreur 400 — Nom manquant
+PUT {{baseUrl}}/collectivities/{{validCollectivityId}}/informations
+Content-Type: application/json
+
+{
+  "number": "COL-2024-003"
+}
+
+###
+
+### J-5. Erreur 404 — Collectivité inexistante
+PUT {{baseUrl}}/collectivities/{{invalidCollectivityId}}/informations
+Content-Type: application/json
+
+{
+  "name": "Fantôme",
+  "number": "COL-9999-999"
+}
+
+###
+
+
+### ============================================================
+### GET /collectivities/{id}
+### ============================================================
+
+### GET-1. Cas nominal — 200 OK
+GET {{baseUrl}}/collectivities/{{validCollectivityId}}
+Accept: application/json
+
+###
+
+### GET-2. Erreur 404 — Collectivité inexistante
+GET {{baseUrl}}/collectivities/{{invalidCollectivityId}}
+Accept: application/json
+
+###
+
+
+### ============================================================
+### B — POST /members
+### ============================================================
+
+### B-1. Cas nominal — 201 Created
+### 2 parrains SENIOR de la collectivité cible
+POST {{baseUrl}}/members
+Content-Type: application/json
+
+[
+  {
+    "firstName": "Aina",
+    "lastName": "RAKOTONDRABE",
+    "birthDate": "2000-03-12",
+    "gender": "FEMALE",
+    "address": "Lot 45 Ambohipo, Antananarivo",
+    "profession": "Agricultrice",
+    "phone": "341112233",
+    "email": "aina.rakotondrabe@email.com",
+    "occupation": "JUNIOR",
+    "collectivityIdentifier": "{{validCollectivityId}}",
+    "referees": [
+      "a1000000-0000-0000-0000-000000000005",
+      "a1000000-0000-0000-0000-000000000006"
+    ],
+    "registrationFeePaid": true,
+    "membershipDuesPaid": true
+  }
+]
+
+###
+
+### B-2. Erreur 400 — Un seul parrain (minimum 2 requis)
+POST {{baseUrl}}/members
+Content-Type: application/json
+
+[
+  {
+    "firstName": "Tojo",
+    "lastName": "ANDRIANTSOA",
+    "birthDate": "1998-07-19",
+    "gender": "MALE",
+    "address": "Lot 12 Ivandry, Antananarivo",
+    "profession": "Éleveur",
+    "phone": "342223344",
+    "email": "tojo.andriantsoa@email.com",
+    "occupation": "JUNIOR",
+    "collectivityIdentifier": "{{validCollectivityId}}",
+    "referees": [
+      "a1000000-0000-0000-0000-000000000005"
+    ],
+    "registrationFeePaid": true,
+    "membershipDuesPaid": true
+  }
+]
+
+###
+
+### B-3. Erreur 400 — Frais non réglés
+POST {{baseUrl}}/members
+Content-Type: application/json
+
+[
+  {
+    "firstName": "Nirina",
+    "lastName": "RABEMANANTSOA",
+    "birthDate": "1999-11-03",
+    "gender": "FEMALE",
+    "address": "Lot 78 Analakely, Antananarivo",
+    "profession": "Maraîchère",
+    "phone": "343334455",
+    "email": "nirina.rabemanantsoa@email.com",
+    "occupation": "JUNIOR",
+    "collectivityIdentifier": "{{validCollectivityId}}",
+    "referees": [
+      "a1000000-0000-0000-0000-000000000005",
+      "a1000000-0000-0000-0000-000000000006"
+    ],
+    "registrationFeePaid": false,
+    "membershipDuesPaid": false
+  }
+]
+
+###
+
+### B-4. Erreur 404 — Collectivité inexistante
+POST {{baseUrl}}/members
+Content-Type: application/json
+
+[
+  {
+    "firstName": "Feno",
+    "lastName": "RASOLONDRAIBE",
+    "birthDate": "1997-04-25",
+    "gender": "MALE",
+    "address": "Lot 33 Isotry, Antananarivo",
+    "profession": "Riziculteur",
+    "phone": "344445566",
+    "email": "feno.rasolondraibe@email.com",
+    "occupation": "JUNIOR",
+    "collectivityIdentifier": "{{invalidCollectivityId}}",
+    "referees": [
+      "a1000000-0000-0000-0000-000000000005",
+      "a1000000-0000-0000-0000-000000000006"
+    ],
+    "registrationFeePaid": true,
+    "membershipDuesPaid": true
+  }
+]
+
+###
+
+
+### ============================================================
+### C — POST /collectivities/{id}/membershipFees
+### ============================================================
+
+### C-1. Cas nominal — 200 OK — Cotisation mensuelle
+POST {{baseUrl}}/collectivities/{{validCollectivityId}}/membershipFees
+Content-Type: application/json
+
+[
+  {
+    "label": "Cotisation Spéciale 2026",
+    "amount": 15000.50,
+    "frequency": "MONTHLY",
+    "eligibleFrom": "2026-06-01"
+  },
+  {
+    "label": "Droit d'entrée",
+    "amount": 100000,
+    "frequency": "PUNCTUALLY",
+    "eligibleFrom": "2026-04-22"
+  }
+]
+
+###
+
+### C-2. Erreur 400 — Montant négatif
+POST {{baseUrl}}/collectivities/{{validCollectivityId}}/membershipFees
+Content-Type: application/json
+
+[
+  {
+    "label": "Frais illégaux",
+    "amount": -500,
+    "frequency": "WEEKLY",
+    "eligibleFrom": "2026-01-01"
+  }
+]
+
+###
+
+### C-3. Erreur 400 — Fréquence inconnue
+POST {{baseUrl}}/collectivities/{{validCollectivityId}}/membershipFees
+Content-Type: application/json
+
+[
+  {
+    "label": "Frais bizarre",
+    "amount": 1000,
+    "frequency": "EVERY_DAY",
+    "eligibleFrom": "2026-01-01"
+  }
+]
+
+###
+
+### C-4. Erreur 404 — Collectivité inexistante
+POST {{baseUrl}}/collectivities/{{invalidCollectivityId}}/membershipFees
+Content-Type: application/json
+
+[
+  {
+    "label": "Frais fantôme",
+    "amount": 1000,
+    "frequency": "MONTHLY",
+    "eligibleFrom": "2026-01-01"
+  }
+]
+
+###
+
+
+### ============================================================
+### C — GET /collectivities/{id}/membershipFees
+### ============================================================
+
+### C-5. Cas nominal — 200 OK
+GET {{baseUrl}}/collectivities/{{validCollectivityId}}/membershipFees
+Accept: application/json
+
+###
+
+### C-6. Erreur 404 — Collectivité inexistante
+GET {{baseUrl}}/collectivities/{{invalidCollectivityId}}/membershipFees
+Accept: application/json
+
+###
+
+
+### ============================================================
+### D — POST /members/{id}/payments
+### ============================================================
+
+### D-1. Cas nominal — 201 Created — Paiement en espèces (CASH)
+POST {{baseUrl}}/members/{{validMemberId}}/payments
+Content-Type: application/json
+
+[
+  {
+    "amount": 5000,
+    "membershipFeeIdentifier": "{{feeId1}}",
+    "accountCreditedIdentifier": "{{cashAccountId}}",
+    "paymentMode": "CASH"
+  }
+]
+
+###
+
+### D-2. Cas nominal — 201 Created — Paiement Mobile Banking
+POST {{baseUrl}}/members/{{validMemberId}}/payments
+Content-Type: application/json
+
+[
+  {
+    "amount": 10000,
+    "membershipFeeIdentifier": "{{feeId2}}",
+    "accountCreditedIdentifier": "{{mobileAccountId}}",
+    "paymentMode": "MOBILE_BANKING"
+  }
+]
+
+###
+
+### D-3. Cas nominal — 201 Created — Paiement Virement bancaire
+POST {{baseUrl}}/members/{{validMemberId}}/payments
+Content-Type: application/json
+
+[
+  {
+    "amount": 15000,
+    "membershipFeeIdentifier": "{{feeId3}}",
+    "accountCreditedIdentifier": "{{bankAccountId}}",
+    "paymentMode": "BANK_TRANSFER"
+  }
+]
+
+###
+
+### D-4. Cas nominal — 201 Created — Plusieurs paiements en une requête
+POST {{baseUrl}}/members/{{validMemberId}}/payments
+Content-Type: application/json
+
+[
+  {
+    "amount": 5000,
+    "membershipFeeIdentifier": "{{feeId1}}",
+    "accountCreditedIdentifier": "{{cashAccountId}}",
+    "paymentMode": "CASH"
+  },
+  {
+    "amount": 10000,
+    "membershipFeeIdentifier": "{{feeId2}}",
+    "accountCreditedIdentifier": "{{mobileAccountId}}",
+    "paymentMode": "MOBILE_BANKING"
+  }
+]
+
+###
+
+### D-5. Erreur 404 — Membre inexistant
+POST {{baseUrl}}/members/{{invalidMemberId}}/payments
+Content-Type: application/json
+
+[
+  {
+    "amount": 5000,
+    "membershipFeeIdentifier": "{{feeId1}}",
+    "accountCreditedIdentifier": "{{cashAccountId}}",
+    "paymentMode": "CASH"
+  }
+]
+
+###
+
+### D-6. Erreur 400 — Montant négatif
+POST {{baseUrl}}/members/{{validMemberId}}/payments
+Content-Type: application/json
+
+[
+  {
+    "amount": -1000,
+    "membershipFeeIdentifier": "{{feeId1}}",
+    "accountCreditedIdentifier": "{{cashAccountId}}",
+    "paymentMode": "CASH"
+  }
+]
+
+###
+
+### D-7. Erreur 400 — Champs obligatoires manquants
+POST {{baseUrl}}/members/{{validMemberId}}/payments
+Content-Type: application/json
+
+[
+  {
+    "amount": 5000
+  }
+]
+
+###
+
+
+### ============================================================
+### D — GET /collectivities/{id}/transactions
+### ============================================================
+
+### D-8. Cas nominal — 200 OK — Transactions sur 2024
+GET {{baseUrl}}/collectivities/{{validCollectivityId}}/transactions?from=2024-01-01&to=2024-12-31
+Accept: application/json
+
+###
+
+### D-9. Cas nominal — 200 OK — Transactions sur une courte période
+GET {{baseUrl}}/collectivities/{{validCollectivityId}}/transactions?from=2024-04-01&to=2024-04-30
+Accept: application/json
+
+###
+
+### D-10. Erreur 400 — Paramètre 'to' manquant
+GET {{baseUrl}}/collectivities/{{validCollectivityId}}/transactions?from=2024-01-01
+Accept: application/json
+
+###
+
+### D-11. Erreur 400 — Paramètre 'from' manquant
+GET {{baseUrl}}/collectivities/{{validCollectivityId}}/transactions?to=2024-12-31
+Accept: application/json
+
+###
+
+### D-12. Erreur 400 — 'to' antérieur à 'from'
+GET {{baseUrl}}/collectivities/{{validCollectivityId}}/transactions?from=2024-12-31&to=2024-01-01
+Accept: application/json
+
+###
+
+### D-13. Erreur 404 — Collectivité inexistante
+GET {{baseUrl}}/collectivities/{{invalidCollectivityId}}/transactions?from=2024-01-01&to=2024-12-31
+Accept: application/json
+
+###
+
+
+### ============================================================
+### D — GET /collectivities/{id}/financialAccounts
+### ============================================================
+
+### D-14. Cas nominal — 200 OK — Solde actuel (sans paramètre at)
+GET {{baseUrl}}/collectivities/{{validCollectivityId}}/financialAccounts
+Accept: application/json
+
+###
+
+### D-15. Cas nominal — 200 OK — Solde à une date passée
+### Avant tout paiement => tous les soldes devraient être à 0
+GET {{baseUrl}}/collectivities/{{validCollectivityId}}/financialAccounts?at=2023-12-31
+Accept: application/json
+
+###
+
+### D-16. Cas nominal — 200 OK — Solde après le premier paiement du data.sql (2024-04-20)
+### cashAccount devrait afficher 5000 (paiement du data.sql)
+GET {{baseUrl}}/collectivities/{{validCollectivityId}}/financialAccounts?at=2024-04-20
+Accept: application/json
+
+###
+
+### D-17. Cas nominal — 200 OK — Solde à une date récente (inclut tous les paiements)
+GET {{baseUrl}}/collectivities/{{validCollectivityId}}/financialAccounts?at=2026-04-23
+Accept: application/json
+
+###
+
+### D-18. Erreur 400 — Paramètre 'at' dans le futur
+GET {{baseUrl}}/collectivities/{{validCollectivityId}}/financialAccounts?at=2099-01-01
+Accept: application/json
+
+###
+
+### D-19. Erreur 404 — Collectivité inexistante
+GET {{baseUrl}}/collectivities/{{invalidCollectivityId}}/financialAccounts
+Accept: application/json
+
+###
