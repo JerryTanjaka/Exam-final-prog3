@@ -11,9 +11,13 @@ import hei.fprog3.model.enums.MobileBankingServiceType;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class AccountRepository {
@@ -63,5 +67,76 @@ public class AccountRepository {
             dataSource.closeConnection(connection);
         }
 
+    }
+    public List<FinancialAccount> findByCollectivityId(String collectivityId, LocalDate at) {
+        Connection connection = dataSource.getConnection();
+        try {
+            String query;
+            if (at != null) {
+                query = """
+                SELECT a.id, a.type, a.holder_name, a.bank_name, a.bank_account_number,
+                       a.mobile_banking_service, a.mobile_number,
+                       COALESCE(SUM(p.amount), 0) AS balance
+                FROM accounts a
+                LEFT JOIN payments p
+                    ON p.credited_account_id = a.id
+                    AND p.creation_date <= ?
+                WHERE a.collectivity_id = ?::UUID
+                GROUP BY a.id, a.type, a.holder_name, a.bank_name,
+                         a.bank_account_number, a.mobile_banking_service, a.mobile_number
+                """;
+            } else {
+                query = """
+                SELECT id, type, balance, holder_name, bank_name, bank_account_number,
+                       mobile_banking_service, mobile_number
+                FROM accounts
+                WHERE collectivity_id = ?::UUID
+                """;
+            }
+
+            PreparedStatement ps = connection.prepareStatement(query);
+            if (at != null) {
+                ps.setDate(1, Date.valueOf(at));
+                ps.setString(2, collectivityId);
+            } else {
+                ps.setString(1, collectivityId);
+            }
+
+            ResultSet rs = ps.executeQuery();
+            List<FinancialAccount> accounts = new ArrayList<>();
+
+            while (rs.next()) {
+                AccountType type = AccountType.valueOf(rs.getString("type"));
+                if (type == AccountType.CASH) {
+                    CashAccount account = new CashAccount();
+                    account.setId(rs.getString("id"));
+                    account.setAmount(rs.getDouble("balance"));
+                    accounts.add(account);
+                } else if (type == AccountType.BANK) {
+                    BankAccount account = new BankAccount();
+                    account.setId(rs.getString("id"));
+                    account.setAmount(rs.getDouble("balance"));
+                    account.setHolderName(rs.getString("holder_name"));
+                    account.setBankName(BankType.valueOf(rs.getString("bank_name")));
+                    account.setAccountNumberFieldsFromFullNumber(rs.getString("bank_account_number"));
+                    accounts.add(account);
+                } else if (type == AccountType.MOBILE_MONEY) {
+                    MobileBankingAccount account = new MobileBankingAccount();
+                    account.setId(rs.getString("id"));
+                    account.setAmount(rs.getDouble("balance"));
+                    account.setHolderName(rs.getString("holder_name"));
+                    account.setMobileNumber(rs.getString("mobile_number"));
+                    account.setMobileBankingService(
+                            MobileBankingServiceType.valueOf(rs.getString("mobile_banking_service"))
+                    );
+                    accounts.add(account);
+                }
+            }
+            return accounts;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            dataSource.closeConnection(connection);
+        }
     }
 }
