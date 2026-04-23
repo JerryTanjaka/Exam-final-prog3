@@ -3,6 +3,7 @@ package hei.fprog3.repository;
 import hei.fprog3.datasource.DataSourceConfig;
 import hei.fprog3.dto.member.CreateMemberRequest;
 import hei.fprog3.dto.member.MemberResponse;
+import hei.fprog3.exception.BadRequestException;
 import hei.fprog3.exception.NotFoundException;
 import hei.fprog3.model.enums.GenderType;
 import hei.fprog3.model.enums.PositionType;
@@ -22,13 +23,17 @@ public class MemberRepository {
         this.dataSource = dataSource;
     }
 
-    public List<MemberResponse> create(List<CreateMemberRequest> members) throws NotFoundException {
+    public List<MemberResponse> create(List<CreateMemberRequest> members) throws BadRequestException, NotFoundException {
         Connection connection = dataSource.getConnection();
         try {
             List<MemberResponse> memberResponses = new ArrayList<>();
             connection.setAutoCommit(false);
             for (CreateMemberRequest member : members) {
                 member.setId(UUID.randomUUID().toString());
+                if (isEmailUsed(member.getEmail(), connection
+                )) {
+                    throw new BadRequestException("Email already used");
+                };
                 PreparedStatement memberPs = connection.prepareStatement(
                         """
                         INSERT INTO members (last_name, first_name, birth_date, gender, address, profession, phone, email, id)
@@ -144,6 +149,21 @@ public class MemberRepository {
             throw new RuntimeException(e);
         } finally {
             dataSource.closeConnection(connection);
+        }
+    }
+
+    public boolean isEmailUsed(String email, Connection connection) throws SQLException {
+        try {
+            PreparedStatement ps = connection.prepareStatement("""
+                        SELECT COUNT(id) AS usage_count
+                        FROM members WHERE email = ?
+                        """);
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return (rs.getInt("usage_count") > 0);
+        } catch (SQLException e) {
+            throw new SQLException(e);
         }
     }
 
