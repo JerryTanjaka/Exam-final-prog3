@@ -303,3 +303,29 @@ Content-Type: application/json
     "paymentMode": "CASH"
   }
 ]
+
+### 18. POST /members/{id}/payments — Mobile Banking payment (succès 201)
+POST {{baseUrl}}/members/a1000000-0000-0000-0000-000000000001/payments
+Content-Type: application/json
+
+[
+  {
+    "amount": 10000,
+    "membershipFeeIdentifier": "f1000000-0000-0000-0000-000000000002",
+    "accountCreditedIdentifier": "c1000000-0000-0000-0000-000000000003",
+    "paymentMode": "MOBILE_BANKING"
+  }
+]
+
+### 19. POST /members/{id}/payments — Bank Transfer payment (succès 201)
+POST {{baseUrl}}/members/a1000000-0000-0000-0000-000000000001/payments
+Content-Type: application/json
+
+[
+  {
+    "amount": 15000,
+    "membershipFeeIdentifier": "f1000000-0000-0000-0000-000000000003",
+    "accountCreditedIdentifier": "c1000000-0000-0000-0000-000000000002",
+    "paymentMode": "BANK_TRANSFER"
+  }
+]

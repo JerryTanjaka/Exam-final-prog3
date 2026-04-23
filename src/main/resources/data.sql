@@ -18,7 +18,8 @@ VALUES
     ('a1000000-0000-0000-0000-000000000007', 'RAFY', 'Niry', '1989-04-30', 'MALE', 'Antananarivo', 'Éleveur', '0347890123', 'niry.rafy@email.com'),
     ('a1000000-0000-0000-0000-000000000008', 'RAVELO', 'Tina', '1994-12-05', 'FEMALE', 'Antananarivo', 'Horticultrice', '0348901234', 'tina.ravelo@email.com'),
     ('a1000000-0000-0000-0000-000000000009', 'RATOVO', 'Marc', '1990-06-18', 'MALE', 'Antananarivo', 'Pisciculteur', '0349012345', 'marc.ratovo@email.com'),
-    ('a1000000-0000-0000-0000-000000000010', 'RAMIALY', 'Zo', '1987-02-22', 'MALE', 'Antananarivo', 'Forestier', '0340123456', 'zo.ramialy@email.com');
+    ('a1000000-0000-0000-0000-000000000010', 'RAMIALY', 'Zo', '1987-02-22', 'MALE', 'Antananarivo', 'Forestier', '0340123456', 'zo.ramialy@email.com'),
+    ('a1000000-0000-0000-0000-000000000011', 'RAZAFY', 'Lova', '1996-08-12', 'FEMALE', 'Antananarivo', 'Cultivatrice', '0341112223', 'lova.razafy@email.com');
 
 -- ============================================================
 -- MEMBERSHIPS dans une collectivité existante
@@ -26,7 +27,7 @@ VALUES
 -- et occupation SENIOR pour pouvoir parrainer (condition B-2)
 -- ============================================================
 
--- Les 10 membres dans cette collectivité existante depuis > 6 mois
+-- Les 11 membres dans cette collectivité existante depuis > 6 mois
 INSERT INTO memberships (id, member_id, collectivity_id, occupation, start_date)
 VALUES
     (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000001', 'PRESIDENT',      '2024-01-01'),
@@ -38,7 +39,8 @@ VALUES
     (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000007', 'b2000000-0000-0000-0000-000000000001', 'SENIOR',         '2024-01-01'),
     (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000008', 'b2000000-0000-0000-0000-000000000001', 'SENIOR',         '2024-01-01'),
     (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000009', 'b2000000-0000-0000-0000-000000000001', 'JUNIOR',         '2024-01-01'),
-    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000010', 'b2000000-0000-0000-0000-000000000001', 'JUNIOR',         '2024-01-01');
+    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000010', 'b2000000-0000-0000-0000-000000000001', 'JUNIOR',         '2024-01-01'),
+    (gen_random_uuid(), 'a1000000-0000-0000-0000-000000000011', 'b2000000-0000-0000-0000-000000000001', 'JUNIOR',         '2024-01-01');
 
 -- ============================================================
 -- MOCK DATA v0.0.3
@@ -48,13 +50,15 @@ VALUES
 INSERT INTO fees (id, eligible_from, amount, label, frequency, status)
 VALUES
     ('f1000000-0000-0000-0000-000000000001', '2024-01-01', 5000.00, 'Cotisation Mensuelle', 'MONTHLY', 'ACTIVE'),
-    ('f1000000-0000-0000-0000-000000000002', '2024-01-01', 10000.00, 'Frais d''inscription', 'PUNCTUALLY', 'ACTIVE');
+    ('f1000000-0000-0000-0000-000000000002', '2024-01-01', 10000.00, 'Frais d''inscription', 'PUNCTUALLY', 'ACTIVE'),
+    ('f1000000-0000-0000-0000-000000000003', '2024-01-01', 15000.00, 'Contribution annuelle matériel', 'ANNUALLY', 'ACTIVE');
 
 -- Link Fees to Collectivity
 INSERT INTO collectivityFee (id, collectivity_id, fee_id)
 VALUES
     (gen_random_uuid(), 'b2000000-0000-0000-0000-000000000001', 'f1000000-0000-0000-0000-000000000001'),
-    (gen_random_uuid(), 'b2000000-0000-0000-0000-000000000001', 'f1000000-0000-0000-0000-000000000002');
+    (gen_random_uuid(), 'b2000000-0000-0000-0000-000000000001', 'f1000000-0000-0000-0000-000000000002'),
+    (gen_random_uuid(), 'b2000000-0000-0000-0000-000000000001', 'f1000000-0000-0000-0000-000000000003');
 
 -- Accounts
 INSERT INTO accounts (id, collectivity_id, type, balance, holder_name)

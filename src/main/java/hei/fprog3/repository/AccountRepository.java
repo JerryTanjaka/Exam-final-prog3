@@ -6,6 +6,8 @@ import hei.fprog3.model.CashAccount;
 import hei.fprog3.model.FinancialAccount;
 import hei.fprog3.model.MobileBankingAccount;
 import hei.fprog3.model.enums.AccountType;
+import hei.fprog3.model.enums.BankType;
+import hei.fprog3.model.enums.MobileBankingServiceType;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
@@ -40,6 +42,7 @@ public class AccountRepository {
                     BankAccount account = new BankAccount();
                     account.setId(rs.getString("id"));
                     account.setAmount(rs.getDouble("balance"));
+                    account.setBankName(BankType.valueOf(rs.getString("bank_name")));
                     account.setAccountNumberFieldsFromFullNumber(rs.getString("bank_account_number"));
                     account.setHolderName(rs.getString("holder_name"));
                     return account;
@@ -48,7 +51,9 @@ public class AccountRepository {
                     account.setId(rs.getString("id"));
                     account.setAmount(rs.getDouble("balance"));
                     account.setHolderName(rs.getString("holder_name"));
-                    account.setMobileNumber(account.getMobileNumber());
+                    account.setMobileNumber(rs.getString("mobile_number"));
+                    account.setMobileBankingService(MobileBankingServiceType.valueOf(rs.getString("mobile_banking_service")));
+                    return account;
                 }
             }
             return null;
