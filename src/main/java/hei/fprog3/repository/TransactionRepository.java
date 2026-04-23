@@ -37,7 +37,7 @@ public class TransactionRepository {
                     FROM transactions AS t
                     JOIN payments AS p ON payment_id = p.id
                     JOIN accounts AS a ON a.id = p.credited_account_id
-                    WHERE a.collectivity_id = ?::UUID AND t.creation_date BETWEEN ? AND ?
+                    WHERE a.collectivity_id = ? AND t.creation_date BETWEEN ? AND ?
                     """);
             transactionsPs.setString(1, collectivityId);
             transactionsPs.setDate(2, Date.valueOf(from));

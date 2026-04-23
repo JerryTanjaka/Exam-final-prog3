@@ -76,7 +76,7 @@ public class CollectivityValidator {
         if (info.getName() == null || info.getName().trim().isEmpty()) {
             throw new BadRequestException("Name is required");
         }
-        if (info.getNumber() == null || info.getNumber().isEmpty()) {
+        if (info.getNumber() == null || info.getNumber() <= 0) {
             throw new BadRequestException("Number is required");
         }
 

@@ -32,21 +32,21 @@ public class MemberRepository {
             PreparedStatement memberPs = connection.prepareStatement(
                     """
                     INSERT INTO members (last_name, first_name, birth_date, gender, address, profession, phone, email, id)
-                    VALUES (?, ?, ?, ?::gender_type, ?, ?, ?, ?, ?::UUID)
+                    VALUES (?, ?, ?, ?::gender_type, ?, ?, ?, ?, ?)
                     """
             );
 
             PreparedStatement membershipPs = connection.prepareStatement(
                     """
                     INSERT INTO memberships (member_id, collectivity_id, occupation)
-                    VALUES (?::UUID, ?::UUID, ?::position_type);
+                    VALUES (?, ?, ?::position_type);
                     """
             );
 
             PreparedStatement refereePs = connection.prepareStatement(
                     """
                     INSERT INTO referals (member_id, referee_id)
-                    VALUES (?::UUID, ?::UUID);
+                    VALUES (?, ?);
                     """
             );
 
@@ -109,7 +109,7 @@ public class MemberRepository {
         try {
             PreparedStatement membersPs = connection.prepareStatement("""
                         SELECT id, first_name, last_name, birth_date, gender, address, profession, phone, email
-                        FROM members WHERE id = ?::UUID
+                        FROM members WHERE id = ?
                         """);
             membersPs.setString(1, id);
 
@@ -149,7 +149,7 @@ public class MemberRepository {
         try {
             PreparedStatement ps = connection.prepareStatement("""
                         SELECT id
-                        FROM memberships WHERE member_id = ?::UUID AND collectivity_id = ?::UUID AND occupation != 'JUNIOR' AND end_date IS NULL
+                        FROM memberships WHERE member_id = ? AND collectivity_id = ? AND occupation != 'JUNIOR' AND end_date IS NULL
                         ORDER BY end_date DESC
                         """);
             ps.setString(1, memberId);
@@ -183,7 +183,7 @@ public class MemberRepository {
         try {
             PreparedStatement ps = connection.prepareStatement("""
                         SELECT id, start_date, end_date
-                        FROM memberships WHERE member_id = ?::UUID
+                        FROM memberships WHERE member_id = ?
                         ORDER BY end_date DESC
                         """);
             ps.setString(1, memberId);
@@ -205,7 +205,7 @@ public class MemberRepository {
     public List<MemberResponse> getMemberReferees(String id) throws NotFoundException {
         Connection connection = dataSource.getConnection();
         try {
-            PreparedStatement referalsPs = connection.prepareStatement("SELECT referee_id FROM referals WHERE member_id = ?::UUID;");
+            PreparedStatement referalsPs = connection.prepareStatement("SELECT referee_id FROM referals WHERE member_id = ?;");
             referalsPs.setString(1, id);
             ResultSet referalsRs = referalsPs.executeQuery();
             List<MemberResponse> referals = new ArrayList<>();
@@ -225,7 +225,7 @@ public class MemberRepository {
         try {
             PreparedStatement ps = connection.prepareStatement("""
                         SELECT occupation
-                        FROM memberships WHERE member_id = ?::UUID AND end_date IS NULL
+                        FROM memberships WHERE member_id = ? AND end_date IS NULL
                         ORDER BY end_date DESC
                         """);
             ps.setString(1, memberId);

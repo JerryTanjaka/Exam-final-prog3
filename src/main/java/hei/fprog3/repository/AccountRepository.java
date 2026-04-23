@@ -32,7 +32,7 @@ public class AccountRepository {
             PreparedStatement accountsPs = connection.prepareStatement(
                 """
                 SELECT id, type ,balance, holder_name, bank_name, bank_account_number, mobile_banking_service, mobile_number
-                FROM accounts WHERE id = ?::UUID
+                FROM accounts WHERE id = ?
                 """);
             accountsPs.setString(1, id);
             ResultSet rs = accountsPs.executeQuery();
@@ -81,7 +81,7 @@ public class AccountRepository {
                 LEFT JOIN payments p
                     ON p.credited_account_id = a.id
                     AND p.creation_date <= ?
-                WHERE a.collectivity_id = ?::UUID
+                WHERE a.collectivity_id = ?
                 GROUP BY a.id, a.type, a.holder_name, a.bank_name,
                          a.bank_account_number, a.mobile_banking_service, a.mobile_number
                 """;
@@ -90,7 +90,7 @@ public class AccountRepository {
                 SELECT id, type, balance, holder_name, bank_name, bank_account_number,
                        mobile_banking_service, mobile_number
                 FROM accounts
-                WHERE collectivity_id = ?::UUID
+                WHERE collectivity_id = ?
                 """;
             }
 

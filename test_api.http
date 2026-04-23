@@ -223,12 +223,12 @@ Content-Type: application/json
 
 
 ### PUT
-PUT {{baseUrl}}/collectivities/b2000000-0000-0000-0000-000000000001/informations
+PUT {{baseUrl}}/collectivities/b2000000-0000-0000-0000-000000000002/informations
 Content-Type: application/json
 
 {
   "name": "Hello",
-  "number": "1243564789"
+  "number": 1243564789
 }
 
 ### 9. GET /collectivities/{id}/membershipFees — Récupérer les frais d'adhésion
@@ -339,3 +339,12 @@ GET {{baseUrl}}/collectivities/b2000000-0000-0000-0000-000000000001
 
 ### 21. GET /collectivities/{id} -- Not Found Error
 GET {{baseUrl}}/collectivities/b2000000-0000-0000-0000-000000000100
+
+### 22. GET /collectivities/{id}/financialAccounts -- Returns a collecticity accounts list at a certain date
+GET {{baseUrl}}/collectivities/b2000000-0000-0000-0000-000000000001/financialAccounts?at=2024-10-01
+
+### 23. GET /collectivities/{id}/financialAccounts -- Returns a collecitivity accounts
+GET {{baseUrl}}/collectivities/b2000000-0000-0000-0000-000000000001/financialAccounts
+
+### 24. GET /collectivities/{id}/financialAccounts -- Not Found Error
+GET {{baseUrl}}/collectivities/b2000000-0000-0000-0000-000000000100/financialAccounts

@@ -35,7 +35,7 @@ public class FeeRepository {
                 """
                 SELECT f.id, eligible_from, amount, label, frequency, status
                 FROM fees AS f JOIN collectivityfee AS cf ON cf.fee_id = f.id
-                WHERE cf.collectivity_id = ?::UUID
+                WHERE cf.collectivity_id = ?
                 """);
             ps.setString(1, id);
             ResultSet rs = ps.executeQuery();
@@ -67,14 +67,14 @@ public class FeeRepository {
             PreparedStatement feesPs = connection.prepareStatement(
                     """
                     INSERT INTO fees (id, eligible_from, amount, label, frequency, status)
-                    VALUES (?::UUID, ?, ?::FLOAT, ?, ?::fee_frequency_type, ?::activity_status)
+                    VALUES (?, ?, ?::FLOAT, ?, ?::fee_frequency_type, ?::activity_status)
                     """
             );
 
             PreparedStatement collectivityFeePs = connection.prepareStatement(
                     """
                     INSERT INTO collectivityfee (collectivity_id, fee_id)
-                    VALUES (?::UUID, ?::UUID)
+                    VALUES (?, ?)
                     """
             );
 
@@ -118,7 +118,7 @@ public class FeeRepository {
                     """
                     SELECT f.id, eligible_from, amount, label, frequency, status
                     FROM fees AS f
-                    WHERE f.id = ?::UUID
+                    WHERE f.id = ?
                     """);
             ps.setString(1, id);
             ResultSet rs = ps.executeQuery();

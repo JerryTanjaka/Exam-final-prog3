@@ -31,14 +31,14 @@ public class CollectivityRepository {
             PreparedStatement collectivitiesPs = connection.prepareStatement(
                     """
                     INSERT INTO collectivities (id, location, specialty)
-                    VALUES (?::UUID, ?, ?)
+                    VALUES (?, ?, ?)
                     """
             );
 
             PreparedStatement membershipsPs = connection.prepareStatement(
                     """
                     INSERT INTO memberships (member_id, collectivity_id, occupation)
-                    VALUES (?::UUID, ?::UUID, ?::position_type)
+                    VALUES (?, ?, ?::position_type)
                     """
             );
 
@@ -91,7 +91,7 @@ public class CollectivityRepository {
         try {
             PreparedStatement collectivitiesPs = connection.prepareStatement("""
                         SELECT id, number, name, location, specialty, creation_date
-                        FROM collectivities WHERE id = ?::UUID
+                        FROM collectivities WHERE id = ?
                         """);
             collectivitiesPs.setString(1, id);
 
@@ -104,7 +104,7 @@ public class CollectivityRepository {
             }
 
             collectivity.setId(collectivitiesRs.getString("id"));
-            CollectivityInformation collectivityInformation = new CollectivityInformation(collectivitiesRs.getString("name"), collectivitiesRs.getString("number"));
+            CollectivityInformation collectivityInformation = new CollectivityInformation(collectivitiesRs.getString("name"), collectivitiesRs.getInt("number"));
             collectivity.setIdentity(collectivityInformation);
             collectivity.setLocation(collectivitiesRs.getString("location"));
             collectivity.setSpecialty(collectivitiesRs.getString("specialty"));
@@ -113,7 +113,7 @@ public class CollectivityRepository {
             List<Member> members = new ArrayList<>();
             PreparedStatement membershipsPs = connection.prepareStatement("""
                         SELECT id, member_id, occupation
-                        FROM memberships WHERE collectivity_id = ?::UUID
+                        FROM memberships WHERE collectivity_id = ?
                         """);
             membershipsPs.setString(1, id);
             ResultSet membershipsRs = membershipsPs.executeQuery();
@@ -147,7 +147,7 @@ public class CollectivityRepository {
     public void exists(String id) throws NotFoundException {
         Connection  connection = dataSource.getConnection();
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT id FROM collectivities WHERE id = ?::UUID");
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT id FROM collectivities WHERE id = ?");
             preparedStatement.setString(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (!resultSet.next()) {
@@ -168,7 +168,7 @@ public class CollectivityRepository {
             PreparedStatement collectivitiesPs = connection.prepareStatement(
                     """
                     UPDATE collectivities SET name = ?, number = ?
-                    WHERE id = ?::UUID
+                    WHERE id = ?
                     """
             );
             collectivitiesPs.setString(1, collectivityInformation.getName());
@@ -189,7 +189,7 @@ public class CollectivityRepository {
         Connection connection = dataSource.getConnection();
         try {
             PreparedStatement ps = connection.prepareStatement(
-                    "SELECT COUNT(id) FROM collectivities WHERE name = ? AND id != ?::UUID"
+                    "SELECT COUNT(id) FROM collectivities WHERE name = ? AND id != ?"
             );
             ps.setString(1, name);
             ps.setString(2, excludeId);
@@ -202,13 +202,13 @@ public class CollectivityRepository {
         }
     }
 
-    public boolean existsByNumber(String number, String excludeId) {
+    public boolean existsByNumber(Integer number, String excludeId) {
         Connection connection = dataSource.getConnection();
         try {
             PreparedStatement ps = connection.prepareStatement(
-                    "SELECT COUNT(id) FROM collectivities WHERE number = ? AND id != ?::UUID"
+                    "SELECT COUNT(id) FROM collectivities WHERE number = ? AND id != ?"
             );
-            ps.setString(1, number);
+            ps.setInt(1, number);
             ps.setString(2, excludeId);
             ResultSet rs = ps.executeQuery();
             return rs.next() && rs.getInt(1) > 0;

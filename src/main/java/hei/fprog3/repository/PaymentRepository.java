@@ -40,20 +40,20 @@ public class PaymentRepository {
             PreparedStatement paymentPs = connection.prepareStatement(
                     """
                     INSERT INTO payments (id, membership_fee_id, credited_account_id, amount, payment_method)
-                    VALUES (?::UUID, ?::UUID, ?::UUID, ?::FLOAT, ?::payment_method);
+                    VALUES (?, ?, ?, ?::FLOAT, ?::payment_method);
                     """
             );
 
             PreparedStatement transactionPs = connection.prepareStatement(
                         """
                         INSERT INTO transactions (member_id, payment_id)
-                        VALUES (?::UUID, ?::UUID);
+                        VALUES (?, ?);
                         """
             );
 
             PreparedStatement accountsPs = connection.prepareStatement(
                     """
-                    UPDATE accounts SET balance = balance + ?::FLOAT WHERE id = ?::UUID
+                    UPDATE accounts SET balance = balance + ?::FLOAT WHERE id = ?
                     """
             );
 
@@ -103,7 +103,7 @@ public class PaymentRepository {
                         SELECT p.id, amount, payment_method, creation_date, accounts.id AS account_id
                         FROM payments AS p
                         JOIN accounts ON p.credited_account_id = accounts.id
-                        WHERE p.id = ?::UUID
+                        WHERE p.id = ?
                         """);
             paymentsPs.setString(1, paymentId);
             ResultSet rs = paymentsPs.executeQuery();
