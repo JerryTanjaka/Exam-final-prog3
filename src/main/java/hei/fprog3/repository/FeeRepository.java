@@ -33,9 +33,9 @@ public class FeeRepository {
 
             PreparedStatement ps = connection.prepareStatement(
                 """
-                SELECT f.id, eligible_from, amount, label, frequency, status
-                FROM fees AS f JOIN collectivityfee AS cf ON cf.fee_id = f.id
-                WHERE cf.collectivity_id = ?
+                SELECT f.id, f.collectivity_id, eligible_from, amount, label, frequency, status
+                FROM fees AS f
+                WHERE f.collectivity_id = ?
                 """);
             ps.setString(1, id);
             ResultSet rs = ps.executeQuery();
@@ -66,15 +66,8 @@ public class FeeRepository {
 
             PreparedStatement feesPs = connection.prepareStatement(
                     """
-                    INSERT INTO fees (id, eligible_from, amount, label, frequency, status)
-                    VALUES (?, ?, ?::FLOAT, ?, ?::fee_frequency_type, ?::activity_status)
-                    """
-            );
-
-            PreparedStatement collectivityFeePs = connection.prepareStatement(
-                    """
-                    INSERT INTO collectivityfee (collectivity_id, fee_id)
-                    VALUES (?, ?)
+                    INSERT INTO fees (id, eligible_from, amount, label, frequency, status, collectivity_id)
+                    VALUES (?, ?, ?::FLOAT, ?, ?::fee_frequency_type, ?::activity_status, ?)
                     """
             );
 
@@ -87,15 +80,12 @@ public class FeeRepository {
                 feesPs.setString(4, feeRequest.getLabel());
                 feesPs.setString(5, feeRequest.getFrequency().name());
                 feesPs.setString(6, ((feeRequest.getEligibleFrom() == null || feeRequest.getEligibleFrom().isAfter(LocalDate.now())) ? StatusType.INACTIVE.name() : StatusType.ACTIVE.name()));
+                feesPs.setString(7, collectivityId);
+
                 feesPs.addBatch();
 
-                collectivityFeePs.setString(1, collectivityId);
-                collectivityFeePs.setString(2, newFeeId);
-                collectivityFeePs.addBatch();
             }
-
             feesPs.executeBatch();
-            collectivityFeePs.executeBatch();
 
             connection.commit();
             List<Fee> newFees = new ArrayList<>();

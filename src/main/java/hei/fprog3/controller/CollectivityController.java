@@ -144,4 +144,21 @@ public class CollectivityController {
                     .body(e.getMessage());
         }
     }
+
+    @GetMapping("/{id}/statistics")
+    public ResponseEntity<?> getMembersStatistics(@PathVariable String id,
+                                                  @RequestParam(required = false) LocalDate from,
+                                                  @RequestParam(required = false) LocalDate to) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .header("Content-Type","application/json")
+                    .body(collectivityService.getMemberStatistics(id));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .header("Content-Type", "application/json")
+                    .body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
+    }
 }

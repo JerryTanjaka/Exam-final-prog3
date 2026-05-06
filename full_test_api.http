@@ -50,7 +50,10 @@ Content-Type: application/json
   }
 ]
 
-###
+
+### G-1. Get stats
+GET {{baseUrl}}/collectivities/col-1/statistics
+
 
 ### A-2. Erreur 400 — Pas d'approbation de la fédération
 POST {{baseUrl}}/collectivities
@@ -232,7 +235,7 @@ Content-Type: application/json
     "gender": "FEMALE",
     "address": "Lot 45 Ambohipo, Antananarivo",
     "profession": "Agricultrice",
-    "phone": "341112233",
+    "phoneNumber": "341112233",
     "email": "aina.rakotondrabe@email.com",
     "occupation": "JUNIOR",
     "collectivityIdentifier": "{{validCollectivityId}}",

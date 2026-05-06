@@ -84,33 +84,28 @@ CREATE TABLE accounts (
     mobile_number           VARCHAR(50)
 );
 
+CREATE TABLE fees (
+                      id              VARCHAR(50)            PRIMARY KEY DEFAULT  gen_random_uuid(),
+                      collectivity_id VARCHAR(50)     NOT NULL REFERENCES collectivities(id),
+                      eligible_from   DATE            NOT NULL,
+                      amount          NUMERIC(15,2)   NOT NULL,
+                      label           VARCHAR(255)    NOT NULL,
+                      frequency       fee_frequency_type NOT NULL,
+                      status          activity_status NOT NULL
+);
+
 CREATE TABLE payments (
     id                  VARCHAR(50)            PRIMARY KEY DEFAULT gen_random_uuid(),
     amount              NUMERIC(15,2)   NOT NULL,
-    membership_fee_id   VARCHAR(50)            NOT NULL,
-    credited_account_id VARCHAR(50)            NOT NULL,
+    membership_fee_id   VARCHAR(50)            NOT NULL REFERENCES fees(id),
+    credited_account_id VARCHAR(50)            NOT NULL REFERENCES accounts(id),
     payment_method      payment_method  NOT NULL,
     creation_date       DATE            NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE transactions (
     id              VARCHAR(50)    PRIMARY KEY DEFAULT gen_random_uuid(),
-    member_id       VARCHAR(50)    NOT NULL,
-    payment_id      VARCHAR(50)    NOT NULL,
+    member_id       VARCHAR(50)    NOT NULL REFERENCES members(id),
+    payment_id      VARCHAR(50)    NOT NULL REFERENCES payments(id),
     creation_date   DATE    NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE fees (
-    id              VARCHAR(50)            PRIMARY KEY DEFAULT  gen_random_uuid(),
-    eligible_from   DATE            NOT NULL,
-    amount          NUMERIC(15,2)   NOT NULL,
-    label           VARCHAR(255)    NOT NULL,
-    frequency       fee_frequency_type NOT NULL,
-    status          activity_status NOT NULL
-);
-
-CREATE TABLE collectivityFee (
-    id              VARCHAR(50)    PRIMARY KEY DEFAULT gen_random_uuid(),
-    collectivity_id VARCHAR(50)    NOT NULL REFERENCES collectivities(id),
-    fee_id          VARCHAR(50)    NOT NULL REFERENCES fees(id)
 );
