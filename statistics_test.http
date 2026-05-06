@@ -1,0 +1,92 @@
+### Variables
+@baseUrl = http://localhost:8080
+
+### ============================================================
+### GET /collectivities/statistics — CAS NOMINAL
+### Résultats attendus d'après data.sql :
+###
+### col-1 (Mpanorina) :
+###   - total membres actifs : 8
+###   - membres à jour (ont payé 100 000 sur cot-1) : 6 (M1 à M6)
+###   - M7 a payé 60 000 < 100 000 → pas à jour
+###   - M8 a payé 90 000 < 100 000 → pas à jour
+###   - % à jour : 6/8 * 100 = 75%
+###   - nouveaux adhérents sur 2026 : 8 (start_date = 2024-01-01 → 0 sur 2026)
+###
+### col-2 (Dobo voalohany) :
+###   - total membres actifs : 8
+###   - membres à jour (ont payé 100 000 sur cot-2) : 6 (M1 à M6)
+###   - M7 a payé 40 000 < 100 000 → pas à jour
+###   - M8 a payé 60 000 < 100 000 → pas à jour
+###   - % à jour : 6/8 * 100 = 75%
+###   - nouveaux adhérents sur 2026 : 0 (start_date = 2024-01-01)
+###
+### col-3 (Tantely mamy) :
+###   - total membres actifs : 8
+###   - aucun paiement → 0 membres à jour
+###   - % à jour : 0%
+###   - nouveaux adhérents sur 2026 : 0
+### ============================================================
+GET {{baseUrl}}/collectivities/statistics?from=2026-01-01&to=2026-12-31
+Accept: application/json
+
+###
+
+### ============================================================
+### GET /collectivities/statistics — période courte
+### Seuls les paiements du 2026-01-01 (date exacte dans data.sql) sont inclus
+### Résultats attendus : identiques au cas nominal car tous les paiements
+### sont datés du 2026-01-01
+### ============================================================
+GET {{baseUrl}}/collectivities/statistics?from=2026-01-01&to=2026-01-01
+Accept: application/json
+
+###
+
+### ============================================================
+### GET /collectivities/statistics — période AVANT tous les paiements
+### Aucun paiement n'existe avant 2026-01-01
+### Résultats attendus :
+###   - toutes les collectivités : 0% à jour
+###   - nouveaux adhérents : 0 (start_date = 2024-01-01)
+### ============================================================
+GET {{baseUrl}}/collectivities/statistics?from=2025-01-01&to=2025-12-31
+Accept: application/json
+
+###
+
+### ============================================================
+### GET /collectivities/statistics — période pour compter les nouveaux adhérents
+### Les memberships ont start_date = 2024-01-01
+### Résultats attendus :
+###   - col-1 : newMembersNumber = 8
+###   - col-2 : newMembersNumber = 8
+###   - col-3 : newMembersNumber = 8
+###   - % à jour : 0% (aucun paiement en 2024)
+### ============================================================
+GET {{baseUrl}}/collectivities/statistics?from=2024-01-01&to=2024-12-31
+Accept: application/json
+
+###
+
+### ============================================================
+### ERREUR 400 — paramètre 'from' manquant
+### ============================================================
+GET {{baseUrl}}/collectivities/statistics?to=2026-12-31
+Accept: application/json
+
+###
+
+### ============================================================
+### ERREUR 400 — paramètre 'to' manquant
+### ============================================================
+GET {{baseUrl}}/collectivities/statistics?from=2026-01-01
+Accept: application/json
+
+###
+
+### ============================================================
+### ERREUR 400 — 'to' avant 'from'
+### ============================================================
+GET {{baseUrl}}/collectivities/statistics?from=2026-12-31&to=2026-01-01
+Accept: application/json

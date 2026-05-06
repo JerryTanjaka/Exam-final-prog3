@@ -3,12 +3,14 @@ package hei.fprog3.repository;
 import hei.fprog3.datasource.DataSourceConfig;
 import hei.fprog3.dto.collectivity.*;
 import hei.fprog3.dto.member.MemberResponse;
+import hei.fprog3.dto.statistic.CollectivityOverallStatistics;
 import hei.fprog3.exception.NotFoundException;
 import hei.fprog3.model.Member;
 import hei.fprog3.model.enums.PositionType;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;

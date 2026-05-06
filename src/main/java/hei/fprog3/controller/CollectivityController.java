@@ -162,4 +162,21 @@ public class CollectivityController {
         }
     }
 
+    @GetMapping("/statistics")
+    public ResponseEntity<?> getOverallStatistics(
+            @RequestParam(required = false) LocalDate from,
+            @RequestParam(required = false) LocalDate to) {
+        try {
+            if (from == null || to == null) {
+                throw new BadRequestException("from and to are required");
+            }
+            if (to.isBefore(from)) {
+                throw new BadRequestException("to must be after from");
+            }
+            return ResponseEntity.ok(collectivityService.getOverallStatistics(from, to));
+        } catch (BadRequestException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }

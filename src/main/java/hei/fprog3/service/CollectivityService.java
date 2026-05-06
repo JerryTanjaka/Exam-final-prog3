@@ -4,6 +4,7 @@ import hei.fprog3.dto.collectivity.CollectivityInformation;
 import hei.fprog3.dto.collectivity.CollectivityResponse;
 import hei.fprog3.dto.collectivity.CreateCollectivityRequest;
 import hei.fprog3.dto.fee.FeeRequest;
+import hei.fprog3.dto.statistic.CollectivityOverallStatistics;
 import hei.fprog3.dto.statistic.MemberStatistic;
 import hei.fprog3.exception.NotFoundException;
 import hei.fprog3.model.Fee;
@@ -64,4 +65,10 @@ public class CollectivityService {
         collectivityRepository.exists(collectivityId);
         return statisticRepository.getCollectivityMemberStatistic(collectivityId);
     }
+
+
+    public List<CollectivityOverallStatistics> getOverallStatistics(LocalDate from, LocalDate to) {
+        return statisticRepository.getOverallStatistics(from, to);
+    }
+
 }
