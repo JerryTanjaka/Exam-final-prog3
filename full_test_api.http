@@ -3,16 +3,16 @@
 ### ============================================================
 
 @baseUrl = http://localhost:8080
-@validCollectivityId   = b2000000-0000-0000-0000-000000000001
-@invalidCollectivityId = 99999999-9999-9999-9999-999999999999
-@validMemberId         = a1000000-0000-0000-0000-000000000001
-@invalidMemberId       = 00000000-0000-0000-0000-000000000000
-@feeId1                = f1000000-0000-0000-0000-000000000001
-@feeId2                = f1000000-0000-0000-0000-000000000002
-@feeId3                = f1000000-0000-0000-0000-000000000003
-@cashAccountId         = c1000000-0000-0000-0000-000000000001
+@validCollectivityId   = col-1
+@invalidCollectivityId = col-99
+@validMemberId         = C1-M1
+@invalidMemberId       = C10-10
+@feeId1                = cot-1
+@feeId2                = cot-2
+@feeId3                = cot-3
+@cashAccountId         = C1-A-CASH
 @bankAccountId         = c1000000-0000-0000-0000-000000000002
-@mobileAccountId       = c1000000-0000-0000-0000-000000000003
+@mobileAccountId       = C1-A-MOBILE-1
 
 
 ### ============================================================
@@ -52,10 +52,10 @@ Content-Type: application/json
 
 
 ### G-1. Get stats between dates
-GET {{baseUrl}}/collectivities/col-1/statistics?from=1970-01-01&to=2026-12-30
+GET {{baseUrl}}/collectivities/col-1/statistics?from=2026-01-01&to=2026-12-30
 
 ### G-2. Get stats
-GET {{baseUrl}}/collectivities/col-1/statistics
+GET {{baseUrl}}/collectivities/col-2/statistics
 
 
 ### A-2. Erreur 400 — Pas d'approbation de la fédération

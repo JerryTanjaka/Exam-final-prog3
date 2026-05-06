@@ -39,16 +39,9 @@ public class PaymentRepository {
 
             PreparedStatement paymentPs = connection.prepareStatement(
                     """
-                    INSERT INTO payments (id, membership_fee_id, credited_account_id, amount, payment_method)
-                    VALUES (?, ?, ?, ?::FLOAT, ?::payment_method);
+                    INSERT INTO payments (id, membership_fee_id, credited_account_id, amount, payment_method, member_id)
+                    VALUES (?, ?, ?, ?::FLOAT, ?::payment_method, ?);
                     """
-            );
-
-            PreparedStatement transactionPs = connection.prepareStatement(
-                        """
-                        INSERT INTO transactions (member_id, payment_id)
-                        VALUES (?, ?);
-                        """
             );
 
             PreparedStatement accountsPs = connection.prepareStatement(
@@ -66,11 +59,8 @@ public class PaymentRepository {
                 paymentPs.setString(3, paymentRequest.getAccountCreditedIdentifier());
                 paymentPs.setDouble(4, paymentRequest.getAmount());
                 paymentPs.setString(5, paymentRequest.getPaymentMode().name());
+                paymentPs.setString(6, paymentRequest.getPayerId());
                 paymentPs.addBatch();
-
-                transactionPs.setString(1, paymentRequest.getPayerId());
-                transactionPs.setString(2, newPaymentId.toString());
-                transactionPs.addBatch();
 
                 accountsPs.setDouble(1, paymentRequest.getAmount());
                 accountsPs.setString(2, paymentRequest.getAccountCreditedIdentifier());
@@ -78,7 +68,6 @@ public class PaymentRepository {
             }
 
             paymentPs.executeBatch();
-            transactionPs.executeBatch();
             accountsPs.executeBatch();
 
             connection.commit();

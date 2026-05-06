@@ -42,9 +42,8 @@ public class StatisticRepository {
                         SELECT SUM(p.amount) AS earnedAmount
                         FROM payments AS p
                             JOIN fees AS f ON f.id = p.membership_fee_id
-                            JOIN transactions AS t ON p.id = t.payment_id
-                        WHERE f.collectivity_id = ? AND t.member_id = ?
-                            AND t.creation_date BETWEEN ? AND ?
+                        WHERE f.collectivity_id = ? AND p.member_id = ?
+                            AND p.creation_date BETWEEN ? AND ?
                     ), total_active_fees AS (
                         SELECT SUM(CASE f.status WHEN 'ACTIVE' THEN f.amount ELSE 0 END) AS total_fees
                         FROM fees AS f
@@ -140,9 +139,8 @@ public class StatisticRepository {
                     p.membership_fee_id,
                     SUM(p.amount) AS paid_amount
                 FROM payments p
-                JOIN transactions t ON t.payment_id = p.id
                 WHERE p.creation_date BETWEEN ? AND ?
-                GROUP BY t.member_id, p.membership_fee_id
+                GROUP BY p.member_id, p.membership_fee_id
             ) paid_per_fee
                 ON  paid_per_fee.member_id       = ms.member_id
                 AND paid_per_fee.membership_fee_id = f.id
@@ -181,7 +179,6 @@ public class StatisticRepository {
             }
 
             return result;
-
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {

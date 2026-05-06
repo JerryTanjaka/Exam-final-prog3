@@ -158,67 +158,35 @@ VALUES
 -- PAIEMENTS — Collectivité 1 (Tableau 8)
 -- ============================================================
 
-INSERT INTO payments (id, amount, membership_fee_id, credited_account_id, payment_method, creation_date)
+INSERT INTO payments (id, member_id, amount, membership_fee_id, credited_account_id, payment_method, creation_date)
 VALUES
-    ('PAY-C1-M1', 100000.00, 'cot-1', 'C1-A-CASH', 'CASH', '2026-01-01'),
-    ('PAY-C1-M2', 100000.00, 'cot-1', 'C1-A-CASH', 'CASH', '2026-01-01'),
-    ('PAY-C1-M3', 100000.00, 'cot-1', 'C1-A-CASH', 'CASH', '2026-01-01'),
-    ('PAY-C1-M4', 100000.00, 'cot-1', 'C1-A-CASH', 'CASH', '2026-01-01'),
-    ('PAY-C1-M5', 100000.00, 'cot-1', 'C1-A-CASH', 'CASH', '2026-01-01'),
-    ('PAY-C1-M6', 100000.00, 'cot-1', 'C1-A-CASH', 'CASH', '2026-01-01'),
-    ('PAY-C1-M7',  60000.00, 'cot-1', 'C1-A-CASH', 'CASH', '2026-01-01'),
-    ('PAY-C1-M8',  90000.00, 'cot-1', 'C1-A-CASH', 'CASH', '2026-01-01');
+    ('PAY-C1-M1', 'C1-M1', 100000.00, 'cot-1', 'C1-A-CASH', 'CASH', '2026-01-01'),
+    ('PAY-C1-M2', 'C1-M2', 100000.00, 'cot-1', 'C1-A-CASH', 'CASH', '2026-01-01'),
+    ('PAY-C1-M3', 'C1-M3', 100000.00, 'cot-1', 'C1-A-CASH', 'CASH', '2026-01-01'),
+    ('PAY-C1-M4', 'C1-M4', 100000.00, 'cot-1', 'C1-A-CASH', 'CASH', '2026-01-01'),
+    ('PAY-C1-M5', 'C1-M5', 100000.00, 'cot-1', 'C1-A-CASH', 'CASH', '2026-01-01'),
+    ('PAY-C1-M6', 'C1-M6', 100000.00, 'cot-1', 'C1-A-CASH', 'CASH', '2026-01-01'),
+    ('PAY-C1-M7', 'C1-M7', 60000.00, 'cot-1', 'C1-A-CASH', 'CASH', '2026-01-01'),
+    ('PAY-C1-M8', 'C1-M8', 90000.00, 'cot-1', 'C1-A-CASH', 'CASH', '2026-01-01');
 
 -- Mise à jour du solde du compte caisse col-1
 UPDATE accounts SET balance = 750000.00 WHERE id = 'C1-A-CASH';
 
 -- ============================================================
--- TRANSACTIONS — Collectivité 1 (Tableau 9)
--- ============================================================
-
-INSERT INTO transactions (id, member_id, payment_id, creation_date)
-VALUES
-    (gen_random_uuid()::VARCHAR, 'C1-M1', 'PAY-C1-M1', '2026-01-01'),
-    (gen_random_uuid()::VARCHAR, 'C1-M2', 'PAY-C1-M2', '2026-01-01'),
-    (gen_random_uuid()::VARCHAR, 'C1-M3', 'PAY-C1-M3', '2026-01-01'),
-    (gen_random_uuid()::VARCHAR, 'C1-M4', 'PAY-C1-M4', '2026-01-01'),
-    (gen_random_uuid()::VARCHAR, 'C1-M5', 'PAY-C1-M5', '2026-01-01'),
-    (gen_random_uuid()::VARCHAR, 'C1-M6', 'PAY-C1-M6', '2026-01-01'),
-    (gen_random_uuid()::VARCHAR, 'C1-M7', 'PAY-C1-M7', '2026-01-01'),
-    (gen_random_uuid()::VARCHAR, 'C1-M8', 'PAY-C1-M8', '2026-01-01');
-
--- ============================================================
 -- PAIEMENTS — Collectivité 2 (Tableau 10)
 -- ============================================================
 
-INSERT INTO payments (id, amount, membership_fee_id, credited_account_id, payment_method, creation_date)
+INSERT INTO payments (id, member_id, amount, membership_fee_id, credited_account_id, payment_method, creation_date)
 VALUES
-    ('PAY-C2-M1',  60000.00, 'cot-2', 'C2-A-CASH',     'CASH',           '2026-01-01'),
-    ('PAY-C2-M2',  90000.00, 'cot-2', 'C2-A-CASH',     'CASH',           '2026-01-01'),
-    ('PAY-C2-M3', 100000.00, 'cot-2', 'C2-A-CASH',     'CASH',           '2026-01-01'),
-    ('PAY-C2-M4', 100000.00, 'cot-2', 'C2-A-CASH',     'CASH',           '2026-01-01'),
-    ('PAY-C2-M5', 100000.00, 'cot-2', 'C2-A-CASH',     'CASH',           '2026-01-01'),
-    ('PAY-C2-M6', 100000.00, 'cot-2', 'C2-A-CASH',     'CASH',           '2026-01-01'),
-    ('PAY-C2-M7',  40000.00, 'cot-2', 'C2-A-MOBILE-1', 'MOBILE_BANKING', '2026-01-01'),
-    ('PAY-C2-M8',  60000.00, 'cot-2', 'C2-A-MOBILE-1', 'MOBILE_BANKING', '2026-01-01');
+    ('PAY-C2-M1', 'C1-M1', 60000.00, 'cot-2', 'C2-A-CASH',     'CASH',           '2026-01-01'),
+    ('PAY-C2-M2', 'C1-M2', 90000.00, 'cot-2', 'C2-A-CASH',     'CASH',           '2026-01-01'),
+    ('PAY-C2-M3', 'C1-M3', 100000.00, 'cot-2', 'C2-A-CASH',     'CASH',           '2026-01-01'),
+    ('PAY-C2-M4', 'C1-M4', 100000.00, 'cot-2', 'C2-A-CASH',     'CASH',           '2026-01-01'),
+    ('PAY-C2-M5', 'C1-M5', 100000.00, 'cot-2', 'C2-A-CASH',     'CASH',           '2026-01-01'),
+    ('PAY-C2-M6', 'C1-M6', 100000.00, 'cot-2', 'C2-A-CASH',     'CASH',           '2026-01-01'),
+    ('PAY-C2-M7', 'C1-M7', 40000.00, 'cot-2', 'C2-A-MOBILE-1', 'MOBILE_BANKING', '2026-01-01'),
+    ('PAY-C2-M8', 'C1-M8', 60000.00, 'cot-2', 'C2-A-MOBILE-1', 'MOBILE_BANKING', '2026-01-01');
 
 -- Mise à jour des soldes des comptes col-2
 UPDATE accounts SET balance = 550000.00 WHERE id = 'C2-A-CASH';
 UPDATE accounts SET balance = 100000.00 WHERE id = 'C2-A-MOBILE-1';
-
--- ============================================================
--- TRANSACTIONS — Collectivité 2 (Tableau 11)
--- ============================================================
-
-INSERT INTO transactions (id, member_id, payment_id, creation_date)
-VALUES
-    (gen_random_uuid()::VARCHAR, 'C1-M1', 'PAY-C2-M1', '2026-01-01'),
-    (gen_random_uuid()::VARCHAR, 'C1-M2', 'PAY-C2-M2', '2026-01-01'),
-    (gen_random_uuid()::VARCHAR, 'C1-M3', 'PAY-C2-M3', '2026-01-01'),
-    (gen_random_uuid()::VARCHAR, 'C1-M4', 'PAY-C2-M4', '2026-01-01'),
-    (gen_random_uuid()::VARCHAR, 'C1-M5', 'PAY-C2-M5', '2026-01-01'),
-    (gen_random_uuid()::VARCHAR, 'C1-M6', 'PAY-C2-M6', '2026-01-01'),
-    (gen_random_uuid()::VARCHAR, 'C1-M7', 'PAY-C2-M7', '2026-01-01'),
-    (gen_random_uuid()::VARCHAR, 'C1-M8', 'PAY-C2-M8', '2026-01-01');
-
--- Collectivité 3 : aucun paiement ni transaction (liste vide)

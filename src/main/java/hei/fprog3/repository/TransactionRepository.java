@@ -33,11 +33,10 @@ public class TransactionRepository {
             List<Transaction> transactions = new ArrayList<>();
             PreparedStatement transactionsPs = connection.prepareStatement(
                     """
-                    SELECT t.id, member_id, payment_id, t.creation_date
-                    FROM transactions AS t
-                    JOIN payments AS p ON payment_id = p.id
+                    SELECT p.id, p.member_id, p.creation_date
+                    FROM payments AS p
                     JOIN accounts AS a ON a.id = p.credited_account_id
-                    WHERE a.collectivity_id = ? AND t.creation_date BETWEEN ? AND ?
+                    WHERE a.collectivity_id = ? AND p.creation_date BETWEEN ? AND ?
                     """);
             transactionsPs.setString(1, collectivityId);
             transactionsPs.setDate(2, Date.valueOf(from));
