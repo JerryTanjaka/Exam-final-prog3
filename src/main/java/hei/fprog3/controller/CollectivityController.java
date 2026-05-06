@@ -150,9 +150,15 @@ public class CollectivityController {
                                                   @RequestParam(required = false) LocalDate from,
                                                   @RequestParam(required = false) LocalDate to) {
         try {
+            if (from == null) {
+                from = LocalDate.EPOCH;
+            }
+            if (to == null) {
+                to = LocalDate.now();
+            }
             return ResponseEntity.status(HttpStatus.OK)
                     .header("Content-Type","application/json")
-                    .body(collectivityService.getMemberStatistics(id));
+                    .body(collectivityService.getMemberStatistics(id, from, to));
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .header("Content-Type", "application/json")

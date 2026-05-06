@@ -51,7 +51,10 @@ Content-Type: application/json
 ]
 
 
-### G-1. Get stats
+### G-1. Get stats between dates
+GET {{baseUrl}}/collectivities/col-1/statistics?from=1970-01-01&to=2026-12-30
+
+### G-2. Get stats
 GET {{baseUrl}}/collectivities/col-1/statistics
 
 
