@@ -15,7 +15,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class StatisticRepository {
@@ -61,76 +63,103 @@ public class StatisticRepository {
             dataSource.closeConnection(connection);
         }
     }
-// Remplacement complet de la méthode getOverallStatistics dans StatisticRepository.java
 
     public List<CollectivityOverallStatistics> getOverallStatistics(LocalDate from, LocalDate to) {
         Connection connection = dataSource.getConnection();
         try {
-            PreparedStatement ps = connection.prepareStatement("""
-            WITH member_status AS (
-                SELECT
-                    ms.collectivity_id,
-                    ms.member_id,
-                    ms.start_date,
-                    CASE WHEN NOT EXISTS (
-                        -- Existe-t-il un paiement lié à cette collectivité
-                        -- que ce membre n'a pas couvert ?
-                        SELECT 1 FROM fees f
-                        JOIN accounts a ON a.collectivity_id = ms.collectivity_id
-                        WHERE f.collectivity_id = ms.collectivity_id
-                          AND f.status = 'ACTIVE'
-                          AND (
-                              SELECT COALESCE(SUM(p.amount), 0)
-                              FROM payments p
-                              JOIN transactions t ON t.payment_id = p.id
-                              WHERE t.member_id = ms.member_id
-                                AND p.membership_fee_id = f.id
-                                AND p.credited_account_id = a.id
-                                AND p.creation_date BETWEEN ? AND ?
-                          ) < f.amount
-                    ) THEN 1 ELSE 0 END AS is_up_to_date
-                FROM memberships ms
-                WHERE ms.end_date IS NULL
-            )
-            SELECT
-                c.id,
-                c.name,
-                c.number,
-                COUNT(mst.member_id)                                                   AS total_members,
-                SUM(mst.is_up_to_date)                                                 AS up_to_date_count,
-                COUNT(mst.member_id) FILTER (WHERE mst.start_date BETWEEN ? AND ?)     AS new_members
+
+            List<CollectivityOverallStatistics> result = new ArrayList<>();
+            List<String> collectivityIds = new ArrayList<>();
+
+            PreparedStatement collectivitiesPs = connection.prepareStatement("""
+            SELECT c.id, c.name, c.number,
+                   COUNT(ms.member_id)                                              AS total_members,
+                   COUNT(ms.member_id) FILTER (WHERE ms.start_date BETWEEN ? AND ?) AS new_members
             FROM collectivities c
-            JOIN member_status mst ON mst.collectivity_id = c.id
+            LEFT JOIN memberships ms ON ms.collectivity_id = c.id AND ms.end_date IS NULL
             GROUP BY c.id, c.name, c.number
             ORDER BY c.name
         """);
+            collectivitiesPs.setDate(1, Date.valueOf(from));
+            collectivitiesPs.setDate(2, Date.valueOf(to));
 
-            ps.setDate(1, Date.valueOf(from));
-            ps.setDate(2, Date.valueOf(to));
-            ps.setDate(3, Date.valueOf(from));
-            ps.setDate(4, Date.valueOf(to));
+            ResultSet collectivitiesRs = collectivitiesPs.executeQuery();
 
-            ResultSet rs = ps.executeQuery();
-            List<CollectivityOverallStatistics> result = new ArrayList<>();
+            List<Object[]> collectivitiesData = new ArrayList<>();
+            while (collectivitiesRs.next()) {
+                collectivitiesData.add(new Object[]{
+                        collectivitiesRs.getString("id"),
+                        collectivitiesRs.getString("name"),
+                        collectivitiesRs.getInt("number"),
+                        collectivitiesRs.getInt("total_members"),
+                        collectivitiesRs.getInt("new_members")
+                });
+                collectivityIds.add(collectivitiesRs.getString("id"));
+            }
 
-            while (rs.next()) {
-                int total = rs.getInt("total_members");
-                int upToDate = rs.getInt("up_to_date_count");
+            PreparedStatement upToDatePs = connection.prepareStatement("""
+            SELECT
+                ms.collectivity_id,
+                ms.member_id,
+                -- Le membre est à jour si le total de ses paiements
+                -- sur cette cotisation couvre le montant dû
+                BOOL_AND(
+                    paid_per_fee.paid_amount >= f.amount
+                ) AS is_up_to_date
+            FROM memberships ms
+            JOIN fees f
+                ON f.collectivity_id = ms.collectivity_id
+                AND f.status = 'ACTIVE'
+            LEFT JOIN (
+                -- ÉTAPE 2a : Calculer ce que chaque membre a payé
+                -- par cotisation dans la période
+                SELECT
+                    t.member_id,
+                    p.membership_fee_id,
+                    SUM(p.amount) AS paid_amount
+                FROM payments p
+                JOIN transactions t ON t.payment_id = p.id
+                WHERE p.creation_date BETWEEN ? AND ?
+                GROUP BY t.member_id, p.membership_fee_id
+            ) paid_per_fee
+                ON  paid_per_fee.member_id       = ms.member_id
+                AND paid_per_fee.membership_fee_id = f.id
+            WHERE ms.end_date IS NULL
+            GROUP BY ms.collectivity_id, ms.member_id
+        """);
+            upToDatePs.setDate(1, Date.valueOf(from));
+            upToDatePs.setDate(2, Date.valueOf(to));
+
+            ResultSet upToDateRs = upToDatePs.executeQuery();
+
+            Map<String, Integer> upToDateCountByCollectivity = new HashMap<>();
+            while (upToDateRs.next()) {
+                String colId = upToDateRs.getString("collectivity_id");
+                boolean isUpToDate = upToDateRs.getBoolean("is_up_to_date");
+                if (isUpToDate) {
+                    upToDateCountByCollectivity.merge(colId, 1, Integer::sum);
+                }
+            }
+
+            for (Object[] row : collectivitiesData) {
+                String colId      = (String)  row[0];
+                String name       = (String)  row[1];
+                int    number     = (Integer) row[2];
+                int    total      = (Integer) row[3];
+                int    newMembers = (Integer) row[4];
+
+                int upToDate = upToDateCountByCollectivity.getOrDefault(colId, 0);
                 double percentage = (total == 0) ? 0.0 : (upToDate * 100.0 / total);
 
-                CollectivityInformation info = new CollectivityInformation(
-                        rs.getString("name"),
-                        rs.getInt("number")
-                );
-
                 result.add(new CollectivityOverallStatistics(
-                        info,
-                        rs.getInt("new_members"),
+                        new CollectivityInformation(name, number),
+                        newMembers,
                         percentage
                 ));
             }
 
             return result;
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {

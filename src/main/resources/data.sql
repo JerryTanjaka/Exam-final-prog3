@@ -130,8 +130,8 @@ INSERT INTO referals (id, member_id, referee_id) VALUES
 INSERT INTO fees (id, collectivity_id, eligible_from, amount, label, frequency, status)
 VALUES
     ('cot-1', 'col-1', '2026-01-01', 100000.00, 'Cotisation annuelle', 'ANNUALLY', 'ACTIVE'),
-    ('cot-2', 'col-1', '2026-01-01', 100000.00, 'Cotisation annuelle', 'ANNUALLY', 'ACTIVE'),
-    ('cot-3', 'col-1', '2026-01-01',  50000.00, 'Cotisation annuelle', 'ANNUALLY', 'ACTIVE');
+    ('cot-2', 'col-2', '2026-01-01', 100000.00, 'Cotisation annuelle', 'ANNUALLY', 'ACTIVE'),
+    ('cot-3', 'col-3', '2026-01-01',  50000.00, 'Cotisation annuelle', 'ANNUALLY', 'ACTIVE');
 
 -- ============================================================
 -- COMPTES (page 16 du PDF)
