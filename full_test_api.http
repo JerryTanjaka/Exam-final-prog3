@@ -76,6 +76,25 @@ Content-Type: application/json
       "dayOfWeek": "SA"
     },
     "executiveDate": "2026-05-06"
+  }
+]
+
+
+### E-2.2 Create Activities
+POST {{baseUrl}}/collectivities/col-2/activities
+Content-Type: application/json
+
+[
+  {
+    "label": "string",
+    "activityType": "MEETING",
+    "memberOccupationConcerned": [
+      "SENIOR", "VICE_PRESIDENT"
+    ],
+    "recurrenceRule": {
+      "weekOrdinal": 3,
+      "dayOfWeek": "SA"
+    }
   },
   {
     "label": "string",
@@ -83,16 +102,12 @@ Content-Type: application/json
     "memberOccupationConcerned": [
       "TREASURER"
     ],
-    "recurrenceRule": {
-      "weekOrdinal": 1,
-      "dayOfWeek": "SA"
-    },
     "executiveDate": "2026-05-06"
   }
 ]
 
-### F-1. Create Activities
-POST {{baseUrl}}/collectivities/col-2/activities/e8e5a6e8-8e47-40b2-a960-e30ba8c9d208/attendance
+### F-1. Create attendance
+POST {{baseUrl}}/collectivities/col-2/activities/8d7c2249-23e5-4641-ae5b-c67795ba9dd0/attendance
 Content-Type: application/json
 
 [
@@ -106,8 +121,8 @@ Content-Type: application/json
   }
 ]
 
-### F-1.2 Create Activities with duplicate MemberId
-POST {{baseUrl}}/collectivities/col-2/activities/e8e5a6e8-8e47-40b2-a960-e30ba8c9d208/attendance
+### F-1.2 Create attendance with duplicate MemberId
+POST {{baseUrl}}/collectivities/col-2/activities/8d7c2249-23e5-4641-ae5b-c67795ba9dd0/attendance
 Content-Type: application/json
 
 [
@@ -120,6 +135,9 @@ Content-Type: application/json
     "attendanceStatus": "ATTENDED"
   }
 ]
+
+### F-2. Get attendance
+GET {{baseUrl}}/collectivities/col-2/activities/8d7c2249-23e5-4641-ae5b-c67795ba9dd0/attendance
 
 ### A-2. Erreur 400 — Pas d'approbation de la fédération
 POST {{baseUrl}}/collectivities

@@ -99,4 +99,10 @@ public class CollectivityService {
         activityRepository.exists(activityId);
         return attendanceRepository.createAndReturn(activityId, attendances);
     }
+
+    public List<AttendanceResponse> getActivityAttendance(String id, String activityId) throws NotFoundException {
+        collectivityRepository.exists(id);
+        activityRepository.exists(activityId);
+        return attendanceRepository.getActivityAttendance(activityId);
+    }
 }

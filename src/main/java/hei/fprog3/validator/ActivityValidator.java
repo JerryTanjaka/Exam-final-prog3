@@ -14,7 +14,7 @@ public class ActivityValidator {
             throw new BadRequestException("Activity is missing");
         }
         List<String> errors = new ArrayList<>();
-        if (activity.getLabel() == null) {
+        if (activity.getLabel() == null ||  activity.getLabel().isEmpty()) {
             errors.add("Label is not defined");
         }
         if (activity.getActivityType() == null) {
@@ -24,9 +24,9 @@ public class ActivityValidator {
                 || activity.getMemberOccupationConcerned().isEmpty()) {
             errors.add("No member occupation concerned");
         }
-        if (activity.getRecurrenceRule() == null) {
-            errors.add("Recurrence rule is invalid");
-        } else {
+        if (activity.getRecurrenceRule() != null && activity.getExecutiveDate() != null) {
+            errors.add("Recurrence rule and executive date cannot be set together");
+        } else if (activity.getRecurrenceRule() != null) {
             if (activity.getRecurrenceRule().getDayOfWeek() == null) {
                 errors.add("Day of week not defined");
             }
@@ -34,9 +34,9 @@ public class ActivityValidator {
                     || activity.getRecurrenceRule().getWeekOrdinal() > 5) {
                 errors.add("Week ordinal must be between 1 and 5");
             }
-        }
-        if (activity.getExecutiveDate() == null) {
-            errors.add("Executive date is missing");
+        } else if (activity.getExecutiveDate() != null) {
+        } else {
+            errors.add("Either recurrence rule or executive date must be defined");
         }
         if (!errors.isEmpty()) {
             throw new BadRequestException(String.join(", ", errors));

@@ -112,9 +112,9 @@ CREATE TABLE activities (
     collectivity_id     VARCHAR(50)         NOT NULL REFERENCES collectivities(id),
     label               VARCHAR(255)        NOT NULL,
     type                activity_type       NOT NULL,
-    executive_date      DATE                NOT NULL,
-    week_ordinal        INT                 NOT NULL CHECK ( week_ordinal BETWEEN 1 AND 5 ),
-    day_of_week         day_of_week_type    NOT NULL
+    executive_date      DATE,
+    week_ordinal        INT                 CHECK ( week_ordinal BETWEEN 1 AND 5 ),
+    day_of_week         day_of_week_type
 );
 
 CREATE TABLE activity_required_members (
@@ -131,4 +131,4 @@ CREATE TABLE activity_attendances (
     status          attendance_status   NOT NULL DEFAULT 'UNDEFINED'::attendance_status,
     is_outsider     BOOLEAN             NOT NULL DEFAULT FALSE,
     UNIQUE (activity_id, member_id)
-)
+);

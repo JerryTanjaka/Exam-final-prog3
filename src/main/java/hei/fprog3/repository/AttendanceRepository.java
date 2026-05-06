@@ -136,4 +136,56 @@ public class AttendanceRepository {
         }
         throw new NotFoundException("No such attendance with id " + attendanceId);
     }
+
+    public List<AttendanceResponse> getActivityAttendance(String activityId) {
+        Connection connection = dataSource.getConnection();
+        try {
+            PreparedStatement ps = connection.prepareStatement(
+                    """
+                    SELECT aa.id, aa.status, aa.member_id, aa.activity_id, collectivity_id FROM activity_attendances AS aa
+                    JOIN activities ON aa.activity_id = activities.id
+                    WHERE activity_id = ?
+                    """
+            );
+            ps.setString(1, activityId);
+
+            PreparedStatement memberPs = connection.prepareStatement(
+                    """
+                    SELECT m.id, m.first_name, m.last_name, m.email, ms.occupation FROM members AS m
+                    JOIN memberships AS ms ON m.id = ms.member_id
+                    WHERE ms.collectivity_id = ? AND ms.member_id = ?
+                    GROUP BY m.id, ms.occupation
+                    ORDER BY m.id, MAX(ms.start_date) DESC
+                    """);
+
+            ResultSet rs = ps.executeQuery();
+            List<AttendanceResponse> attendanceResponses = new ArrayList<>();
+            while (rs.next()) {
+                AttendanceResponse attendanceResponse = new AttendanceResponse();
+                attendanceResponse.setId(rs.getString("id"));
+                attendanceResponse.setAttendanceStatus(AttendanceStatus.valueOf(rs.getString("status")));
+
+                memberPs.setString(1, rs.getString("collectivity_id"));
+                memberPs.setString(2, rs.getString("member_id"));
+                ResultSet memberRs = memberPs.executeQuery();
+                if (memberRs.next()) {
+                    attendanceResponse.setMemberDescription(
+                            new MemberDescription(
+                                    memberRs.getString(1),
+                                    memberRs.getString(2),
+                                    memberRs.getString(3),
+                                    memberRs.getString(4),
+                                    PositionType.valueOf(memberRs.getString(5))
+                            )
+                    );
+                }
+                attendanceResponses.add(attendanceResponse);
+            }
+            return attendanceResponses;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            dataSource.closeConnection(connection);
+        }
+    }
 }

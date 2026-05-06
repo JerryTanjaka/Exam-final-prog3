@@ -66,7 +66,7 @@ public class ActivityRepository {
         }
     }
 
-    public List<Activity> createActivityAndReturn(String id, List<ActivityCreate> newActivities) throws NotFoundException {
+    public List<Activity> createActivityAndReturn(String id, List<ActivityCreate> newActivities) {
         Connection connection = dataSource.getConnection();
         try {
             connection.setAutoCommit(false);
@@ -86,9 +86,21 @@ public class ActivityRepository {
                 activityPs.setString(1, id);
                 activityPs.setString(2, activity.getLabel());
                 activityPs.setString(3, activity.getActivityType().name());
-                activityPs.setDate(4, Date.valueOf(activity.getExecutiveDate()));
-                activityPs.setInt(5, activity.getRecurrenceRule().getWeekOrdinal());
-                activityPs.setString(6, activity.getRecurrenceRule().getDayOfWeek().name());
+
+                if (activity.getExecutiveDate() != null) {
+                    activityPs.setDate(4, Date.valueOf(activity.getExecutiveDate()));
+                } else {
+                    activityPs.setNull(4, Types.DATE);
+                }
+
+                if (activity.getRecurrenceRule() != null) {
+                    activityPs.setInt(5, activity.getRecurrenceRule().getWeekOrdinal());
+                    activityPs.setString(6, activity.getRecurrenceRule().getDayOfWeek().name());
+                } else {
+                    activityPs.setNull(5, Types.INTEGER);
+                    activityPs.setNull(6, Types.VARCHAR);
+                }
+
                 activityPs.addBatch();
             }
             activityPs.executeBatch();
@@ -150,12 +162,22 @@ public class ActivityRepository {
             activity.setId(activityRs.getString("id"));
             activity.setLabel(activityRs.getString("label"));
             activity.setActivityType(ActivityType.valueOf(activityRs.getString("type")));
-            activity.setExecutiveDate(activityRs.getDate("executive_date").toLocalDate());
             activity.setMemberOccupationConcerned(requiredMembers);
-            activity.setRecurrenceRule(new ActivityRecurrenceRule(
-                    activityRs.getInt("week_ordinal"),
-                    DayOfWeek.valueOf(activityRs.getString("day_of_week")))
-            );
+
+            if (activityRs.getObject("executive_date") != null) {
+                activity.setExecutiveDate(activityRs.getDate("executive_date").toLocalDate());
+            } else {
+                activity.setExecutiveDate(null);
+            }
+
+            if (activityRs.getObject("week_ordinal") != null && activityRs.getObject("day_of_week") != null) {
+                activity.setRecurrenceRule(new ActivityRecurrenceRule(
+                        activityRs.getInt("week_ordinal"),
+                        DayOfWeek.valueOf(activityRs.getString("day_of_week"))));
+            } else {
+                activity.setRecurrenceRule(null);
+            }
+
             return activity;
         }
         return null;

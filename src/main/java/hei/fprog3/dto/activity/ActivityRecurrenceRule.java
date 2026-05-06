@@ -11,6 +11,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ActivityRecurrenceRule {
-    private int weekOrdinal;
+    private Integer weekOrdinal;
     private DayOfWeek dayOfWeek;
 }

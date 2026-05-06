@@ -252,4 +252,19 @@ public class CollectivityController {
                     .body(e.getMessage());
         }
     }
+
+    @GetMapping("/{id}/activities/{activityId}/attendance")
+    public ResponseEntity<?> getActivityAttendance(@PathVariable String id, @PathVariable String  activityId) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .header("Content-Type", "application/json")
+                    .body(collectivityService.getActivityAttendance(id, activityId));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
+        }
+    }
 }

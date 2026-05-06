@@ -12,13 +12,12 @@ import java.util.List;
 public class AttendanceValidator {
     public void validate(AttendanceRequest attendance) throws BadRequestException {
         List<String> errors = new ArrayList<>();
-        if (attendance.getMemberIdentifier() == null) {
+        if (attendance.getMemberIdentifier() == null ||  attendance.getMemberIdentifier().isEmpty()) {
             errors.add("Member identifier is required");
         }
         if (attendance.getAttendanceStatus() == null) {
             errors.add("Attendance status is null");
-        }
-        if (attendance.getAttendanceStatus() == AttendanceStatus.UNDEFINED) {
+        } else if (attendance.getAttendanceStatus() == AttendanceStatus.UNDEFINED) {
             errors.add("Attendance status cannot be set to UNDEFINED");
         }
         if (!errors.isEmpty()) {
