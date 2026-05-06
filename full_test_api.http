@@ -52,7 +52,7 @@ Content-Type: application/json
 
 
 ### G-1. Get stats
-GET {{baseUrl}}/collectivities/col-1/statistics
+GET {{baseUrl}}/collectivities/col-1/statistics?from=1970-01-01&to=2026-12-30
 
 
 ### A-2. Erreur 400 — Pas d'approbation de la fédération

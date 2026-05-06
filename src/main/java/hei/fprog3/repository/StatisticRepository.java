@@ -5,14 +5,11 @@ import hei.fprog3.dto.collectivity.CollectivityInformation;
 import hei.fprog3.dto.member.MemberDescription;
 import hei.fprog3.dto.statistic.CollectivityOverallStatistics;
 import hei.fprog3.dto.statistic.MemberStatistic;
+import hei.fprog3.exception.NotFoundException;
 import hei.fprog3.model.enums.PositionType;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,35 +21,60 @@ public class StatisticRepository {
         this.dataSource = dataSource;
     }
 
-    public List<MemberStatistic> getCollectivityMemberStatistic(String collectivityId) {
+    public List<MemberStatistic> getCollectivityMemberStatistic(String collectivityId, LocalDate from, LocalDate to) throws NotFoundException {
         Connection connection = dataSource.getConnection();
         try {
-            PreparedStatement ps = connection.prepareStatement(
+            PreparedStatement memberPs = connection.prepareStatement(
                 """
-                SELECT m.id, m.first_name, m.last_name, m.email, SUM(p.amount) AS earnedAmount FROM members AS m
-                JOIN memberships AS ms ON ms.collectivity_id = ?
-                JOIN fees AS f ON f.collectivity_id = ?
-                JOIN payments AS p ON p.membership_fee_id = f.id
-                JOIN transactions AS t ON t.payment_id = p.id
+                SELECT m.id, m.first_name, m.last_name, m.email, ms.occupation FROM members AS m
+                JOIN memberships AS ms ON m.id = ms.member_id
                 WHERE ms.collectivity_id = ?
-                GROUP BY m.id, ms.start_date
-                ORDER BY ms.start_date DESC
+                GROUP BY m.id, ms.occupation
+                ORDER BY m.id, MAX(ms.start_date) DESC
                 """);
+            memberPs.setString(1, collectivityId);
 
-            ps.setString(1, collectivityId);
-            ps.setString(2, collectivityId);
-            ps.setString(3, collectivityId);
+            PreparedStatement amountPs = connection.prepareStatement(
+                    """
+                    WITH total_earned AS (
+                        SELECT SUM(p.amount) AS earnedAmount
+                        FROM payments AS p
+                            JOIN fees AS f ON f.id = p.membership_fee_id
+                            JOIN transactions AS t ON p.id = t.payment_id
+                        WHERE f.collectivity_id = ? AND t.member_id = ?
+                            AND t.creation_date BETWEEN ? AND ?
+                    ), total_active_fees AS (
+                        SELECT SUM(CASE f.status WHEN 'ACTIVE' THEN f.amount ELSE 0 END) AS total_fees
+                        FROM fees AS f
+                        WHERE f.collectivity_id = ?
+                            AND f.eligible_from BETWEEN ? AND ?
+                    )
 
-            ResultSet rs = ps.executeQuery();
+                    SELECT earnedAmount, (total_fees::FLOAT - earnedAmount::FLOAT)::FLOAT AS dueAmount
+                    FROM total_earned, total_active_fees
+                    """);
+            amountPs.setString(1, collectivityId);
+            amountPs.setDate(3, Date.valueOf(from));
+            amountPs.setDate(4, Date.valueOf(to));
+            amountPs.setString(5, collectivityId);
+            amountPs.setDate(6, Date.valueOf(from));
+            amountPs.setDate(7, Date.valueOf(to));
+
+            ResultSet memberRs = memberPs.executeQuery();
             List<MemberStatistic> memberStatistics = new ArrayList<>();
-            while(rs.next()) {
+            while(memberRs.next()) {
+                amountPs.setString(2, memberRs.getString("id"));
+                ResultSet amountRs = amountPs.executeQuery();
+                if (!amountRs.next()) {
+                    throw new RuntimeException("Empty amountRs");
+                }
                 MemberDescription memberDescription = new MemberDescription();
-                memberDescription.setId(rs.getString("id"));
-                memberDescription.setFirstName(rs.getString("first_name"));
-                memberDescription.setLastName(rs.getString("last_name"));
-                memberDescription.setEmail(rs.getString("email"));
-                memberDescription.setOccupation(null);
-                memberStatistics.add(new MemberStatistic(memberDescription, rs.getDouble("earnedAmount"), 0));
+                memberDescription.setId(memberRs.getString("id"));
+                memberDescription.setFirstName(memberRs.getString("first_name"));
+                memberDescription.setLastName(memberRs.getString("last_name"));
+                memberDescription.setEmail(memberRs.getString("email"));
+                memberDescription.setOccupation(PositionType.valueOf(memberRs.getString("occupation")));
+                memberStatistics.add(new MemberStatistic(memberDescription, amountRs.getDouble("earnedAmount"), amountRs.getDouble("dueAmount")));
             }
             return memberStatistics;
         } catch (SQLException e) {

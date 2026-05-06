@@ -152,7 +152,7 @@ public class CollectivityController {
         try {
             return ResponseEntity.status(HttpStatus.OK)
                     .header("Content-Type","application/json")
-                    .body(collectivityService.getMemberStatistics(id));
+                    .body(collectivityService.getMemberStatistics(id, from, to));
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .header("Content-Type", "application/json")

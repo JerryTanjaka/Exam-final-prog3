@@ -61,9 +61,9 @@ public class CollectivityService {
         return accountRepository.findByCollectivityId(id, at);
     }
 
-    public List<MemberStatistic> getMemberStatistics(String collectivityId) throws NotFoundException {
+    public List<MemberStatistic> getMemberStatistics(String collectivityId, LocalDate from, LocalDate to) throws NotFoundException {
         collectivityRepository.exists(collectivityId);
-        return statisticRepository.getCollectivityMemberStatistic(collectivityId);
+        return statisticRepository.getCollectivityMemberStatistic(collectivityId, from, to);
     }
 
 
