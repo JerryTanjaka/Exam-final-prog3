@@ -176,7 +176,7 @@ VALUES
     ('PAY-C1-M8',  90000.00, 'cot-1', 'C1-A-CASH', 'CASH', '2026-01-01');
 
 -- Mise à jour du solde du compte caisse col-1
-UPDATE accounts SET balance = 760000.00 WHERE id = 'C1-A-CASH';
+UPDATE accounts SET balance = 750000.00 WHERE id = 'C1-A-CASH';
 
 -- ============================================================
 -- TRANSACTIONS — Collectivité 1 (Tableau 9)

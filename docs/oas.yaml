@@ -1651,7 +1651,7 @@ components:
             - gender
             - address
             - occupation
-            - phone
+            - phoneNumber
             - email
             - communityId
             - sponsors

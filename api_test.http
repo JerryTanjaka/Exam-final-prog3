@@ -1,0 +1,587 @@
+### Variables globales
+@baseUrl = http://localhost:8080
+@validCollectivityId = col-1
+@validCollectivityId2 = col-2
+@validCollectivityId3 = col-3
+@invalidCollectivityId = 99999999-9999-9999-9999-999999999999
+
+@validMemberId = C1-M1
+@invalidMemberId = 99999999-9999-9999-9999-999999999999
+
+@validFeeId = cot-1
+@validAccountId = C1-A-CASH
+
+
+### POST /collectivities — CAS NOMINAL (SUCCÈS 201)
+POST {{baseUrl}}/collectivities
+Content-Type: application/json
+
+[
+  {
+    "location": "Antananarivo",
+    "specialty": "Maraîchage",
+    "federationApproval": true,
+    "members": [
+      "C1-M1", "C1-M2", "C1-M3", "C1-M4", "C1-M5",
+      "C1-M6", "C1-M7", "C1-M8", "C3-M1", "C3-M2"
+    ],
+    "structure": {
+      "president": "C1-M1",
+      "vicePresident": "C1-M2",
+      "treasurer": "C1-M4",
+      "secretary": "C1-M3"
+    }
+  }
+]
+
+### POST /collectivities — ERREUR 400 (PAS D'APPROBATION FÉDÉRATION)
+POST {{baseUrl}}/collectivities
+Content-Type: application/json
+
+[
+  {
+    "location": "Toamasina",
+    "specialty": "Pêche",
+    "federationApproval": false,
+    "members": [
+      "C1-M1", "C1-M2", "C1-M3", "C1-M4", "C1-M5",
+      "C1-M6", "C1-M7", "C1-M8", "C3-M1", "C3-M2"
+    ],
+    "structure": {
+      "president": "C1-M1",
+      "vicePresident": "C1-M2",
+      "treasurer": "C1-M4",
+      "secretary": "C1-M3"
+    }
+  }
+]
+
+### POST /collectivities — ERREUR 400 (MOINS DE 10 MEMBRES)
+POST {{baseUrl}}/collectivities
+Content-Type: application/json
+
+[
+  {
+    "location": "Fianarantsoa",
+    "specialty": "Viticulture",
+    "federationApproval": true,
+    "members": ["C1-M1", "C1-M2", "C1-M3"],
+    "structure": {
+      "president": "C1-M1",
+      "vicePresident": "C1-M2",
+      "treasurer": "C1-M3",
+      "secretary": "C1-M3"
+    }
+  }
+]
+
+### POST /collectivities — ERREUR 404 (MEMBRE INEXISTANT)
+POST {{baseUrl}}/collectivities
+Content-Type: application/json
+
+[
+  {
+    "location": "Mahajanga",
+    "specialty": "Aquaculture",
+    "federationApproval": true,
+    "members": [
+      "C1-M1", "C1-M2", "C1-M3", "C1-M4", "C1-M5",
+      "C1-M6", "C1-M7", "C1-M8", "C3-M1", "MEMBRE-INEXISTANT"
+    ],
+    "structure": {
+      "president": "C1-M1",
+      "vicePresident": "C1-M2",
+      "treasurer": "C1-M4",
+      "secretary": "C1-M3"
+    }
+  }
+]
+
+
+### GET /collectivities/{id} — CAS NOMINAL (SUCCÈS 200)
+GET {{baseUrl}}/collectivities/{{validCollectivityId}}
+Accept: application/json
+
+### GET /collectivities/{id} — CAS NOMINAL COLLECTIVITÉ 2
+GET {{baseUrl}}/collectivities/{{validCollectivityId2}}
+Accept: application/json
+
+### GET /collectivities/{id} — CAS NOMINAL COLLECTIVITÉ 3
+GET {{baseUrl}}/collectivities/{{validCollectivityId3}}
+Accept: application/json
+
+### GET /collectivities/{id} — ERREUR 404 (COLLECTIVITÉ INEXISTANTE)
+GET {{baseUrl}}/collectivities/{{invalidCollectivityId}}
+Accept: application/json
+
+
+### PUT /collectivities/{id}/informations — CAS NOMINAL (SUCCÈS 200)
+PUT {{baseUrl}}/collectivities/{{validCollectivityId}}/informations
+Content-Type: application/json
+
+{
+  "name": "Mpanorina Updated",
+  "number": 101
+}
+
+### PUT /collectivities/{id}/informations — ERREUR 400 (NOM DÉJÀ UTILISÉ)
+PUT {{baseUrl}}/collectivities/{{validCollectivityId}}/informations
+Content-Type: application/json
+
+{
+  "name": "Dobo voalohany",
+  "number": 999
+}
+
+### PUT /collectivities/{id}/informations — ERREUR 400 (NUMÉRO DÉJÀ UTILISÉ)
+PUT {{baseUrl}}/collectivities/{{validCollectivityId}}/informations
+Content-Type: application/json
+
+{
+  "name": "Nom unique nouveau",
+  "number": 2
+}
+
+### PUT /collectivities/{id}/informations — ERREUR 400 (DONNÉES MANQUANTES)
+PUT {{baseUrl}}/collectivities/{{validCollectivityId}}/informations
+Content-Type: application/json
+
+{
+  "name": "",
+  "number": null
+}
+
+### PUT /collectivities/{id}/informations — ERREUR 404 (COLLECTIVITÉ INEXISTANTE)
+PUT {{baseUrl}}/collectivities/{{invalidCollectivityId}}/informations
+Content-Type: application/json
+
+{
+  "name": "Collectivité fantôme",
+  "number": 500
+}
+
+
+### POST /collectivities/{id}/membershipFees — CAS NOMINAL (SUCCÈS 200)
+POST {{baseUrl}}/collectivities/{{validCollectivityId}}/membershipFees
+Content-Type: application/json
+
+[
+  {
+    "label": "Cotisation Spéciale 2026",
+    "amount": 15000.50,
+    "frequency": "MONTHLY",
+    "eligibleFrom": "2026-06-01"
+  },
+  {
+    "label": "Droit d'entrée",
+    "amount": 100000,
+    "frequency": "PUNCTUALLY",
+    "eligibleFrom": "2026-04-22"
+  }
+]
+
+### POST /collectivities/{id}/membershipFees — ERREUR 400 (MONTANT NÉGATIF)
+POST {{baseUrl}}/collectivities/{{validCollectivityId}}/membershipFees
+Content-Type: application/json
+
+[
+  {
+    "label": "Frais illégaux",
+    "amount": -500,
+    "frequency": "WEEKLY",
+    "eligibleFrom": "2026-01-01"
+  }
+]
+
+### POST /collectivities/{id}/membershipFees — ERREUR 400 (MONTANT ZÉRO)
+POST {{baseUrl}}/collectivities/{{validCollectivityId}}/membershipFees
+Content-Type: application/json
+
+[
+  {
+    "label": "Frais zéro",
+    "amount": 0,
+    "frequency": "MONTHLY",
+    "eligibleFrom": "2026-01-01"
+  }
+]
+
+### POST /collectivities/{id}/membershipFees — ERREUR 400 (FRÉQUENCE INCONNUE)
+POST {{baseUrl}}/collectivities/{{validCollectivityId}}/membershipFees
+Content-Type: application/json
+
+[
+  {
+    "label": "Frais bizarre",
+    "amount": 1000,
+    "frequency": "EVERY_DAY",
+    "eligibleFrom": "2026-01-01"
+  }
+]
+
+### POST /collectivities/{id}/membershipFees — ERREUR 400 (LABEL VIDE)
+POST {{baseUrl}}/collectivities/{{validCollectivityId}}/membershipFees
+Content-Type: application/json
+
+[
+  {
+    "label": "",
+    "amount": 5000,
+    "frequency": "MONTHLY",
+    "eligibleFrom": "2026-01-01"
+  }
+]
+
+### POST /collectivities/{id}/membershipFees — ERREUR 400 (DATE NULLE)
+POST {{baseUrl}}/collectivities/{{validCollectivityId}}/membershipFees
+Content-Type: application/json
+
+[
+  {
+    "label": "Cotisation sans date",
+    "amount": 5000,
+    "frequency": "MONTHLY",
+    "eligibleFrom": null
+  }
+]
+
+### POST /collectivities/{id}/membershipFees — ERREUR 404 (COLLECTIVITÉ INEXISTANTE)
+POST {{baseUrl}}/collectivities/{{invalidCollectivityId}}/membershipFees
+Content-Type: application/json
+
+[
+  {
+    "label": "Frais fantôme",
+    "amount": 1000,
+    "frequency": "MONTHLY",
+    "eligibleFrom": "2026-01-01"
+  }
+]
+
+
+### GET /collectivities/{id}/membershipFees — CAS NOMINAL col-1 (SUCCÈS 200)
+GET {{baseUrl}}/collectivities/{{validCollectivityId}}/membershipFees
+Accept: application/json
+
+### GET /collectivities/{id}/membershipFees — CAS NOMINAL col-2 (SUCCÈS 200)
+GET {{baseUrl}}/collectivities/{{validCollectivityId2}}/membershipFees
+Accept: application/json
+
+### GET /collectivities/{id}/membershipFees — CAS NOMINAL col-3 (SUCCÈS 200)
+GET {{baseUrl}}/collectivities/{{validCollectivityId3}}/membershipFees
+Accept: application/json
+
+### GET /collectivities/{id}/membershipFees — ERREUR 404 (COLLECTIVITÉ INEXISTANTE)
+GET {{baseUrl}}/collectivities/{{invalidCollectivityId}}/membershipFees
+Accept: application/json
+
+
+### GET /collectivities/{id}/transactions — CAS NOMINAL (SUCCÈS 200)
+GET {{baseUrl}}/collectivities/{{validCollectivityId}}/transactions?from=2026-01-01&to=2026-12-31
+Accept: application/json
+
+### GET /collectivities/{id}/transactions — CAS NOMINAL col-2 avec période courte
+GET {{baseUrl}}/collectivities/{{validCollectivityId2}}/transactions?from=2026-01-01&to=2026-01-31
+Accept: application/json
+
+### GET /collectivities/{id}/transactions — CAS NOMINAL col-3 (liste vide attendue)
+GET {{baseUrl}}/collectivities/{{validCollectivityId3}}/transactions?from=2026-01-01&to=2026-12-31
+Accept: application/json
+
+### GET /collectivities/{id}/transactions — ERREUR 400 (PARAMÈTRE from MANQUANT)
+GET {{baseUrl}}/collectivities/{{validCollectivityId}}/transactions?to=2026-12-31
+Accept: application/json
+
+### GET /collectivities/{id}/transactions — ERREUR 400 (PARAMÈTRE to MANQUANT)
+GET {{baseUrl}}/collectivities/{{validCollectivityId}}/transactions?from=2026-01-01
+Accept: application/json
+
+### GET /collectivities/{id}/transactions — ERREUR 400 (to AVANT from)
+GET {{baseUrl}}/collectivities/{{validCollectivityId}}/transactions?from=2026-12-31&to=2026-01-01
+Accept: application/json
+
+### GET /collectivities/{id}/transactions — ERREUR 404 (COLLECTIVITÉ INEXISTANTE)
+GET {{baseUrl}}/collectivities/{{invalidCollectivityId}}/transactions?from=2026-01-01&to=2026-12-31
+Accept: application/json
+
+
+### GET /collectivities/{id}/financialAccounts — CAS NOMINAL col-1 (solde actuel)
+GET {{baseUrl}}/collectivities/{{validCollectivityId}}/financialAccounts
+Accept: application/json
+
+### GET /collectivities/{id}/financialAccounts — CAS NOMINAL col-1 avec paramètre at
+GET {{baseUrl}}/collectivities/{{validCollectivityId}}/financialAccounts?at=2026-01-01
+Accept: application/json
+
+### GET /collectivities/{id}/financialAccounts — CAS NOMINAL col-2 (2 comptes)
+GET {{baseUrl}}/collectivities/{{validCollectivityId2}}/financialAccounts
+Accept: application/json
+
+### GET /collectivities/{id}/financialAccounts — CAS NOMINAL col-3 (1 compte caisse)
+GET {{baseUrl}}/collectivities/{{validCollectivityId3}}/financialAccounts
+Accept: application/json
+
+### GET /collectivities/{id}/financialAccounts — ERREUR 400 (at DANS LE FUTUR)
+GET {{baseUrl}}/collectivities/{{validCollectivityId}}/financialAccounts?at=2099-01-01
+Accept: application/json
+
+### GET /collectivities/{id}/financialAccounts — ERREUR 404 (COLLECTIVITÉ INEXISTANTE)
+GET {{baseUrl}}/collectivities/{{invalidCollectivityId}}/financialAccounts
+Accept: application/json
+
+
+### POST /members — CAS NOMINAL (SUCCÈS 201)
+POST {{baseUrl}}/members
+Content-Type: application/json
+
+[
+  {
+    "firstName": "Nouveau",
+    "lastName": "Membre",
+    "birthDate": "1995-06-15",
+    "gender": "MALE",
+    "address": "Lot 12 Antananarivo",
+    "profession": "Agriculteur",
+    "phone": "0341112233",
+    "email": "nouveau.membre@fed-agri.mg",
+    "collectivityIdentifier": "col-1",
+    "occupation": "JUNIOR",
+    "referees": ["C1-M1", "C1-M2"],
+    "registrationFeePaid": true,
+    "membershipDuesPaid": true
+  }
+]
+
+### POST /members — ERREUR 400 (CHAMPS OBLIGATOIRES MANQUANTS)
+POST {{baseUrl}}/members
+Content-Type: application/json
+
+[
+  {
+    "firstName": "",
+    "lastName": "",
+    "birthDate": null,
+    "gender": null,
+    "address": "",
+    "profession": "Agriculteur",
+    "phone": "",
+    "email": "",
+    "collectivityIdentifier": "col-1",
+    "occupation": "JUNIOR",
+    "referees": ["C1-M1", "C1-M2"],
+    "registrationFeePaid": true,
+    "membershipDuesPaid": true
+  }
+]
+
+### POST /members — ERREUR 400 (FRAIS D'ADHÉSION NON RÉGLÉS)
+POST {{baseUrl}}/members
+Content-Type: application/json
+
+[
+  {
+    "firstName": "Jean",
+    "lastName": "Dupont",
+    "birthDate": "1990-01-01",
+    "gender": "MALE",
+    "address": "Lot 1 Tana",
+    "profession": "Riziculteur",
+    "phone": "0340000001",
+    "email": "jean.dupont@fed-agri.mg",
+    "collectivityIdentifier": "col-1",
+    "occupation": "JUNIOR",
+    "referees": ["C1-M1", "C1-M2"],
+    "registrationFeePaid": false,
+    "membershipDuesPaid": false
+  }
+]
+
+### POST /members — ERREUR 400 (MOINS DE 2 PARRAINS)
+POST {{baseUrl}}/members
+Content-Type: application/json
+
+[
+  {
+    "firstName": "Marie",
+    "lastName": "Rakoto",
+    "birthDate": "1992-03-10",
+    "gender": "FEMALE",
+    "address": "Lot 2 Tana",
+    "profession": "Agricultrice",
+    "phone": "0340000002",
+    "email": "marie.rakoto@fed-agri.mg",
+    "collectivityIdentifier": "col-1",
+    "occupation": "JUNIOR",
+    "referees": ["C1-M1"],
+    "registrationFeePaid": true,
+    "membershipDuesPaid": true
+  }
+]
+
+### POST /members — ERREUR 400 (PARRAINS INVALIDES — pas de la bonne collectivité)
+POST {{baseUrl}}/members
+Content-Type: application/json
+
+[
+  {
+    "firstName": "Paul",
+    "lastName": "Raivo",
+    "birthDate": "1993-05-20",
+    "gender": "MALE",
+    "address": "Lot 5 Tana",
+    "profession": "Distributeur",
+    "phone": "0340000003",
+    "email": "paul.raivo@fed-agri.mg",
+    "collectivityIdentifier": "col-1",
+    "occupation": "JUNIOR",
+    "referees": ["C3-M5", "C3-M6"],
+    "registrationFeePaid": true,
+    "membershipDuesPaid": true
+  }
+]
+
+### POST /members — ERREUR 404 (COLLECTIVITÉ INEXISTANTE)
+POST {{baseUrl}}/members
+Content-Type: application/json
+
+[
+  {
+    "firstName": "Ghost",
+    "lastName": "Member",
+    "birthDate": "1990-01-01",
+    "gender": "MALE",
+    "address": "Lot 99 Nulle part",
+    "profession": "Fantôme",
+    "phone": "0340000099",
+    "email": "ghost@fed-agri.mg",
+    "collectivityIdentifier": "{{invalidCollectivityId}}",
+    "occupation": "JUNIOR",
+    "referees": ["C1-M1", "C1-M2"],
+    "registrationFeePaid": true,
+    "membershipDuesPaid": true
+  }
+]
+
+
+### POST /members/{id}/payments — CAS NOMINAL (SUCCÈS 201) — paiement CASH
+POST {{baseUrl}}/members/{{validMemberId}}/payments
+Content-Type: application/json
+
+[
+  {
+    "amount": 100000,
+    "membershipFeeIdentifier": "cot-1",
+    "accountCreditedIdentifier": "C1-A-CASH",
+    "paymentMode": "CASH"
+  }
+]
+
+### POST /members/{id}/payments — CAS NOMINAL — paiement MOBILE_BANKING
+POST {{baseUrl}}/members/C1-M7/payments
+Content-Type: application/json
+
+[
+  {
+    "amount": 50000,
+    "membershipFeeIdentifier": "cot-1",
+    "accountCreditedIdentifier": "C1-A-MOBILE-1",
+    "paymentMode": "MOBILE_BANKING"
+  }
+]
+
+### POST /members/{id}/payments — CAS NOMINAL — plusieurs paiements
+POST {{baseUrl}}/members/C3-M1/payments
+Content-Type: application/json
+
+[
+  {
+    "amount": 25000,
+    "membershipFeeIdentifier": "cot-3",
+    "accountCreditedIdentifier": "C3-A-CASH",
+    "paymentMode": "CASH"
+  },
+  {
+    "amount": 25000,
+    "membershipFeeIdentifier": "cot-3",
+    "accountCreditedIdentifier": "C3-A-CASH",
+    "paymentMode": "CASH"
+  }
+]
+
+### POST /members/{id}/payments — ERREUR 400 (MONTANT NÉGATIF)
+POST {{baseUrl}}/members/{{validMemberId}}/payments
+Content-Type: application/json
+
+[
+  {
+    "amount": -1000,
+    "membershipFeeIdentifier": "cot-1",
+    "accountCreditedIdentifier": "C1-A-CASH",
+    "paymentMode": "CASH"
+  }
+]
+
+### POST /members/{id}/payments — ERREUR 400 (MONTANT ZÉRO)
+POST {{baseUrl}}/members/{{validMemberId}}/payments
+Content-Type: application/json
+
+[
+  {
+    "amount": 0,
+    "membershipFeeIdentifier": "cot-1",
+    "accountCreditedIdentifier": "C1-A-CASH",
+    "paymentMode": "CASH"
+  }
+]
+
+### POST /members/{id}/payments — ERREUR 400 (IDENTIFIANT COMPTE VIDE)
+POST {{baseUrl}}/members/{{validMemberId}}/payments
+Content-Type: application/json
+
+[
+  {
+    "amount": 50000,
+    "membershipFeeIdentifier": "cot-1",
+    "accountCreditedIdentifier": "",
+    "paymentMode": "CASH"
+  }
+]
+
+### POST /members/{id}/payments — ERREUR 400 (IDENTIFIANT COTISATION VIDE)
+POST {{baseUrl}}/members/{{validMemberId}}/payments
+Content-Type: application/json
+
+[
+  {
+    "amount": 50000,
+    "membershipFeeIdentifier": "",
+    "accountCreditedIdentifier": "C1-A-CASH",
+    "paymentMode": "CASH"
+  }
+]
+
+### POST /members/{id}/payments — ERREUR 400 (MODE DE PAIEMENT NULL)
+POST {{baseUrl}}/members/{{validMemberId}}/payments
+Content-Type: application/json
+
+[
+  {
+    "amount": 50000,
+    "membershipFeeIdentifier": "cot-1",
+    "accountCreditedIdentifier": "C1-A-CASH",
+    "paymentMode": null
+  }
+]
+
+### POST /members/{id}/payments — ERREUR 404 (MEMBRE INEXISTANT)
+POST {{baseUrl}}/members/{{invalidMemberId}}/payments
+Content-Type: application/json
+
+[
+  {
+    "amount": 50000,
+    "membershipFeeIdentifier": "cot-1",
+    "accountCreditedIdentifier": "C1-A-CASH",
+    "paymentMode": "CASH"
+  }
+]

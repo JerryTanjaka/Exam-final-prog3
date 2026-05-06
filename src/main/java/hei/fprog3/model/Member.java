@@ -19,7 +19,7 @@ public class Member {
     private GenderType gender;
     private String address;
     private String profession;
-    private String phone;
+    private String phoneNumber;
     private String email;
 
     public Member() {}

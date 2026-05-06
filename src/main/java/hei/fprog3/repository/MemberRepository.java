@@ -64,7 +64,7 @@ public class MemberRepository {
                 memberPs.setString(4, member.getGender().name());
                 memberPs.setString(5, member.getAddress());
                 memberPs.setString(6, member.getProfession());
-                memberPs.setString(7, member.getPhone());
+                memberPs.setString(7, member.getPhoneNumber());
                 memberPs.setString(8, member.getEmail());
                 memberPs.setObject(9, member.getId());
                 memberPs.addBatch();
@@ -124,7 +124,7 @@ public class MemberRepository {
                 member.setGender(GenderType.valueOf(membersRs.getString("gender")));
                 member.setAddress(membersRs.getString("address"));
                 member.setProfession(membersRs.getString("profession"));
-                member.setPhone(membersRs.getString("phone"));
+                member.setPhoneNumber(membersRs.getString("phoneNumber"));
                 member.setEmail(membersRs.getString("email"));
                 member.setOccupation(getLatestOccupation(id));
             } else {

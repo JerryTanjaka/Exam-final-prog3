@@ -20,7 +20,7 @@ public class MemberValidator {
         if (member.getLastName() == null || member.getLastName().isEmpty()) {
             errors.add("Last name");
         }
-        if (member.getPhone() == null || member.getPhone().isEmpty()) {
+        if (member.getPhoneNumber() == null || member.getPhoneNumber().isEmpty()) {
             errors.add("Phone number");
         }
         if (member.getGender() == null) {
