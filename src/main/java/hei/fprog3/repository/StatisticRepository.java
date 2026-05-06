@@ -122,8 +122,6 @@ public class StatisticRepository {
             SELECT
                 ms.collectivity_id,
                 ms.member_id,
-                -- Le membre est à jour si le total de ses paiements
-                -- sur cette cotisation couvre le montant dû
                 BOOL_AND(
                     paid_per_fee.paid_amount >= f.amount
                 ) AS is_up_to_date
@@ -132,8 +130,6 @@ public class StatisticRepository {
                 ON f.collectivity_id = ms.collectivity_id
                 AND f.status = 'ACTIVE'
             LEFT JOIN (
-                -- ÉTAPE 2a : Calculer ce que chaque membre a payé
-                -- par cotisation dans la période
                 SELECT
                     t.member_id,
                     p.membership_fee_id,
