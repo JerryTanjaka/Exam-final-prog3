@@ -57,6 +57,8 @@ GET {{baseUrl}}/collectivities/col-1/statistics?from=2026-01-01&to=2026-12-30
 ### G-2. Get stats
 GET {{baseUrl}}/collectivities/col-2/statistics
 
+### E-2. Get activities
+GET {{baseUrl}}/collectivities/col-2/activities
 
 ### A-2. Erreur 400 — Pas d'approbation de la fédération
 POST {{baseUrl}}/collectivities

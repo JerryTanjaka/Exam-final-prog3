@@ -185,4 +185,18 @@ public class CollectivityController {
         }
     }
 
+    @GetMapping("/{id}/activities")
+    public ResponseEntity<?> getActivities(@PathVariable String id) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .header("Content-Type", "application/json")
+                    .body(collectivityService.getAllActivities(id));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
+        }
+    }
 }

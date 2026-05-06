@@ -15,6 +15,9 @@ CREATE TYPE account_type           AS ENUM ('CASH', 'BANK', 'MOBILE_MONEY');
 CREATE TYPE bank_name              AS ENUM ('BRED','MCB','BMOI','BOA','BGFI','AFG','ACCES_BANQUE','BAOBAB','SIPEM');
 CREATE TYPE mobile_money_service   AS ENUM ('ORANGE_MONEY', 'MVOLA', 'AIRTEL_MONEY');
 CREATE TYPE activity_status        AS ENUM ('ACTIVE', 'INACTIVE');
+CREATE TYPE activity_type          AS ENUM ('MEETING', 'TRAINING', 'OHTER');
+CREATE TYPE day_of_week_type       AS ENUM ('MO','TU','WE','TH','FR','SA','SU');
+CREATE TYPE attendance_status      AS ENUM ('MISSING', 'ATTENDED', 'UNDEFINED');
 
 -- ============================================================
 -- TABLE : collectivities
@@ -34,7 +37,7 @@ CREATE TABLE collectivities (
 -- ============================================================
 
 CREATE TABLE members (
-    id                               VARCHAR(50)          PRIMARY KEY DEFAULT gen_random_uuid(),
+    id                               VARCHAR(50)   PRIMARY KEY DEFAULT gen_random_uuid(),
     last_name                        VARCHAR(255)  NOT NULL,
     first_name                       VARCHAR(255)  NOT NULL,
     birth_date                       DATE          NOT NULL,
@@ -46,9 +49,9 @@ CREATE TABLE members (
 );
 
 CREATE TABLE memberships (
-    id                VARCHAR(50)            PRIMARY KEY DEFAULT gen_random_uuid(),
-    member_id         VARCHAR(50)            NOT NULL REFERENCES members(id),
-    collectivity_id   VARCHAR(50)            NOT NULL REFERENCES collectivities(id),
+    id                VARCHAR(50)     PRIMARY KEY DEFAULT gen_random_uuid(),
+    member_id         VARCHAR(50)     NOT NULL REFERENCES members(id),
+    collectivity_id   VARCHAR(50)     NOT NULL REFERENCES collectivities(id),
     occupation        position_type   NOT NULL,
     start_date        DATE            NOT NULL DEFAULT NOW(),
     end_date          DATE,
@@ -70,8 +73,8 @@ CREATE TABLE referals (
 );
 
 CREATE TABLE accounts (
-    id                      VARCHAR(50)             PRIMARY KEY DEFAULT gen_random_uuid(),
-    collectivity_id         VARCHAR(50)             NOT NULL REFERENCES collectivities(id),  -- NULL = fédération
+    id                      VARCHAR(50)      PRIMARY KEY DEFAULT gen_random_uuid(),
+    collectivity_id         VARCHAR(50)      NOT NULL REFERENCES collectivities(id),  -- NULL = fédération
     type                    account_type     NOT NULL,
     balance                 NUMERIC(15,2)    NOT NULL DEFAULT 0,
 
@@ -85,7 +88,7 @@ CREATE TABLE accounts (
 );
 
 CREATE TABLE fees (
-                      id              VARCHAR(50)            PRIMARY KEY DEFAULT  gen_random_uuid(),
+                      id              VARCHAR(50)     PRIMARY KEY DEFAULT  gen_random_uuid(),
                       collectivity_id VARCHAR(50)     NOT NULL REFERENCES collectivities(id),
                       eligible_from   DATE            NOT NULL,
                       amount          NUMERIC(15,2)   NOT NULL,
@@ -95,11 +98,37 @@ CREATE TABLE fees (
 );
 
 CREATE TABLE payments (
-    id                  VARCHAR(50)            PRIMARY KEY DEFAULT gen_random_uuid(),
+    id                  VARCHAR(50)     PRIMARY KEY DEFAULT gen_random_uuid(),
     amount              NUMERIC(15,2)   NOT NULL,
     member_id           VARCHAR(50)     NOT NULL REFERENCES members(id),
-    membership_fee_id   VARCHAR(50)            NOT NULL REFERENCES fees(id),
-    credited_account_id VARCHAR(50)            NOT NULL REFERENCES accounts(id),
+    membership_fee_id   VARCHAR(50)     NOT NULL REFERENCES fees(id),
+    credited_account_id VARCHAR(50)     NOT NULL REFERENCES accounts(id),
     payment_method      payment_method  NOT NULL,
     creation_date       DATE            NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE activities (
+    id                  VARCHAR(50)         PRIMARY KEY DEFAULT gen_random_uuid(),
+    collectivity_id     VARCHAR(50)         NOT NULL REFERENCES collectivities(id),
+    label               VARCHAR(255)        NOT NULL,
+    type                activity_type       NOT NULL,
+    executive_date      DATE                NOT NULL,
+    week_ordinal        INT                 NOT NULL CHECK ( week_ordinal BETWEEN 1 AND 5 ),
+    day_of_week         day_of_week_type    NOT NULL
+);
+
+CREATE TABLE activity_required_members (
+    id                  VARCHAR(50)     PRIMARY KEY DEFAULT gen_random_uuid(),
+    activity_id         VARCHAR(50)     NOT NULL REFERENCES activities(id),
+    required_member     position_type   NOT NULL,
+    UNIQUE (activity_id, required_member)
+);
+
+CREATE TABLE activity_attendances (
+    id              VARCHAR(50)         PRIMARY KEY DEFAULT gen_random_uuid(),
+    activity_id     VARCHAR(50)         NOT NULL REFERENCES activities(id),
+    member_id       VARCHAR(50)         NOT NULL REFERENCES members(id),
+    status          attendance_status   NOT NULL DEFAULT 'UNDEFINED'::attendance_status,
+    is_outsider     BOOLEAN             NOT NULL DEFAULT FALSE,
+    UNIQUE (activity_id, member_id)
+)

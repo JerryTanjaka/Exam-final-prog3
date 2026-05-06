@@ -7,6 +7,7 @@ import hei.fprog3.dto.fee.FeeRequest;
 import hei.fprog3.dto.statistic.CollectivityOverallStatistics;
 import hei.fprog3.dto.statistic.MemberStatistic;
 import hei.fprog3.exception.NotFoundException;
+import hei.fprog3.model.Activity;
 import hei.fprog3.model.Fee;
 import hei.fprog3.model.FinancialAccount;
 import hei.fprog3.model.Transaction;
@@ -24,13 +25,20 @@ public class CollectivityService {
     private FeeRepository feeRepository;
     private AccountRepository accountRepository;
     private StatisticRepository statisticRepository;
+    private ActivityRepository activityRepository;
 
-    public CollectivityService(CollectivityRepository collectivityRepository, TransactionRepository transactionRepository, FeeRepository feeRepository, AccountRepository accountRepository, StatisticRepository statisticRepository) {
+    public CollectivityService(CollectivityRepository collectivityRepository,
+                               TransactionRepository transactionRepository,
+                               FeeRepository feeRepository,
+                               AccountRepository accountRepository,
+                               StatisticRepository statisticRepository,
+                               ActivityRepository activityRepository) {
         this.collectivityRepository = collectivityRepository;
         this.transactionRepository = transactionRepository;
         this.feeRepository = feeRepository;
         this.accountRepository= accountRepository;
         this.statisticRepository = statisticRepository;
+        this.activityRepository = activityRepository;
     }
 
     public List<CollectivityResponse> create(List<CreateCollectivityRequest> collectivities) throws NotFoundException {
@@ -69,6 +77,11 @@ public class CollectivityService {
 
     public List<CollectivityOverallStatistics> getOverallStatistics(LocalDate from, LocalDate to) {
         return statisticRepository.getOverallStatistics(from, to);
+    }
+
+    public List<Activity> getAllActivities(String id) throws NotFoundException {
+        collectivityRepository.exists(id);
+        return activityRepository.getAllActivities(id);
     }
 
 }
