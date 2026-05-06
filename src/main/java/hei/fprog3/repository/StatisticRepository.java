@@ -21,7 +21,7 @@ public class StatisticRepository {
         this.dataSource = dataSource;
     }
 
-    public List<MemberStatistic> getCollectivityMemberStatistic(String collectivityId, LocalDate from, LocalDate to) throws NotFoundException {
+    public List<MemberStatistic> getCollectivityMemberStatistic(String collectivityId, LocalDate from, LocalDate to) {
         Connection connection = dataSource.getConnection();
         try {
             PreparedStatement memberPs = connection.prepareStatement(
