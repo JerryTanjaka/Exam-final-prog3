@@ -1,5 +1,6 @@
 package hei.fprog3.service;
 
+import hei.fprog3.dto.activity.ActivityCreate;
 import hei.fprog3.dto.collectivity.CollectivityInformation;
 import hei.fprog3.dto.collectivity.CollectivityResponse;
 import hei.fprog3.dto.collectivity.CreateCollectivityRequest;
@@ -12,7 +13,6 @@ import hei.fprog3.model.Fee;
 import hei.fprog3.model.FinancialAccount;
 import hei.fprog3.model.Transaction;
 import hei.fprog3.repository.*;
-import hei.fprog3.validator.CollectivityValidator;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -82,6 +82,11 @@ public class CollectivityService {
     public List<Activity> getAllActivities(String id) throws NotFoundException {
         collectivityRepository.exists(id);
         return activityRepository.getAllActivities(id);
+    }
+
+    public List<Activity> createActivities(String id, List<ActivityCreate> newActivities) throws NotFoundException {
+        collectivityRepository.exists(id);
+        return activityRepository.createAndReturn(id, newActivities);
     }
 
 }

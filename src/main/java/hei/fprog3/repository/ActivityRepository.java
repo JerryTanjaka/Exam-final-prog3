@@ -1,25 +1,27 @@
 package hei.fprog3.repository;
 
 import hei.fprog3.datasource.DataSourceConfig;
+import hei.fprog3.dto.activity.ActivityCreate;
 import hei.fprog3.dto.activity.ActivityRecurrenceRule;
+import hei.fprog3.dto.member.MemberResponse;
+import hei.fprog3.exception.NotFoundException;
 import hei.fprog3.model.Activity;
 import hei.fprog3.model.enums.ActivityType;
 import hei.fprog3.model.enums.DayOfWeek;
 import hei.fprog3.model.enums.PositionType;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Repository
 public class ActivityRepository {
+    private final CollectivityRepository collectivityRepository;
     private DataSourceConfig dataSource;
-    public ActivityRepository(DataSourceConfig dataSource) {
+    public ActivityRepository(DataSourceConfig dataSource, CollectivityRepository collectivityRepository) {
         this.dataSource = dataSource;
+        this.collectivityRepository = collectivityRepository;
     }
 
     public List<Activity> getAllActivities(String id) {
@@ -65,5 +67,117 @@ public class ActivityRepository {
         } finally {
             dataSource.closeConnection(connection);
         }
+    }
+
+    public List<Activity> createAndReturn(String id, List<ActivityCreate> newActivities) throws NotFoundException {
+        Connection connection = dataSource.getConnection();
+        try {
+            connection.setAutoCommit(false);
+            PreparedStatement activityPs = connection.prepareStatement(
+                """
+                INSERT INTO activities (collectivity_id, label, type, executive_date, week_ordinal, day_of_week)
+                VALUES (?, ?, ?::activity_type, ?, ?, ?::day_of_week_type)
+                RETURNING id
+                """);
+
+            PreparedStatement membersPs = connection.prepareStatement(
+                """
+                INSERT INTO activity_required_members (activity_id, required_member)
+                VALUES (?, ?::position_type)
+                """);
+
+            PreparedStatement attendancePs = connection.prepareStatement(
+                    """
+                    INSERT INTO public.activity_attendances (activity_id, member_id)
+                    VALUES (?, ?)
+                    """);
+
+            for (ActivityCreate activity : newActivities) {
+                activityPs.setString(1, id);
+                activityPs.setString(2, activity.getLabel());
+                activityPs.setString(3, activity.getActivityType().name());
+                activityPs.setDate(4, Date.valueOf(activity.getExecutiveDate()));
+                activityPs.setInt(5, activity.getRecurrenceRule().getWeekOrdinal());
+                activityPs.setString(6, activity.getRecurrenceRule().getDayOfWeek().name());
+                activityPs.addBatch();
+            }
+
+            ResultSet activityRs = activityPs.executeQuery();
+            List<String> newActivitiesIds = new ArrayList<>();
+            while (activityRs.next()) {
+                newActivitiesIds.add(activityRs.getString("id"));
+            }
+
+            List<MemberResponse> collectivityMembers = collectivityRepository.findById(id).getMembers();
+
+            for (String activityId : newActivitiesIds) {
+                List<PositionType> requiredMemberPositions = newActivities.get(newActivitiesIds.indexOf(activityId)).getMemberOccupationConcerned();
+                for (PositionType position : requiredMemberPositions) {
+                    membersPs.setString(1, activityId);
+                    membersPs.setString(2, position.name());
+                    membersPs.addBatch();
+
+                };
+                for (MemberResponse member : collectivityMembers) {
+                    if (!requiredMemberPositions.contains(member.getOccupation())) {
+                        attendancePs.setString(1, activityId);
+                        attendancePs.setString(2, member.getId());
+                        attendancePs.addBatch();
+                    }
+                }
+            }
+            membersPs.executeBatch();
+            attendancePs.executeBatch();
+
+            List<Activity> activities = new ArrayList<>();
+            for (String newActivityId : newActivitiesIds) {
+                activities.add(getActivityById(connection, newActivityId));
+            }
+            connection.commit();
+            return activities;
+        } catch (SQLException | RuntimeException e) {
+            dataSource.rollbackConnection(connection);
+            throw new RuntimeException(e);
+        } finally {
+            dataSource.closeConnection(connection);
+        }
+    }
+
+    private Activity getActivityById(Connection connection, String id) throws SQLException {
+        PreparedStatement activityPs = connection.prepareStatement(
+                """
+                SELECT a.id, a.label, a.type, a.executive_date, a.week_ordinal, a.day_of_week
+                FROM activities AS a WHERE a.id = ?
+                """);
+        activityPs.setString(1, id);
+        PreparedStatement membersPs = connection.prepareStatement(
+                """
+                SELECT DISTINCT required_member
+                FROM activity_required_members AS arm
+                WHERE arm.activity_id = ?
+                """
+        );
+        membersPs.setString(1, id);
+        ResultSet activityRs = activityPs.executeQuery();
+        if (activityRs.next()) {
+            membersPs.setString(1, activityRs.getString("id"));
+            ResultSet memberRs = membersPs.executeQuery();
+            List<PositionType> requiredMembers = new ArrayList<>();
+            while (memberRs.next()) {
+                requiredMembers.add(PositionType.valueOf(memberRs.getString("required_member")));
+            }
+            Activity activity = new Activity();
+            activity.setId(activityRs.getString("id"));
+            activity.setLabel(activityRs.getString("label"));
+            activity.setActivityType(ActivityType.valueOf(activityRs.getString("type")));
+            activity.setExecutiveDate(activityRs.getDate("executive_date").toLocalDate());
+            activity.setMemberOccupationConcerned(requiredMembers);
+            activity.setRecurrenceRule(new ActivityRecurrenceRule(
+                    activityRs.getInt("week_ordinal"),
+                    DayOfWeek.valueOf(activityRs.getString("day_of_week")))
+            );
+            return activity;
+        }
+        return null;
     }
 }

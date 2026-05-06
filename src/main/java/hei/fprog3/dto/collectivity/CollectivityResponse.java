@@ -1,7 +1,7 @@
 package hei.fprog3.dto.collectivity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import hei.fprog3.model.Member;
+import hei.fprog3.dto.member.MemberResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CollectivityResponse extends CollectivityBase {
     private CollectivityStructureResponse structure;
-    private List<Member> members;
+    private List<MemberResponse> members;
     @JsonIgnore
     private CollectivityInformation identity;
     public CollectivityResponse() {}

@@ -112,7 +112,7 @@ public class CollectivityRepository {
             collectivity.setSpecialty(collectivitiesRs.getString("specialty"));
             collectivity.setCreationDate(collectivitiesRs.getDate("creation_date").toLocalDate());
 
-            List<Member> members = new ArrayList<>();
+            List<MemberResponse> members = new ArrayList<>();
             PreparedStatement membershipsPs = connection.prepareStatement("""
                         SELECT id, member_id, occupation
                         FROM memberships WHERE collectivity_id = ?

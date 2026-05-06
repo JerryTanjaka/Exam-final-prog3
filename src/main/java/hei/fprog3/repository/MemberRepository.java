@@ -124,7 +124,7 @@ public class MemberRepository {
                 member.setGender(GenderType.valueOf(membersRs.getString("gender")));
                 member.setAddress(membersRs.getString("address"));
                 member.setProfession(membersRs.getString("profession"));
-                member.setPhoneNumber(membersRs.getString("phoneNumber"));
+                member.setPhoneNumber(membersRs.getString("phone"));
                 member.setEmail(membersRs.getString("email"));
                 member.setOccupation(getLatestOccupation(id));
             } else {

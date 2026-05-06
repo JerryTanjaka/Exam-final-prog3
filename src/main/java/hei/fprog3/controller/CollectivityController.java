@@ -1,11 +1,13 @@
 package hei.fprog3.controller;
 
+import hei.fprog3.dto.activity.ActivityCreate;
 import hei.fprog3.dto.collectivity.CollectivityInformation;
 import hei.fprog3.dto.collectivity.CreateCollectivityRequest;
 import hei.fprog3.dto.fee.FeeRequest;
 import hei.fprog3.exception.BadRequestException;
 import hei.fprog3.exception.NotFoundException;
 import hei.fprog3.service.CollectivityService;
+import hei.fprog3.validator.ActivityValidator;
 import hei.fprog3.validator.CollectivityValidator;
 import hei.fprog3.validator.FeeValidator;
 import org.springframework.http.HttpStatus;
@@ -18,13 +20,15 @@ import java.util.List;
 @RestController
 @RequestMapping("/collectivities")
 public class CollectivityController {
+    private final ActivityValidator activityValidator;
     public CollectivityService collectivityService;
     public CollectivityValidator  collectivityValidator;
     public FeeValidator  feeValidator;
-    public CollectivityController(CollectivityService collectivityService,  CollectivityValidator collectivityValidator,  FeeValidator feeValidator) {
+    public CollectivityController(CollectivityService collectivityService, CollectivityValidator collectivityValidator, FeeValidator feeValidator, ActivityValidator activityValidator) {
         this.collectivityService = collectivityService;
         this.collectivityValidator = collectivityValidator;
         this.feeValidator = feeValidator;
+        this.activityValidator = activityValidator;
     }
 
     @PostMapping
@@ -191,6 +195,26 @@ public class CollectivityController {
             return ResponseEntity.status(HttpStatus.OK)
                     .header("Content-Type", "application/json")
                     .body(collectivityService.getAllActivities(id));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/activities")
+    public ResponseEntity<?> createActivities(@PathVariable String id,
+                                              @RequestBody List<ActivityCreate> activities) {
+        try {
+            activityValidator.validate(activities);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .header("Content-Type", "application/json")
+                    .body(collectivityService.createActivities(id, activities));
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(e.getMessage());

@@ -57,8 +57,28 @@ GET {{baseUrl}}/collectivities/col-1/statistics?from=2026-01-01&to=2026-12-30
 ### G-2. Get stats
 GET {{baseUrl}}/collectivities/col-2/statistics
 
-### E-2. Get activities
+### E-1. Get activities
 GET {{baseUrl}}/collectivities/col-2/activities
+
+### E-2. Create Activities
+POST {{baseUrl}}/collectivities/col-2/activities
+Content-Type: application/json
+
+[
+  {
+    "label": "string",
+    "activityType": "MEETING",
+    "memberOccupationConcerned": [
+      "SENIOR", "VICE_PRESIDENT"
+    ],
+    "recurrenceRule": {
+      "weekOrdinal": 3,
+      "dayOfWeek": "SA"
+    },
+    "executiveDate": "2026-05-06"
+  }
+]
+
 
 ### A-2. Erreur 400 — Pas d'approbation de la fédération
 POST {{baseUrl}}/collectivities
@@ -90,7 +110,6 @@ Content-Type: application/json
   }
 ]
 
-###
 
 ### A-3. Erreur 400 — Structure manquante
 POST {{baseUrl}}/collectivities
