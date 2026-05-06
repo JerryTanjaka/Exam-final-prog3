@@ -76,9 +76,50 @@ Content-Type: application/json
       "dayOfWeek": "SA"
     },
     "executiveDate": "2026-05-06"
+  },
+  {
+    "label": "string",
+    "activityType": "TRAINING",
+    "memberOccupationConcerned": [
+      "TREASURER"
+    ],
+    "recurrenceRule": {
+      "weekOrdinal": 1,
+      "dayOfWeek": "SA"
+    },
+    "executiveDate": "2026-05-06"
   }
 ]
 
+### F-1. Create Activities
+POST {{baseUrl}}/collectivities/col-2/activities/e8e5a6e8-8e47-40b2-a960-e30ba8c9d208/attendance
+Content-Type: application/json
+
+[
+  {
+    "memberIdentifier": "C1-M7",
+    "attendanceStatus": "MISSING"
+  },
+  {
+    "memberIdentifier": "C1-M8",
+    "attendanceStatus": "ATTENDED"
+  }
+]
+
+### F-1.2 Create Activities with duplicate MemberId
+POST {{baseUrl}}/collectivities/col-2/activities/e8e5a6e8-8e47-40b2-a960-e30ba8c9d208/attendance
+Content-Type: application/json
+
+[
+  {
+    "memberIdentifier": "C1-M1",
+    "attendanceStatus": "MISSING"
+  },
+  {
+    "memberIdentifier": "C1-M1",
+    "attendanceStatus": "ATTENDED"
+  }
+]
 
 ### A-2. Erreur 400 — Pas d'approbation de la fédération
 POST {{baseUrl}}/collectivities

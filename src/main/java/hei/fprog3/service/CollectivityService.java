@@ -1,12 +1,15 @@
 package hei.fprog3.service;
 
 import hei.fprog3.dto.activity.ActivityCreate;
+import hei.fprog3.dto.attendance.AttendanceRequest;
+import hei.fprog3.dto.attendance.AttendanceResponse;
 import hei.fprog3.dto.collectivity.CollectivityInformation;
 import hei.fprog3.dto.collectivity.CollectivityResponse;
 import hei.fprog3.dto.collectivity.CreateCollectivityRequest;
 import hei.fprog3.dto.fee.FeeRequest;
 import hei.fprog3.dto.statistic.CollectivityOverallStatistics;
 import hei.fprog3.dto.statistic.MemberStatistic;
+import hei.fprog3.exception.BadRequestException;
 import hei.fprog3.exception.NotFoundException;
 import hei.fprog3.model.Activity;
 import hei.fprog3.model.Fee;
@@ -20,6 +23,7 @@ import java.util.List;
 
 @Service
 public class CollectivityService {
+    private final AttendanceRepository attendanceRepository;
     private CollectivityRepository collectivityRepository;
     private TransactionRepository transactionRepository;
     private FeeRepository feeRepository;
@@ -32,13 +36,14 @@ public class CollectivityService {
                                FeeRepository feeRepository,
                                AccountRepository accountRepository,
                                StatisticRepository statisticRepository,
-                               ActivityRepository activityRepository) {
+                               ActivityRepository activityRepository, AttendanceRepository attendanceRepository) {
         this.collectivityRepository = collectivityRepository;
         this.transactionRepository = transactionRepository;
         this.feeRepository = feeRepository;
         this.accountRepository= accountRepository;
         this.statisticRepository = statisticRepository;
         this.activityRepository = activityRepository;
+        this.attendanceRepository = attendanceRepository;
     }
 
     public List<CollectivityResponse> create(List<CreateCollectivityRequest> collectivities) throws NotFoundException {
@@ -86,7 +91,12 @@ public class CollectivityService {
 
     public List<Activity> createActivities(String id, List<ActivityCreate> newActivities) throws NotFoundException {
         collectivityRepository.exists(id);
-        return activityRepository.createAndReturn(id, newActivities);
+        return activityRepository.createActivityAndReturn(id, newActivities);
     }
 
+    public List<AttendanceResponse> createAttendances(String id, String activityId, List<AttendanceRequest> attendances) throws BadRequestException, NotFoundException {
+        collectivityRepository.exists(id);
+        activityRepository.exists(activityId);
+        return attendanceRepository.createAndReturn(activityId, attendances);
+    }
 }

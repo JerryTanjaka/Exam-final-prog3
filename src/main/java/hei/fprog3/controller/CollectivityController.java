@@ -1,6 +1,7 @@
 package hei.fprog3.controller;
 
 import hei.fprog3.dto.activity.ActivityCreate;
+import hei.fprog3.dto.attendance.AttendanceRequest;
 import hei.fprog3.dto.collectivity.CollectivityInformation;
 import hei.fprog3.dto.collectivity.CreateCollectivityRequest;
 import hei.fprog3.dto.fee.FeeRequest;
@@ -8,6 +9,7 @@ import hei.fprog3.exception.BadRequestException;
 import hei.fprog3.exception.NotFoundException;
 import hei.fprog3.service.CollectivityService;
 import hei.fprog3.validator.ActivityValidator;
+import hei.fprog3.validator.AttendanceValidator;
 import hei.fprog3.validator.CollectivityValidator;
 import hei.fprog3.validator.FeeValidator;
 import org.springframework.http.HttpStatus;
@@ -21,14 +23,20 @@ import java.util.List;
 @RequestMapping("/collectivities")
 public class CollectivityController {
     private final ActivityValidator activityValidator;
+    private final AttendanceValidator attendanceValidator;
     public CollectivityService collectivityService;
     public CollectivityValidator  collectivityValidator;
     public FeeValidator  feeValidator;
-    public CollectivityController(CollectivityService collectivityService, CollectivityValidator collectivityValidator, FeeValidator feeValidator, ActivityValidator activityValidator) {
+    public CollectivityController(CollectivityService collectivityService,
+                                  CollectivityValidator collectivityValidator,
+                                  FeeValidator feeValidator,
+                                  ActivityValidator activityValidator,
+                                  AttendanceValidator attendanceValidator) {
         this.collectivityService = collectivityService;
         this.collectivityValidator = collectivityValidator;
         this.feeValidator = feeValidator;
         this.activityValidator = activityValidator;
+        this.attendanceValidator = attendanceValidator;
     }
 
     @PostMapping
@@ -212,6 +220,27 @@ public class CollectivityController {
             return ResponseEntity.status(HttpStatus.OK)
                     .header("Content-Type", "application/json")
                     .body(collectivityService.createActivities(id, activities));
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/activities/{activityId}/attendance")
+    public ResponseEntity<?> createActivities(@PathVariable String id,
+                                              @PathVariable String  activityId,
+                                              @RequestBody List<AttendanceRequest> attendances) {
+        try {
+            attendanceValidator.validate(attendances);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .header("Content-Type", "application/json")
+                    .body(collectivityService.createAttendances(id, activityId, attendances));
         } catch (BadRequestException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(e.getMessage());

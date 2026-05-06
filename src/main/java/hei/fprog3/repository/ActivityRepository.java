@@ -3,7 +3,6 @@ package hei.fprog3.repository;
 import hei.fprog3.datasource.DataSourceConfig;
 import hei.fprog3.dto.activity.ActivityCreate;
 import hei.fprog3.dto.activity.ActivityRecurrenceRule;
-import hei.fprog3.dto.member.MemberResponse;
 import hei.fprog3.exception.NotFoundException;
 import hei.fprog3.model.Activity;
 import hei.fprog3.model.enums.ActivityType;
@@ -17,11 +16,9 @@ import java.util.List;
 
 @Repository
 public class ActivityRepository {
-    private final CollectivityRepository collectivityRepository;
     private DataSourceConfig dataSource;
-    public ActivityRepository(DataSourceConfig dataSource, CollectivityRepository collectivityRepository) {
+    public ActivityRepository(DataSourceConfig dataSource) {
         this.dataSource = dataSource;
-        this.collectivityRepository = collectivityRepository;
     }
 
     public List<Activity> getAllActivities(String id) {
@@ -69,7 +66,7 @@ public class ActivityRepository {
         }
     }
 
-    public List<Activity> createAndReturn(String id, List<ActivityCreate> newActivities) throws NotFoundException {
+    public List<Activity> createActivityAndReturn(String id, List<ActivityCreate> newActivities) throws NotFoundException {
         Connection connection = dataSource.getConnection();
         try {
             connection.setAutoCommit(false);
@@ -77,20 +74,13 @@ public class ActivityRepository {
                 """
                 INSERT INTO activities (collectivity_id, label, type, executive_date, week_ordinal, day_of_week)
                 VALUES (?, ?, ?::activity_type, ?, ?, ?::day_of_week_type)
-                RETURNING id
-                """);
+                """, Statement.RETURN_GENERATED_KEYS);
 
             PreparedStatement membersPs = connection.prepareStatement(
                 """
                 INSERT INTO activity_required_members (activity_id, required_member)
                 VALUES (?, ?::position_type)
                 """);
-
-            PreparedStatement attendancePs = connection.prepareStatement(
-                    """
-                    INSERT INTO public.activity_attendances (activity_id, member_id)
-                    VALUES (?, ?)
-                    """);
 
             for (ActivityCreate activity : newActivities) {
                 activityPs.setString(1, id);
@@ -101,14 +91,13 @@ public class ActivityRepository {
                 activityPs.setString(6, activity.getRecurrenceRule().getDayOfWeek().name());
                 activityPs.addBatch();
             }
+            activityPs.executeBatch();
 
-            ResultSet activityRs = activityPs.executeQuery();
+            ResultSet activityRs = activityPs.getGeneratedKeys();
             List<String> newActivitiesIds = new ArrayList<>();
             while (activityRs.next()) {
                 newActivitiesIds.add(activityRs.getString("id"));
             }
-
-            List<MemberResponse> collectivityMembers = collectivityRepository.findById(id).getMembers();
 
             for (String activityId : newActivitiesIds) {
                 List<PositionType> requiredMemberPositions = newActivities.get(newActivitiesIds.indexOf(activityId)).getMemberOccupationConcerned();
@@ -116,18 +105,9 @@ public class ActivityRepository {
                     membersPs.setString(1, activityId);
                     membersPs.setString(2, position.name());
                     membersPs.addBatch();
-
                 };
-                for (MemberResponse member : collectivityMembers) {
-                    if (!requiredMemberPositions.contains(member.getOccupation())) {
-                        attendancePs.setString(1, activityId);
-                        attendancePs.setString(2, member.getId());
-                        attendancePs.addBatch();
-                    }
-                }
             }
             membersPs.executeBatch();
-            attendancePs.executeBatch();
 
             List<Activity> activities = new ArrayList<>();
             for (String newActivityId : newActivitiesIds) {
@@ -179,5 +159,18 @@ public class ActivityRepository {
             return activity;
         }
         return null;
+    }
+
+    public void exists(String id) throws NotFoundException {
+        Connection connection = dataSource.getConnection();
+        try {
+            if (getActivityById(connection, id) == null) {
+                throw new NotFoundException(id);
+            };
+        } catch (SQLException | RuntimeException e) {
+            throw new RuntimeException(e);
+        } finally {
+            dataSource.closeConnection(connection);
+        }
     }
 }
