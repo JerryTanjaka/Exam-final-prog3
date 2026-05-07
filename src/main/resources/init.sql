@@ -81,7 +81,7 @@ CREATE TABLE accounts (
     holder_name             VARCHAR(255),
 
     bank_name               bank_name,
-    bank_account_number     CHAR(23),
+    bank_account_number     CHAR(22),
 
     mobile_banking_service  mobile_money_service,
     mobile_number           VARCHAR(50)

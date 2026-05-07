@@ -14,4 +14,5 @@ public class MemberStatistic {
     private MemberDescription memberDescription;
     private double earnedAmount;
     private double unpaidAmount;
+    private double assiduityPercentage;
 }
