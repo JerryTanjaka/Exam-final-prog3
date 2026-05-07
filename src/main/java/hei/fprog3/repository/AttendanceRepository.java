@@ -104,11 +104,13 @@ public class AttendanceRepository {
 
         PreparedStatement memberPs = connection.prepareStatement(
                 """
-                SELECT m.id, m.first_name, m.last_name, m.email, ms.occupation FROM members AS m
-                JOIN memberships AS ms ON m.id = ms.member_id
-                WHERE ms.collectivity_id = ? AND ms.member_id = ?
-                GROUP BY m.id, ms.occupation
-                ORDER BY m.id, MAX(ms.start_date) DESC
+                SELECT m.id, m.first_name, m.last_name, m.email,
+                COALESCE(
+                    (SELECT ms.occupation FROM memberships ms WHERE ms.member_id = m.id AND ms.collectivity_id = ?),
+                    (SELECT ms.occupation FROM memberships ms WHERE ms.member_id = m.id ORDER BY ms.start_date DESC LIMIT 1)
+                ) as occupation
+                FROM members AS m
+                WHERE m.id = ?
                 """);
 
         ps.setString(1, attendanceId);
@@ -128,7 +130,7 @@ public class AttendanceRepository {
                                 memberRs.getString(2),
                                 memberRs.getString(3),
                                 memberRs.getString(4),
-                                PositionType.valueOf(memberRs.getString(5))
+                                memberRs.getString(5) != null ? PositionType.valueOf(memberRs.getString(5)) : null
                         )
                 );
             }
@@ -151,11 +153,13 @@ public class AttendanceRepository {
 
             PreparedStatement memberPs = connection.prepareStatement(
                     """
-                    SELECT m.id, m.first_name, m.last_name, m.email, ms.occupation FROM members AS m
-                    JOIN memberships AS ms ON m.id = ms.member_id
-                    WHERE ms.collectivity_id = ? AND ms.member_id = ?
-                    GROUP BY m.id, ms.occupation
-                    ORDER BY m.id, MAX(ms.start_date) DESC
+                    SELECT m.id, m.first_name, m.last_name, m.email,
+                    COALESCE(
+                        (SELECT ms.occupation FROM memberships ms WHERE ms.member_id = m.id AND ms.collectivity_id = ?),
+                        (SELECT ms.occupation FROM memberships ms WHERE ms.member_id = m.id ORDER BY ms.start_date DESC LIMIT 1)
+                    ) as occupation
+                    FROM members AS m
+                    WHERE m.id = ?
                     """);
 
             ResultSet rs = ps.executeQuery();
@@ -175,7 +179,7 @@ public class AttendanceRepository {
                                     memberRs.getString(2),
                                     memberRs.getString(3),
                                     memberRs.getString(4),
-                                    PositionType.valueOf(memberRs.getString(5))
+                                    memberRs.getString(5) != null ? PositionType.valueOf(memberRs.getString(5)) : null
                             )
                     );
                 }
