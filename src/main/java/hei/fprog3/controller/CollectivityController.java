@@ -162,11 +162,10 @@ public class CollectivityController {
                                                   @RequestParam(required = false) LocalDate from,
                                                   @RequestParam(required = false) LocalDate to) {
         try {
-            if (from == null) {
-                from = LocalDate.EPOCH;
-            }
-            if (to == null) {
-                to = LocalDate.now();
+            if (from == null || to == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .header("Content-Type", "application/json")
+                        .body("From and to cannot be null");
             }
             return ResponseEntity.status(HttpStatus.OK)
                     .header("Content-Type","application/json")
