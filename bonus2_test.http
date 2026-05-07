@@ -206,7 +206,7 @@ GET {{baseUrl}}/collectivities/col-1/statistics?from=2026-01-01&to=2026-12-31
 ### B-2. CAS NOMINAL col-1 — période courte (avant la Famangiana)
 ### Seule cot-1 (200000) est dans la période → due = 200000 - paiement
 GET {{baseUrl}}/collectivities/col-1/statistics?from=2026-01-01&to=2026-04-29
-
+x-Api-Key:agri-secure-key
 ###
 
 ### B-3. CAS NOMINAL col-2 — période complète 2026
