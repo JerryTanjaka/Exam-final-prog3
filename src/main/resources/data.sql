@@ -222,8 +222,8 @@ VALUES ('C3-A-CASH', 'col-3', 'CASH', 0);
 --        mais le format impose 11 chiffres. On complète à 11 en préfixant d'un 0.
 INSERT INTO accounts (id, collectivity_id, type, balance, holder_name, bank_name, bank_account_number)
 VALUES
-    ('C3-A-BANK-1', 'col-3', 'BANK', 0, 'Koto',  'BMOI', '00004000010123456789012'),
-    ('C3-A-BANK-2', 'col-3', 'BANK', 0, 'Naivo', 'BRED', '00008000030456789012358');
+    ('C3-A-BANK-1', 'col-3', 'BANK', 0, 'Koto',  'BMOI', '0000400001123456789012'),
+    ('C3-A-BANK-2', 'col-3', 'BANK', 0, 'Naivo', 'BRED', '0000800003456789012358');
 
 -- Collectivité 3 — compte mobile money (Tableau p.24)
 INSERT INTO accounts (id, collectivity_id, type, balance, holder_name, mobile_banking_service, mobile_number)
