@@ -50,12 +50,26 @@ public class ActivityRepository {
                 activity.setId(activityRs.getString("id"));
                 activity.setLabel(activityRs.getString("label"));
                 activity.setActivityType(ActivityType.valueOf(activityRs.getString("type")));
-                activity.setExecutiveDate(activityRs.getDate("executive_date").toLocalDate());
                 activity.setMemberOccupationConcerned(requiredMembers);
-                activity.setRecurrenceRule(new ActivityRecurrenceRule(
-                        activityRs.getInt("week_ordinal"),
-                        DayOfWeek.valueOf(activityRs.getString("day_of_week")))
-                );
+
+                // ✅ vérifier null avant de setter
+                if (activityRs.getObject("executive_date") != null) {
+                    activity.setExecutiveDate(activityRs.getDate("executive_date").toLocalDate());
+                } else {
+                    activity.setExecutiveDate(null);
+                }
+
+                // ✅ vérifier null avant de créer la recurrence rule
+                if (activityRs.getObject("week_ordinal") != null
+                        && activityRs.getObject("day_of_week") != null) {
+                    activity.setRecurrenceRule(new ActivityRecurrenceRule(
+                            activityRs.getInt("week_ordinal"),
+                            DayOfWeek.valueOf(activityRs.getString("day_of_week")))
+                    );
+                } else {
+                    activity.setRecurrenceRule(null);
+                }
+
                 activities.add(activity);
             }
             return activities;
