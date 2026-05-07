@@ -321,3 +321,193 @@ UPDATE accounts SET balance =  60000 WHERE id = 'C3-A-CASH';
 UPDATE accounts SET balance = 150000 WHERE id = 'C3-A-BANK-1';
 UPDATE accounts SET balance =  95000 WHERE id = 'C3-A-BANK-2';
 UPDATE accounts SET balance =  30000 WHERE id = 'C3-A-MOBILE-1';
+
+-- ============================================================
+-- DONNÉES BONUS — Activités et Présences
+-- ============================================================
+
+-- ============================================================
+-- ACTIVITÉS
+-- ============================================================
+
+-- Collectivité 1 (Tableau 21)
+INSERT INTO activities (id, collectivity_id, label, type, executive_date, week_ordinal, day_of_week)
+VALUES
+    ('act-1', 'col-1', 'AG1',           'MEETING',  NULL, 1, 'SA'),
+    ('act-2', 'col-1', 'Formation de base', 'TRAINING', NULL, 2, 'SU');
+
+INSERT INTO activity_required_members (activity_id, required_member)
+VALUES
+    ('act-1', 'JUNIOR'),
+    ('act-1', 'SENIOR'),
+    ('act-1', 'SECRETARY'),
+    ('act-1', 'TREASURER'),
+    ('act-1', 'VICE_PRESIDENT'),
+    ('act-1', 'PRESIDENT'),
+    ('act-2', 'JUNIOR');
+
+-- Collectivité 2 (Tableau 22)
+INSERT INTO activities (id, collectivity_id, label, type, executive_date, week_ordinal, day_of_week)
+VALUES
+    ('act-3', 'col-2', 'AG2',              'MEETING',  NULL,         1, 'SU'),
+    ('act-4', 'col-2', 'Formation de base','TRAINING', NULL,         3, 'SU'),
+    ('act-5', 'col-2', 'Perfectionnement', 'OTHER',    '2026-04-30', NULL, NULL);
+
+INSERT INTO activity_required_members (activity_id, required_member)
+VALUES
+    ('act-3', 'JUNIOR'),
+    ('act-3', 'SENIOR'),
+    ('act-3', 'SECRETARY'),
+    ('act-3', 'TREASURER'),
+    ('act-3', 'VICE_PRESIDENT'),
+    ('act-3', 'PRESIDENT'),
+    ('act-4', 'JUNIOR'),
+    ('act-5', 'SENIOR');
+
+-- Collectivité 3 (Tableau 23)
+INSERT INTO activities (id, collectivity_id, label, type, executive_date, week_ordinal, day_of_week)
+VALUES
+    ('act-6', 'col-3', 'AG3',              'MEETING',  NULL, 1, 'FR'),
+    ('act-7', 'col-3', 'Formation de base','TRAINING', NULL, 4, 'WE');
+
+INSERT INTO activity_required_members (activity_id, required_member)
+VALUES
+    ('act-6', 'JUNIOR'),
+    ('act-6', 'SENIOR'),
+    ('act-6', 'SECRETARY'),
+    ('act-6', 'TREASURER'),
+    ('act-6', 'VICE_PRESIDENT'),
+    ('act-6', 'PRESIDENT'),
+    ('act-7', 'JUNIOR');
+
+-- ============================================================
+-- PRÉSENCES
+-- ============================================================
+
+-- Tableau 24 : AG1 col-1 — Mars 2026 (07/03/2026)
+-- ⚠️ act-1 a une recurrence rule, pas de executive_date fixe
+-- On insère les présences directement dans activity_attendances
+INSERT INTO activity_attendances (id, activity_id, member_id, status)
+VALUES
+    (gen_random_uuid()::VARCHAR, 'act-1', 'C1-M1', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-1', 'C1-M2', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-1', 'C1-M3', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-1', 'C1-M4', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-1', 'C1-M5', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-1', 'C1-M6', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-1', 'C1-M7', 'MISSING'),
+    (gen_random_uuid()::VARCHAR, 'act-1', 'C1-M8', 'MISSING');
+
+-- ⚠️ Problème : act-1 a une UNIQUE constraint (activity_id, member_id)
+-- Le tableau 25 (avril) représente la MÊME activité récurrente
+-- Il faudrait une nouvelle occurrence → on crée act-1b pour avril
+INSERT INTO activities (id, collectivity_id, label, type, executive_date, week_ordinal, day_of_week)
+VALUES ('act-1b', 'col-1', 'AG1', 'MEETING', '2026-04-04', NULL, NULL);
+
+INSERT INTO activity_required_members (activity_id, required_member)
+VALUES
+    ('act-1b', 'JUNIOR'),
+    ('act-1b', 'SENIOR'),
+    ('act-1b', 'SECRETARY'),
+    ('act-1b', 'TREASURER'),
+    ('act-1b', 'VICE_PRESIDENT'),
+    ('act-1b', 'PRESIDENT');
+
+-- Tableau 25 : AG1 col-1 — Avril 2026 (04/04/2026)
+INSERT INTO activity_attendances (id, activity_id, member_id, status)
+VALUES
+    (gen_random_uuid()::VARCHAR, 'act-1b', 'C1-M1', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-1b', 'C1-M2', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-1b', 'C1-M3', 'MISSING'),
+    (gen_random_uuid()::VARCHAR, 'act-1b', 'C1-M4', 'MISSING'),
+    (gen_random_uuid()::VARCHAR, 'act-1b', 'C1-M5', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-1b', 'C1-M6', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-1b', 'C1-M7', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-1b', 'C1-M8', 'ATTENDED');
+
+-- Tableau 26 : AG2 col-2 — Mars 2026 (08/03/2026)
+INSERT INTO activity_attendances (id, activity_id, member_id, status)
+VALUES
+    (gen_random_uuid()::VARCHAR, 'act-3', 'C1-M1', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-3', 'C1-M2', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-3', 'C1-M3', 'MISSING'),
+    (gen_random_uuid()::VARCHAR, 'act-3', 'C1-M4', 'MISSING'),
+    (gen_random_uuid()::VARCHAR, 'act-3', 'C1-M5', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-3', 'C1-M6', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-3', 'C1-M7', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-3', 'C1-M8', 'ATTENDED');
+
+-- Tableau 27 : AG2 col-2 — Avril 2026 (05/04/2026)
+INSERT INTO activities (id, collectivity_id, label, type, executive_date, week_ordinal, day_of_week)
+VALUES ('act-3b', 'col-2', 'AG2', 'MEETING', '2026-04-05', NULL, NULL);
+
+INSERT INTO activity_required_members (activity_id, required_member)
+VALUES
+    ('act-3b', 'JUNIOR'),
+    ('act-3b', 'SENIOR'),
+    ('act-3b', 'SECRETARY'),
+    ('act-3b', 'TREASURER'),
+    ('act-3b', 'VICE_PRESIDENT'),
+    ('act-3b', 'PRESIDENT');
+
+INSERT INTO activity_attendances (id, activity_id, member_id, status)
+VALUES
+    (gen_random_uuid()::VARCHAR, 'act-3b', 'C1-M1', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-3b', 'C1-M2', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-3b', 'C1-M3', 'MISSING'),
+    (gen_random_uuid()::VARCHAR, 'act-3b', 'C1-M4', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-3b', 'C1-M5', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-3b', 'C1-M6', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-3b', 'C1-M7', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-3b', 'C1-M8', 'MISSING');
+
+-- Tableau 28 : Perfectionnement col-2 — 30/04/2026
+-- act-5 a déjà une executive_date donc pas besoin de doublon
+INSERT INTO activity_attendances (id, activity_id, member_id, status)
+VALUES
+    (gen_random_uuid()::VARCHAR, 'act-5', 'C1-M1', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-5', 'C1-M2', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-5', 'C1-M3', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-5', 'C1-M4', 'MISSING'),
+    (gen_random_uuid()::VARCHAR, 'act-5', 'C1-M5', 'UNDEFINED'),
+    (gen_random_uuid()::VARCHAR, 'act-5', 'C1-M6', 'UNDEFINED'),
+    (gen_random_uuid()::VARCHAR, 'act-5', 'C1-M7', 'UNDEFINED'),
+    (gen_random_uuid()::VARCHAR, 'act-5', 'C1-M8', 'UNDEFINED');
+
+-- Tableau 29 : AG3 col-3 — Mars 2026 (06/03/2026)
+INSERT INTO activity_attendances (id, activity_id, member_id, status)
+VALUES
+    (gen_random_uuid()::VARCHAR, 'act-6', 'C3-M1', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-6', 'C3-M2', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-6', 'C3-M3', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-6', 'C3-M4', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-6', 'C3-M5', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-6', 'C3-M6', 'ATTENDED'),
+    (gen_random_uuid()::VARCHAR, 'act-6', 'C3-M7', 'MISSING'),
+    (gen_random_uuid()::VARCHAR, 'act-6', 'C3-M8', 'MISSING');
+
+-- Tableau 30 : AG3 col-3 — Avril 2026 (03/04/2026)
+-- C1-M1 est un membre extérieur qui assiste → is_outsider = TRUE
+INSERT INTO activities (id, collectivity_id, label, type, executive_date, week_ordinal, day_of_week)
+VALUES ('act-6b', 'col-3', 'AG3', 'MEETING', '2026-04-03', NULL, NULL);
+
+INSERT INTO activity_required_members (activity_id, required_member)
+VALUES
+    ('act-6b', 'JUNIOR'),
+    ('act-6b', 'SENIOR'),
+    ('act-6b', 'SECRETARY'),
+    ('act-6b', 'TREASURER'),
+    ('act-6b', 'VICE_PRESIDENT'),
+    ('act-6b', 'PRESIDENT');
+
+INSERT INTO activity_attendances (id, activity_id, member_id, status, is_outsider)
+VALUES
+    (gen_random_uuid()::VARCHAR, 'act-6b', 'C3-M1', 'ATTENDED', FALSE),
+    (gen_random_uuid()::VARCHAR, 'act-6b', 'C3-M2', 'ATTENDED', FALSE),
+    (gen_random_uuid()::VARCHAR, 'act-6b', 'C3-M3', 'MISSING',  FALSE),
+    (gen_random_uuid()::VARCHAR, 'act-6b', 'C3-M4', 'MISSING',  FALSE),
+    (gen_random_uuid()::VARCHAR, 'act-6b', 'C3-M5', 'ATTENDED', FALSE),
+    (gen_random_uuid()::VARCHAR, 'act-6b', 'C3-M6', 'ATTENDED', FALSE),
+    (gen_random_uuid()::VARCHAR, 'act-6b', 'C3-M7', 'MISSING',  FALSE),
+    (gen_random_uuid()::VARCHAR, 'act-6b', 'C3-M8', 'ATTENDED', FALSE),
+    (gen_random_uuid()::VARCHAR, 'act-6b', 'C1-M1', 'ATTENDED', TRUE); -- ✅ membre extérieur

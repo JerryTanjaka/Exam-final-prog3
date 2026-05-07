@@ -15,7 +15,7 @@ CREATE TYPE account_type           AS ENUM ('CASH', 'BANK', 'MOBILE_MONEY');
 CREATE TYPE bank_name              AS ENUM ('BRED','MCB','BMOI','BOA','BGFI','AFG','ACCES_BANQUE','BAOBAB','SIPEM');
 CREATE TYPE mobile_money_service   AS ENUM ('ORANGE_MONEY', 'MVOLA', 'AIRTEL_MONEY');
 CREATE TYPE activity_status        AS ENUM ('ACTIVE', 'INACTIVE');
-CREATE TYPE activity_type          AS ENUM ('MEETING', 'TRAINING', 'OHTER');
+CREATE TYPE activity_type          AS ENUM ('MEETING', 'TRAINING', 'OTHER');
 CREATE TYPE day_of_week_type       AS ENUM ('MO','TU','WE','TH','FR','SA','SU');
 CREATE TYPE attendance_status      AS ENUM ('MISSING', 'ATTENDED', 'UNDEFINED');
 
