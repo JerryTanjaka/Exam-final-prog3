@@ -23,15 +23,20 @@ public class BankAccount extends FinancialAccount {
     }
 
     public void setAccountNumberFieldsFromFullNumber(String fullAccountNumber) {
-        if  (fullAccountNumber == null) {
+        if (fullAccountNumber == null) {
             return;
         }
-        if (fullAccountNumber.length() != 23) {
-            return;
+
+        if (fullAccountNumber.length() == 23) {
+            bankCode          = fullAccountNumber.substring(0, 5);
+            bankBranchCode    = fullAccountNumber.substring(5, 10);
+            bankAccountNumber = fullAccountNumber.substring(10, 21);
+            bankAccountKey    = fullAccountNumber.substring(21);
+        } else if (fullAccountNumber.length() == 22) {
+            bankCode          = fullAccountNumber.substring(0, 5);
+            bankBranchCode    = fullAccountNumber.substring(5, 10);
+            bankAccountNumber = fullAccountNumber.substring(10, 20);
+            bankAccountKey    = fullAccountNumber.substring(20);
         }
-        bankCode = fullAccountNumber.substring(0, 5);
-        bankBranchCode = fullAccountNumber.substring(5, 10);
-        bankAccountNumber = fullAccountNumber.substring(10, 21);
-        bankAccountKey = fullAccountNumber.substring(21);
     }
 }

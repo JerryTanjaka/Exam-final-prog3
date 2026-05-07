@@ -1,0 +1,473 @@
+### ============================================================
+### BONUS 2 — Tests statistiques avec assiduité + transactions
+### Basé sur data.sql du 6 mai 2026
+### ============================================================
+
+@baseUrl = http://localhost:8080
+
+### ============================================================
+### PRÉ-REQUIS : Créer des activités pour tester l'assiduité
+### (sans activités, tout le monde est à 100% par défaut)
+### ============================================================
+
+### STEP 1 — Créer une activité MEETING pour col-1
+### Concernée : PRESIDENT, VICE_PRESIDENT, SECRETARY, TREASURER, SENIOR
+### Date passée dans la période de test (2026-01-01 → 2026-12-31)
+POST {{baseUrl}}/collectivities/col-1/activities
+Content-Type: application/json
+
+[
+  {
+    "label": "Assemblée générale janvier col-1",
+    "activityType": "MEETING",
+    "memberOccupationConcerned": [
+      "PRESIDENT", "VICE_PRESIDENT", "SECRETARY", "TREASURER", "SENIOR"
+    ],
+    "executiveDate": "2026-01-15"
+  }
+]
+
+###
+
+### STEP 2 — Créer une activité TRAINING pour col-1
+### Concernée : JUNIOR uniquement
+POST {{baseUrl}}/collectivities/col-1/activities
+Content-Type: application/json
+
+[
+  {
+    "label": "Formation juniors janvier col-1",
+    "activityType": "TRAINING",
+    "memberOccupationConcerned": [
+      "JUNIOR"
+    ],
+    "executiveDate": "2026-04-15"
+  }
+]
+
+###
+
+### STEP 3 — Créer une activité MEETING pour col-2
+POST {{baseUrl}}/collectivities/col-2/activities
+Content-Type: application/json
+
+[
+  {
+    "label": "Assemblée générale janvier col-2",
+    "activityType": "MEETING",
+    "memberOccupationConcerned": [
+      "PRESIDENT", "VICE_PRESIDENT", "SECRETARY", "TREASURER", "SENIOR"
+    ],
+    "executiveDate": "2026-01-15"
+  }
+]
+
+###
+
+### STEP 4 — Créer une activité pour col-3
+### col-3 n'a aucun paiement sur cot-5 complet (25000/mois) pour vérifier les stats
+POST {{baseUrl}}/collectivities/col-3/activities
+Content-Type: application/json
+
+[
+  {
+    "label": "Réunion mensuelle col-3",
+    "activityType": "MEETING",
+    "memberOccupationConcerned": [
+      "PRESIDENT", "VICE_PRESIDENT", "SECRETARY", "TREASURER", "SENIOR"
+    ],
+    "executiveDate": "2026-04-10"
+  }
+]
+
+###
+
+### ============================================================
+### STEP 5 — Enregistrer les présences (remplacez {activityId}
+###          par l'ID retourné aux étapes 1 à 4)
+### ============================================================
+
+### 5a — Présences pour l'activité col-1 MEETING (STEP 1)
+### C1-M1 présent, C1-M2 absent, C1-M3 présent, C1-M4 absent,
+### C1-M5 présent, C1-M6 présent, C1-M7 absent, C1-M8 présent
+### Résultat attendu assiduité : 5/8 = 62.5% pour les SENIOR/bureau
+POST {{baseUrl}}/collectivities/col-1/activities/{{activityId_col1_meeting}}/attendance
+Content-Type: application/json
+
+[
+  { "memberIdentifier": "C1-M1", "attendanceStatus": "ATTENDED" },
+  { "memberIdentifier": "C1-M2", "attendanceStatus": "MISSING"  },
+  { "memberIdentifier": "C1-M3", "attendanceStatus": "ATTENDED" },
+  { "memberIdentifier": "C1-M4", "attendanceStatus": "MISSING"  },
+  { "memberIdentifier": "C1-M5", "attendanceStatus": "ATTENDED" },
+  { "memberIdentifier": "C1-M6", "attendanceStatus": "ATTENDED" },
+  { "memberIdentifier": "C1-M7", "attendanceStatus": "MISSING"  },
+  { "memberIdentifier": "C1-M8", "attendanceStatus": "ATTENDED" }
+]
+
+###
+
+### 5b — Présences pour l'activité col-1 TRAINING juniors (STEP 2)
+### C1-J1 présent, C1-J2 absent (juniors inscrits depuis 01/04/2026)
+POST {{baseUrl}}/collectivities/col-1/activities/{{activityId_col1_training}}/attendance
+Content-Type: application/json
+
+[
+  { "memberIdentifier": "C1-J1", "attendanceStatus": "ATTENDED" },
+  { "memberIdentifier": "C1-J2", "attendanceStatus": "MISSING"  }
+]
+
+###
+
+### 5c — Présences pour l'activité col-2 MEETING (STEP 3)
+### Tous présents sauf C1-M7 et C1-M8
+POST {{baseUrl}}/collectivities/col-2/activities/{{activityId_col2_meeting}}/attendance
+Content-Type: application/json
+
+[
+  { "memberIdentifier": "C1-M1", "attendanceStatus": "ATTENDED" },
+  { "memberIdentifier": "C1-M2", "attendanceStatus": "ATTENDED" },
+  { "memberIdentifier": "C1-M3", "attendanceStatus": "ATTENDED" },
+  { "memberIdentifier": "C1-M4", "attendanceStatus": "ATTENDED" },
+  { "memberIdentifier": "C1-M5", "attendanceStatus": "ATTENDED" },
+  { "memberIdentifier": "C1-M6", "attendanceStatus": "ATTENDED" },
+  { "memberIdentifier": "C1-M7", "attendanceStatus": "MISSING"  },
+  { "memberIdentifier": "C1-M8", "attendanceStatus": "MISSING"  }
+]
+
+###
+
+### 5d — Présences pour l'activité col-3 MEETING (STEP 4)
+### C3-M1, C3-M3 présents ; les autres absents
+POST {{baseUrl}}/collectivities/col-3/activities/{{activityId_col3_meeting}}/attendance
+Content-Type: application/json
+
+[
+  { "memberIdentifier": "C3-M1", "attendanceStatus": "ATTENDED" },
+  { "memberIdentifier": "C3-M2", "attendanceStatus": "MISSING"  },
+  { "memberIdentifier": "C3-M3", "attendanceStatus": "ATTENDED" },
+  { "memberIdentifier": "C3-M4", "attendanceStatus": "MISSING"  },
+  { "memberIdentifier": "C3-M5", "attendanceStatus": "MISSING"  },
+  { "memberIdentifier": "C3-M6", "attendanceStatus": "MISSING"  },
+  { "memberIdentifier": "C3-M7", "attendanceStatus": "MISSING"  },
+  { "memberIdentifier": "C3-M8", "attendanceStatus": "MISSING"  }
+]
+
+###
+
+### ============================================================
+### SECTION A — GET attendance (vérification avant les stats)
+### ============================================================
+
+### A-1. Vérifier les présences enregistrées pour col-1 MEETING
+GET {{baseUrl}}/collectivities/col-1/activities/{{activityId_col1_meeting}}/attendance
+
+###
+
+### A-2. Vérifier les présences enregistrées pour col-1 TRAINING
+GET {{baseUrl}}/collectivities/col-1/activities/{{activityId_col1_training}}/attendance
+
+###
+
+### A-3. Vérifier les activités de col-1
+GET {{baseUrl}}/collectivities/col-1/activities
+
+###
+
+### ============================================================
+### SECTION B — GET /collectivites/{id}/statistics
+### (statistiques locales avec assiduité — Bonus 2)
+### ============================================================
+
+### B-1. CAS NOMINAL col-1 — période complète 2026
+### Résultats ATTENDUS par membre :
+###   C1-M1 (PRESIDENT)      : earned=200000, due=0,      assiduity=100% (1 meeting/1)
+###   C1-M2 (VICE_PRESIDENT) : earned=200000, due=0,      assiduity=0%   (0/1 meeting)
+###   C1-M3 (SECRETARY)      : earned=200000, due=0,      assiduity=100% (1/1)
+###   C1-M4 (TREASURER)      : earned=200000, due=0,      assiduity=0%   (0/1)
+###   C1-M5 (SENIOR)         : earned=150000, due=50000,  assiduity=100% (1/1)
+###   C1-M6 (SENIOR)         : earned=100000, due=100000, assiduity=100% (1/1)
+###   C1-M7 (SENIOR)         : earned=60000,  due=140000, assiduity=0%   (0/1)
+###   C1-M8 (SENIOR)         : earned=90000,  due=110000, assiduity=100% (1/1)
+###   C1-J1 (JUNIOR)         : earned=0,      due=0,      assiduity=100% (1/1 training)
+###   C1-J2 (JUNIOR)         : earned=0,      due=0,      assiduity=0%   (0/1 training)
+###   C1-J3 (JUNIOR)         : earned=0,      due=0,      assiduity=100% (pas de training avant 05/2026)
+###   C1-J4 (JUNIOR)         : earned=0,      due=0,      assiduity=100% (pas encore inscrit en avril)
+### NOTE : cot-2 (Famangiana, 20000, PUNCTUALLY, 30/04/2026) est ACTIVE mais
+###        son eligible_from=2026-04-30 est DANS la période → due inclus pour chaque membre
+GET {{baseUrl}}/collectivites/col-1/statistics?from=2026-01-01&to=2026-12-31
+
+###
+
+### B-2. CAS NOMINAL col-1 — période courte (avant la Famangiana)
+### Seule cot-1 (200000) est dans la période → due = 200000 - paiement
+GET {{baseUrl}}/collectivites/col-1/statistics?from=2026-01-01&to=2026-04-29
+
+###
+
+### B-3. CAS NOMINAL col-2 — période complète 2026
+### Résultats ATTENDUS :
+###   C1-M1 (SENIOR)         : earned=120000, due=80000,  assiduity=100% (1/1 meeting)
+###   C1-M2 (SENIOR)         : earned=180000, due=20000,  assiduity=100%
+###   C1-M3 (SENIOR)         : earned=200000, due=0,      assiduity=100%
+###   C1-M4 (SENIOR)         : earned=200000, due=0,      assiduity=100%
+###   C1-M5 (PRESIDENT)      : earned=200000, due=0,      assiduity=100%
+###   C1-M6 (VICE_PRESIDENT) : earned=200000, due=0,      assiduity=100%
+###   C1-M7 (SECRETARY)      : earned=80000,  due=120000, assiduity=0%
+###   C1-M8 (TREASURER)      : earned=120000, due=80000,  assiduity=0%
+###   C2-J1/J2/J3 (JUNIOR)   : earned=0, due=0, assiduity=100% (pas de training défini)
+GET {{baseUrl}}/collectivites/col-2/statistics?from=2026-01-01&to=2026-12-31
+
+###
+
+### B-4. CAS NOMINAL col-3 — période complète 2026
+### cot-5 : 25000/mois ACTIVE depuis 01/04/2026
+### Résultats ATTENDUS (cotisation mensuelle → due = 25000 * nb mois ACTIFS dans période) :
+### NOTE : la notion de "impayé potentiel" = total cotisations actives eligible dans période - ce qu'a payé le membre
+###   C3-M1 : earned=50000 (25k avril+25k mai), due=0,     assiduity=0%  (0/1 meeting)
+###   C3-M2 : earned=50000,                     due=0,     assiduity=0%
+###   C3-M3 : earned=40000 (25k+15k),           due=10000, assiduity=100% (ATTENDED)
+###   C3-M4 : earned=40000,                     due=10000, assiduity=0%
+###   C3-M5 : earned=45000 (25k+20k),           due=5000,  assiduity=0%
+###   C3-M6 : earned=50000,                     due=0,     assiduity=0%
+###   C3-M7 : earned=30000 (25k+5k),            due=20000, assiduity=0%
+###   C3-M8 : earned=30000,                     due=20000, assiduity=0%
+###   juniors col-3 : earned=0, due=0, assiduity=100%
+GET {{baseUrl}}/collectivites/col-3/statistics?from=2026-01-01&to=2026-12-31
+
+###
+
+### B-5. Période SANS activités ni paiements
+### → earned=0, due=0, assiduity=100% pour tout le monde (aucune activité dans la période)
+GET {{baseUrl}}/collectivites/col-1/statistics?from=2025-01-01&to=2025-12-31
+
+###
+
+### B-6. ERREUR 400 — paramètre from manquant
+GET {{baseUrl}}/collectivites/col-1/statistics?to=2026-12-31
+
+###
+
+### B-7. ERREUR 400 — paramètre to manquant
+GET {{baseUrl}}/collectivites/col-1/statistics?from=2026-01-01
+
+###
+
+### B-8. ERREUR 404 — collectivité inexistante
+GET {{baseUrl}}/collectivites/col-99/statistics?from=2026-01-01&to=2026-12-31
+
+###
+
+### ============================================================
+### SECTION C — GET /collectivities/statistics
+### (statistiques globales avec assiduité — Bonus 2)
+### ============================================================
+
+### C-1. CAS NOMINAL — période complète 2026
+### Résultats ATTENDUS (avec activités créées aux STEP 1-4) :
+###
+### col-1 (Mpanorina) :
+###   total membres actifs     = 12 (8 anciens + 4 juniors)
+###   nouveaux (2026)          = 4  (C1-J1 01/04, C1-J2 01/04, C1-J3 01/05, C1-J4 01/06)
+###   membres à jour cot-1     : C1-M1(200k✓), C1-M2(200k✓), C1-M3(200k✓), C1-M4(200k✓)
+###                              C1-M5(150k<200k✗), C1-M6(100k✗), C1-M7(60k✗), C1-M8(90k✗)
+###                            + cot-2(Famangiana 20k): personne n'a payé → tous ✗ pour cot-2
+###   upToDate = 0 (dès qu'une cotisation ACTIVE n'est pas réglée → pas à jour)
+###   overallMemberCurrentDuePercentage = 0/12 * 100 = 0%
+###   assiduité globale : moyenne des assiduités individuelles
+###     - 8 anciens membres concernés par le MEETING du 15/01 :
+###       C1-M1=100%, C1-M2=0%, C1-M3=100%, C1-M4=0%,
+###       C1-M5=100%, C1-M6=100%, C1-M7=0%, C1-M8=100%
+###     - 2 juniors concernés par TRAINING 15/04 : C1-J1=100%, C1-J2=0%
+###     - C1-J3 (inscrit 01/05, training était le 15/04) → pas concerné → 100%
+###     - C1-J4 (inscrit 01/06) → pas concerné → 100%
+###   overallMemberAssiduityPercentage ≈ (100+0+100+0+100+100+0+100+100+0+100+100)/12 ≈ 66.67%
+###
+### col-2 (Dobo voalohany) :
+###   total membres actifs     = 11 (8 anciens + 3 juniors)
+###   nouveaux (2026)          = 3  (C2-J1/J2/J3 01/03/2026)
+###   à jour cot-3 (200k) : C1-M3,M4,M5,M6 = 200k ✓ ; C1-M1(120k✗), M2(180k✗), M7(80k✗), M8(120k✗)
+###   cot-4 INACTIVE → ignorée
+###   upToDate = 4 membres → 4/11 ≈ 36.36%
+###   assiduité : 8 anciens concernés meeting 15/01
+###     C1-M1=100%, C1-M2=100%, M3=100%, M4=100%, M5=100%, M6=100%, M7=0%, M8=0%
+###     + 3 juniors : pas d'activité JUNIOR → 100% chacun
+###   overallMemberAssiduityPercentage = (100*6+0*2+100*3)/11 ≈ 81.82%
+###
+### col-3 (Tantely mamy) :
+###   total membres actifs     = 14 (8 anciens + 6 juniors)
+###   nouveaux (2026 entier)   = 7 (C3-J1 01/01, C3-J2+J3 01/02, C3-J4+J5+J6 01/03, +1 de l'ancienne insert)
+###   à jour cot-5 (25k/mois) : C3-M1,M2,M6 ont payé 50k (avril+mai ✓) → 3 à jour
+###                              les autres ont payé moins
+###   upToDate = 3/14 ≈ 21.43%
+###   assiduité : 8 anciens concernés meeting 10/04 ; juniors non concernés → 100%
+###     C3-M1=100%, C3-M2/M4/M5/M6/M7/M8=0%, C3-M3=100%
+###   overallMemberAssiduityPercentage = (100+0+100+0+0+0+0+0+ 6*100)/14 ≈ 57.14%
+GET {{baseUrl}}/collectivities/statistics?from=2026-01-01&to=2026-12-31
+
+###
+
+### C-2. Période sans nouveaux membres ni paiements
+### nouveaux = 0 pour toutes les collectivités
+### à jour = 0% (aucun paiement dans la période)
+### assiduité = 100% (aucune activité dans la période)
+GET {{baseUrl}}/collectivities/statistics?from=2025-01-01&to=2025-12-31
+
+###
+
+### C-3. Période comptant uniquement les adhérents du 01/01/2026
+### col-1 : newMembers = 8 (anciens inscrits le 01/01/2026)
+### col-2 : newMembers = 8
+### col-3 : newMembers = 9 (8 anciens + C3-J1 inscrit le 01/01/2026)
+GET {{baseUrl}}/collectivities/statistics?from=2026-01-01&to=2026-01-01
+
+###
+
+### C-4. Période mars 2026 — nouveaux juniors col-2 et col-3
+### col-2 : newMembers = 3 (C2-J1, J2, J3 inscrits le 01/03)
+### col-3 : newMembers = 3 (C3-J4, J5, J6 inscrits le 01/03)
+GET {{baseUrl}}/collectivities/statistics?from=2026-03-01&to=2026-03-31
+
+###
+
+### C-5. ERREUR 400 — paramètre from manquant
+GET {{baseUrl}}/collectivities/statistics?to=2026-12-31
+
+###
+
+### C-6. ERREUR 400 — paramètre to manquant
+GET {{baseUrl}}/collectivities/statistics?from=2026-01-01
+
+###
+
+### C-7. ERREUR 400 — to avant from
+GET {{baseUrl}}/collectivities/statistics?from=2026-12-31&to=2026-01-01
+
+###
+
+### ============================================================
+### SECTION D — GET /collectivities/{id}/transactions
+### (test du fix TransactionRepository)
+### ============================================================
+
+### D-1. CAS NOMINAL col-1 — toutes les transactions 2026
+### Attendu : 8 transactions (C1-M1 à C1-M8)
+###   - C1-M1 : 200000 CASH     01/01/2026 → C1-A-CASH
+###   - C1-M2 : 200000 CASH     01/01/2026 → C1-A-CASH
+###   - C1-M3 : 200000 MOBILE   01/01/2026 → C1-A-MOBILE-1
+###   - C1-M4 : 200000 MOBILE   01/01/2026 → C1-A-MOBILE-1
+###   - C1-M5 : 150000 MOBILE   01/01/2026 → C1-A-MOBILE-1
+###   - C1-M6 : 100000 CASH     01/05/2026 → C1-A-CASH
+###   - C1-M7 :  60000 CASH     01/05/2026 → C1-A-CASH
+###   - C1-M8 :  90000 CASH     01/05/2026 → C1-A-CASH
+GET {{baseUrl}}/collectivities/col-1/transactions?from=2026-01-01&to=2026-12-31
+
+###
+
+### D-2. CAS NOMINAL col-1 — période courte (janvier seulement)
+### Attendu : 5 transactions (C1-M1 à C1-M5, tous le 01/01/2026)
+GET {{baseUrl}}/collectivities/col-1/transactions?from=2026-01-01&to=2026-01-31
+
+###
+
+### D-3. CAS NOMINAL col-1 — période courte (mai seulement)
+### Attendu : 3 transactions (C1-M6, C1-M7, C1-M8 le 01/05/2026)
+GET {{baseUrl}}/collectivities/col-1/transactions?from=2026-05-01&to=2026-05-31
+
+###
+
+### D-4. CAS NOMINAL col-2 — toutes les transactions 2026
+### Attendu : 8 transactions (C1-M1 à C1-M8)
+GET {{baseUrl}}/collectivities/col-2/transactions?from=2026-01-01&to=2026-12-31
+
+###
+
+### D-5. CAS NOMINAL col-3 — toutes les transactions 2026
+### Attendu : 16 transactions (avril + mai, tous les C3-M1 à C3-M8)
+GET {{baseUrl}}/collectivities/col-3/transactions?from=2026-01-01&to=2026-12-31
+
+###
+
+### D-6. CAS NOMINAL col-3 — avril seulement
+### Attendu : 8 transactions (C3-M1 à C3-M8 le 01/04/2026)
+GET {{baseUrl}}/collectivities/col-3/transactions?from=2026-04-01&to=2026-04-30
+
+###
+
+### D-7. CAS NOMINAL col-3 — mai seulement
+### Attendu : 8 transactions (C3-M1 à C3-M8 le 01/05/2026)
+GET {{baseUrl}}/collectivities/col-3/transactions?from=2026-05-01&to=2026-05-31
+
+###
+
+### D-8. LISTE VIDE — période avant tout paiement
+### Attendu : tableau vide []
+GET {{baseUrl}}/collectivities/col-1/transactions?from=2025-01-01&to=2025-12-31
+
+###
+
+### D-9. ERREUR 400 — paramètre from manquant
+GET {{baseUrl}}/collectivities/col-1/transactions?to=2026-12-31
+
+###
+
+### D-10. ERREUR 400 — paramètre to manquant
+GET {{baseUrl}}/collectivities/col-1/transactions?from=2026-01-01
+
+###
+
+### D-11. ERREUR 400 — to avant from
+GET {{baseUrl}}/collectivities/col-1/transactions?from=2026-12-31&to=2026-01-01
+
+###
+
+### D-12. ERREUR 404 — collectivité inexistante
+GET {{baseUrl}}/collectivities/col-99/transactions?from=2026-01-01&to=2026-12-31
+
+###
+
+### ============================================================
+### SECTION E — Tests d'erreur attendance (robustesse Bonus 1)
+### ============================================================
+
+### E-1. ERREUR 400 — double présence pour le même membre (déjà ATTENDED)
+### Doit retourner 400 car C1-M1 est déjà marqué ATTENDED
+POST {{baseUrl}}/collectivities/col-1/activities/{{activityId_col1_meeting}}/attendance
+Content-Type: application/json
+
+[
+  { "memberIdentifier": "C1-M1", "attendanceStatus": "ATTENDED" }
+]
+
+###
+
+### E-2. ERREUR 400 — statut UNDEFINED interdit dans le payload
+POST {{baseUrl}}/collectivities/col-1/activities/{{activityId_col1_meeting}}/attendance
+Content-Type: application/json
+
+[
+  { "memberIdentifier": "C1-M5", "attendanceStatus": "UNDEFINED" }
+]
+
+###
+
+### E-3. ERREUR 400 — duplicate memberIdentifier dans le même payload
+POST {{baseUrl}}/collectivities/col-2/activities/{{activityId_col2_meeting}}/attendance
+Content-Type: application/json
+
+[
+  { "memberIdentifier": "C2-J1", "attendanceStatus": "ATTENDED" },
+  { "memberIdentifier": "C2-J1", "attendanceStatus": "MISSING"  }
+]
+
+###
+
+### E-4. ERREUR 404 — activité inexistante
+POST {{baseUrl}}/collectivities/col-1/activities/00000000-0000-0000-0000-000000000000/attendance
+Content-Type: application/json
+
+[
+  { "memberIdentifier": "C1-M1", "attendanceStatus": "ATTENDED" }
+]
+
+###
