@@ -59,7 +59,6 @@ public class StatisticRepository {
             amountPs.setDate(6, Date.valueOf(from));
             amountPs.setDate(7, Date.valueOf(to));
 
-            // NOUVEAU : requête assiduité par membre
             PreparedStatement assiduityPs = connection.prepareStatement(
                     """
                     SELECT
