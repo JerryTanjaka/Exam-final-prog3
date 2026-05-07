@@ -176,7 +176,7 @@ public class CollectivityIT {
 
         log.info(exception.getMessage());
 
-        assertTrue(exception.getMessage().contains("500"));
+        assertTrue(exception.getMessage().contains("400"));
     }
 
     @Test

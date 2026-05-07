@@ -1,125 +1,56 @@
 package hei.fprog3.api;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
-import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 public class ApiClient {
-    private static final String BASE_URL = "http://localhost:8080";
-    private final RestTemplate restTemplate;
-    private final String baseUrl;
+    private final RestTemplate restTemplate = new RestTemplate();
+    private final String baseUrl = "http://localhost:8080";
+    private final String apiKey = Dotenv.load().get("API_KEY");
 
-    public ApiClient() {
-        this.baseUrl = BASE_URL;
-        this.restTemplate = new RestTemplate();
+    private HttpHeaders getHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-api-key", apiKey);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return headers;
     }
-
-    // =========================
-    // 🔹 GET
-    // =========================
 
     public <T> T get(String path, Class<T> responseType) {
-        return exchange(path, HttpMethod.GET, null, responseType);
+        try {
+            var entity = new HttpEntity<>(getHeaders());
+            return restTemplate.exchange(baseUrl + path, HttpMethod.GET, entity, responseType).getBody();
+        } catch (HttpClientErrorException e) {
+            throw new RuntimeException(e.getStatusCode() + " " + e.getResponseBodyAsString(), e);
+        }
     }
 
-    public <T> T get(String path, ParameterizedTypeReference<T> typeRef) {
-        return exchange(path, HttpMethod.GET, null, typeRef);
+    public <T> T get(String path, ParameterizedTypeReference<T> responseType) {
+        try {
+            var entity = new HttpEntity<>(getHeaders());
+            return restTemplate.exchange(baseUrl + path, HttpMethod.GET, entity, responseType).getBody();
+        } catch (HttpClientErrorException e) {
+            throw new RuntimeException(e.getStatusCode() + " " + e.getResponseBodyAsString(), e);
+        }
     }
 
-    // =========================
-    // 🔹 POST
-    // =========================
-
-    public <T> T post(String path, Object body, Class<T> responseType) {
-        return exchange(path, HttpMethod.POST, body, responseType);
+    public <T> T post(String path, Object body, ParameterizedTypeReference<T> responseType) {
+        try {
+            var entity = new HttpEntity<>(body, getHeaders());
+            return restTemplate.exchange(baseUrl + path, HttpMethod.POST, entity, responseType).getBody();
+        } catch (HttpClientErrorException e) {
+            throw new RuntimeException("HTTP Error: " + e.getStatusCode().value() + " " + e.getResponseBodyAsString(), e);
+        }
     }
-
-    public <T> T post(String path, Object body, ParameterizedTypeReference<T> typeRef) {
-        return exchange(path, HttpMethod.POST, body, typeRef);
-    }
-
-    // =========================
-    // 🔹 PUT
-    // =========================
 
     public <T> T put(String path, Object body, Class<T> responseType) {
-        return exchange(path, HttpMethod.PUT, body, responseType);
-    }
-
-    public <T> T put(String path, Object body, ParameterizedTypeReference<T> typeRef) {
-        return exchange(path, HttpMethod.PUT, body, typeRef);
-    }
-
-    // =========================
-    // 🔹 DELETE
-    // =========================
-
-    public void delete(String path) {
-        exchange(path, HttpMethod.DELETE, null, Void.class);
-    }
-
-    public <T> T delete(String path, ParameterizedTypeReference<T> typeRef) {
-        return exchange(path, HttpMethod.DELETE, null, typeRef);
-    }
-
-    // =========================
-    // 🔁 CORE METHODS
-    // =========================
-
-    private <T> T exchange(String path,
-                           HttpMethod method,
-                           Object body,
-                           Class<T> responseType) {
-
         try {
-            ResponseEntity<T> response = restTemplate.exchange(
-                    baseUrl + path,
-                    method,
-                    buildEntity(body),
-                    responseType
-            );
-            return response.getBody();
-
-        } catch (HttpStatusCodeException e) {
-            throw buildException(e);
+            var entity = new HttpEntity<>(body, getHeaders());
+            return restTemplate.exchange(baseUrl + path, HttpMethod.PUT, entity, responseType).getBody();
+        } catch (HttpClientErrorException e) {
+            throw new RuntimeException(e.getStatusCode() + " " + e.getResponseBodyAsString(), e);
         }
-    }
-
-    private <T> T exchange(String path,
-                           HttpMethod method,
-                           Object body,
-                           ParameterizedTypeReference<T> typeRef) {
-
-        try {
-            ResponseEntity<T> response = restTemplate.exchange(
-                    baseUrl + path,
-                    method,
-                    buildEntity(body),
-                    typeRef
-            );
-            return response.getBody();
-
-        } catch (HttpStatusCodeException e) {
-            throw buildException(e);
-        }
-    }
-
-    // =========================
-    // 🔧 HELPERS
-    // =========================
-
-    private HttpEntity<?> buildEntity(Object body) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return new HttpEntity<>(body, headers);
-    }
-
-    private RuntimeException buildException(HttpStatusCodeException e) {
-        return new RuntimeException(
-                "HTTP Error: " + e.getStatusCode() +
-                        " | Body: " + e.getResponseBodyAsString(),
-                e
-        );
     }
 }
