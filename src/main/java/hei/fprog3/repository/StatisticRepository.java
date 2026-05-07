@@ -107,7 +107,7 @@ public class StatisticRepository {
                         memberDescription,
                         amountRs.getDouble("earnedAmount"),
                         amountRs.getDouble("dueAmount"),
-                        assiduityPercentage  // NOUVEAU
+                        assiduityPercentage
                 ));
             }
             return memberStatistics;
