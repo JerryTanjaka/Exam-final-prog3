@@ -125,6 +125,7 @@ public class CollectivityController {
                     .body(e.getMessage());
         }
     }
+
     @GetMapping("/{id}/financialAccounts")
     public ResponseEntity<?> getFinancialAccounts(
             @PathVariable String id,
@@ -144,6 +145,7 @@ public class CollectivityController {
                     .body(e.getMessage());
         }
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getCollectivity(@PathVariable String id) {
         try {
@@ -166,6 +168,11 @@ public class CollectivityController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .header("Content-Type", "application/json")
                         .body("From and to cannot be null");
+            }
+            if (to.isBefore(from)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .header("Content-Type", "application/json")
+                        .body("to cannot be before from");
             }
             return ResponseEntity.status(HttpStatus.OK)
                     .header("Content-Type","application/json")
