@@ -129,6 +129,5 @@ CREATE TABLE activity_attendances (
     activity_id     VARCHAR(50)         NOT NULL REFERENCES activities(id),
     member_id       VARCHAR(50)         NOT NULL REFERENCES members(id),
     status          attendance_status   NOT NULL DEFAULT 'UNDEFINED'::attendance_status,
-    is_outsider     BOOLEAN             NOT NULL DEFAULT FALSE,
     UNIQUE (activity_id, member_id)
 );
