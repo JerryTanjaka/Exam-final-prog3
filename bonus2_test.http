@@ -2,8 +2,12 @@
 ### BONUS 2 — Tests statistiques avec assiduité + transactions
 ### Basé sur data.sql du 6 mai 2026
 ### ============================================================
-
+### Variables globales
 @baseUrl = http://localhost:8080
+@activityId_col1_meeting = 079ccf7f-d62f-4dbc-87c0-a13492564421
+@activityId_col1_training = 2702b9dc-f374-4c83-b8f3-eaac30fe25d2
+@activityId_col2_meeting = 40201779-52b5-4c58-98b4-ecb849510fb4
+@activityId_col3_meeting = 88b48634-f80f-40f5-b211-ae8804dec809
 
 ### ============================================================
 ### PRÉ-REQUIS : Créer des activités pour tester l'assiduité
@@ -195,13 +199,13 @@ GET {{baseUrl}}/collectivities/col-1/activities
 ###   C1-J4 (JUNIOR)         : earned=0,      due=0,      assiduity=100% (pas encore inscrit en avril)
 ### NOTE : cot-2 (Famangiana, 20000, PUNCTUALLY, 30/04/2026) est ACTIVE mais
 ###        son eligible_from=2026-04-30 est DANS la période → due inclus pour chaque membre
-GET {{baseUrl}}/collectivites/col-1/statistics?from=2026-01-01&to=2026-12-31
+GET {{baseUrl}}/collectivities/col-1/statistics?from=2026-01-01&to=2026-12-31
 
 ###
 
 ### B-2. CAS NOMINAL col-1 — période courte (avant la Famangiana)
 ### Seule cot-1 (200000) est dans la période → due = 200000 - paiement
-GET {{baseUrl}}/collectivites/col-1/statistics?from=2026-01-01&to=2026-04-29
+GET {{baseUrl}}/collectivities/col-1/statistics?from=2026-01-01&to=2026-04-29
 
 ###
 
@@ -216,7 +220,7 @@ GET {{baseUrl}}/collectivites/col-1/statistics?from=2026-01-01&to=2026-04-29
 ###   C1-M7 (SECRETARY)      : earned=80000,  due=120000, assiduity=0%
 ###   C1-M8 (TREASURER)      : earned=120000, due=80000,  assiduity=0%
 ###   C2-J1/J2/J3 (JUNIOR)   : earned=0, due=0, assiduity=100% (pas de training défini)
-GET {{baseUrl}}/collectivites/col-2/statistics?from=2026-01-01&to=2026-12-31
+GET {{baseUrl}}/collectivities/col-2/statistics?from=2026-01-01&to=2026-12-31
 
 ###
 
@@ -233,28 +237,28 @@ GET {{baseUrl}}/collectivites/col-2/statistics?from=2026-01-01&to=2026-12-31
 ###   C3-M7 : earned=30000 (25k+5k),            due=20000, assiduity=0%
 ###   C3-M8 : earned=30000,                     due=20000, assiduity=0%
 ###   juniors col-3 : earned=0, due=0, assiduity=100%
-GET {{baseUrl}}/collectivites/col-3/statistics?from=2026-01-01&to=2026-12-31
+GET {{baseUrl}}/collectivities/col-3/statistics?from=2026-01-01&to=2026-12-31
 
 ###
 
 ### B-5. Période SANS activités ni paiements
 ### → earned=0, due=0, assiduity=100% pour tout le monde (aucune activité dans la période)
-GET {{baseUrl}}/collectivites/col-1/statistics?from=2025-01-01&to=2025-12-31
+GET {{baseUrl}}/collectivities/col-1/statistics?from=2025-01-01&to=2025-12-31
 
 ###
 
 ### B-6. ERREUR 400 — paramètre from manquant
-GET {{baseUrl}}/collectivites/col-1/statistics?to=2026-12-31
+GET {{baseUrl}}/collectivities/col-1/statistics?to=2026-12-31
 
 ###
 
 ### B-7. ERREUR 400 — paramètre to manquant
-GET {{baseUrl}}/collectivites/col-1/statistics?from=2026-01-01
+GET {{baseUrl}}/collectivities/col-1/statistics?from=2026-01-01
 
 ###
 
 ### B-8. ERREUR 404 — collectivité inexistante
-GET {{baseUrl}}/collectivites/col-99/statistics?from=2026-01-01&to=2026-12-31
+GET {{baseUrl}}/collectivities/col-99/statistics?from=2026-01-01&to=2026-12-31
 
 ###
 
