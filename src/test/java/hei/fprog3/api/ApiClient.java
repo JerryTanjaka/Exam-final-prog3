@@ -1,6 +1,22 @@
 package hei.fprog3.api;
 
-import edu.hei.school.agricultural.api.model.*;
+import hei.fprog3.api.model.ActivityMemberAttendance;
+import hei.fprog3.api.model.Collectivity;
+import hei.fprog3.api.model.CollectivityActivity;
+import hei.fprog3.api.model.CollectivityInformation;
+import hei.fprog3.api.model.CollectivityLocalStatistics;
+import hei.fprog3.api.model.CollectivityOverallStatistics;
+import hei.fprog3.api.model.CollectivityTransaction;
+import hei.fprog3.api.model.CreateActivityMemberAttendance;
+import hei.fprog3.api.model.CreateCollectivity;
+import hei.fprog3.api.model.CreateCollectivityActivity;
+import hei.fprog3.api.model.CreateMember;
+import hei.fprog3.api.model.CreateMemberPayment;
+import hei.fprog3.api.model.CreateMembershipFee;
+import hei.fprog3.api.model.FinancialAccount;
+import hei.fprog3.api.model.Member;
+import hei.fprog3.api.model.MemberPayment;
+import hei.fprog3.api.model.MembershipFee;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -12,7 +28,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class ApiClient {
-    private static final String BASE_URL = "http://192.168.0.150:8080";
+    private static final String BASE_URL = "http://localhost:8080";
     private final RestTemplate restTemplate;
     private final String baseUrl;
 
@@ -83,12 +99,12 @@ public class ApiClient {
     }
 
     public List<CollectivityOverallStatistics> getCollectivitiesOverallStatistics(LocalDate from, LocalDate to) {
-        return get("/collectivites/statistics?from=" + from + "&to=" + to, new ParameterizedTypeReference<>() {
+        return get("/collectivities/statistics?from=" + from + "&to=" + to, new ParameterizedTypeReference<>() {
         });
     }
 
     public List<CollectivityActivity> getCollectivityActivities(String id) {
-        return get("/collectivites/" + id + "/activities", new ParameterizedTypeReference<>() {
+        return get("/collectivities/" + id + "/activities", new ParameterizedTypeReference<>() {
         });
     }
 

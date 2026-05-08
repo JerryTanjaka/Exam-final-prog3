@@ -1,7 +1,8 @@
 package hei.fprog3.service;
 
-import edu.hei.school.agricultural.api.ApiClient;
-import edu.hei.school.agricultural.api.model.*;
+import hei.fprog3.api.model.*;
+import hei.fprog3.api.ApiClient;
+
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 
