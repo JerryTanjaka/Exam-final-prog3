@@ -1,15 +1,7 @@
 package hei.fprog3.service;
 
-
-
-import hei.fprog3.api.ApiClient;
-import hei.fprog3.api.model.CreateMember;
-import hei.fprog3.api.model.CreateMemberPayment;
-import hei.fprog3.api.model.Gender;
-import hei.fprog3.api.model.Member;
-import hei.fprog3.api.model.MemberOccupation;
-import hei.fprog3.api.model.MemberPayment;
-import hei.fprog3.api.model.PaymentMode;
+import edu.hei.school.agricultural.api.ApiClient;
+import edu.hei.school.agricultural.api.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;

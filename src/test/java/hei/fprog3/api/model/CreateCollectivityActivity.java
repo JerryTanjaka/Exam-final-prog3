@@ -4,9 +4,21 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class CreateCollectivityActivity {
+
     public String label;
-    public String activityType;
+    public ActivityType activityType;
     public List<MemberOccupation> memberOccupationConcerned;
-    public LocalDate executiveDate;
     public MonthlyRecurrenceRule recurrenceRule;
+    public LocalDate executiveDate;
+
+    @Override
+    public String toString() {
+        return "CreateCollectivityActivity{" +
+                "label='" + label + '\'' +
+                ", activityType=" + activityType +
+                ", memberOccupationConcerned=" + memberOccupationConcerned +
+                ", recurrenceRule=" + recurrenceRule +
+                ", executiveDate=" + executiveDate +
+                '}';
+    }
 }

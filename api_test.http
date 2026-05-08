@@ -100,6 +100,7 @@ Content-Type: application/json
 
 ### GET /collectivities/{id} — CAS NOMINAL (SUCCÈS 200)
 GET {{baseUrl}}/collectivities/{{validCollectivityId}}
+x-api-key: agri-secure-key
 Accept: application/json
 
 ### GET /collectivities/{id} — CAS NOMINAL COLLECTIVITÉ 2

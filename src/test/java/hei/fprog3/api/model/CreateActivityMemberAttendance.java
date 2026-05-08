@@ -1,6 +1,15 @@
 package hei.fprog3.api.model;
 
 public class CreateActivityMemberAttendance {
+
     public String memberIdentifier;
-    public String attendanceStatus;
+    public AttendanceStatus attendanceStatus;
+
+    @Override
+    public String toString() {
+        return "CreateActivityMemberAttendance{" +
+                "memberIdentifier='" + memberIdentifier + '\'' +
+                ", attendanceStatus=" + attendanceStatus +
+                '}';
+    }
 }
